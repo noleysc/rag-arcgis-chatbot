@@ -12,7 +12,7 @@ import {
   parseStructuredResponse,
 } from "../lib/parseAnswer";
 import { clearResultsOnMap, showResultsOnMap } from "../lib/mapViewStore";
-import { switchToTab } from "../lib/uiStore";
+import { setMapContext, switchToTab } from "../lib/uiStore";
 import type { ChatApiResponse, ChatMessage, NormalizedCard, StreamDonePayload } from "../types";
 
 function makeId(): string {
@@ -25,7 +25,15 @@ function makeId(): string {
 function focusMapOnCards(cards: NormalizedCard[]): void {
   const points = cards
     .filter((c) => c.lat !== null && c.lng !== null)
-    .map((c) => ({ lat: c.lat as number, lng: c.lng as number, label: c.title || c.id }));
+    .map((c, idx) => ({
+      lat: c.lat as number,
+      lng: c.lng as number,
+      label: c.title || c.id,
+      recordId: c.id || undefined,
+      status: c.status || undefined,
+      location: c.location || undefined,
+      index: idx + 1,
+    }));
   if (points.length === 0) return;
   switchToTab("map");
   // Double rAF: if the Map tab was hidden, this lets it become visible and
@@ -214,6 +222,7 @@ export function useChat() {
   const newChat = useCallback(() => {
     setMessages([]);
     clearResultsOnMap();
+    setMapContext(null);
   }, []);
 
   const send = useCallback(async (text: string) => {

@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import PromptHelpDialog from "../PromptHelp/PromptHelpDialog";
+import { setMapContext, subscribeMapContext, type MapContextSelection } from "../../lib/uiStore";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -11,7 +12,17 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
   const [justSent, setJustSent] = useState(false);
+  const [mapCtx, setLocalMapCtx] = useState<MapContextSelection | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    return subscribeMapContext((ctx) => {
+      setLocalMapCtx(ctx);
+      if (ctx) {
+        textareaRef.current?.focus();
+      }
+    });
+  }, []);
 
   const autoResize = () => {
     const el = textareaRef.current;
@@ -23,7 +34,19 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
   const submit = () => {
     const q = value.trim();
     if (!q || disabled) return;
-    onSend(q);
+    let finalQuestion = q;
+    if (mapCtx) {
+      const ctxParts = [
+        mapCtx.title,
+        mapCtx.appId ? `(${mapCtx.appId})` : "",
+        mapCtx.location ? `at ${mapCtx.location}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      finalQuestion = `Regarding ${ctxParts}: ${q}`;
+      setMapContext(null);
+    }
+    onSend(finalQuestion);
     setValue("");
     requestAnimationFrame(autoResize);
     setJustSent(true);
@@ -37,8 +60,31 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   };
 
+  const ctxLabel = mapCtx
+    ? [mapCtx.title || mapCtx.appId || "Selected Location", mapCtx.title && mapCtx.appId ? `(${mapCtx.appId})` : ""]
+        .filter(Boolean)
+        .join(" ")
+    : "";
+
   return (
     <div id="input-bar">
+      {mapCtx && (
+        <div className="chat-map-context-chip" role="status">
+          <span className="chat-map-context-text">
+            📍 <strong>{ctxLabel}</strong>
+            {mapCtx.location ? ` · ${mapCtx.location}` : ""}
+          </span>
+          <button
+            type="button"
+            className="chat-map-context-clear"
+            onClick={() => setMapContext(null)}
+            aria-label="Remove attached map project"
+            title="Remove map context"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <div id="input-wrap">
         <button
           type="button"
@@ -57,7 +103,11 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           id="question"
           ref={textareaRef}
           rows={1}
-          placeholder="Ask about a project, location, year, or decision…"
+          placeholder={
+            mapCtx
+              ? `Ask a question about ${mapCtx.title || mapCtx.appId || "this location"}…`
+              : "Ask about a project, location, year, or decision…"
+          }
           value={value}
           onChange={(e) => {
             setValue(e.target.value);

@@ -1,6 +1,6 @@
 import type { NormalizedCard } from "../../types";
 import { statusClass, statusEmoji } from "../../lib/parseAnswer";
-import { openDirections, panToCoords } from "../../lib/mapViewStore";
+import { focusResultOnMap, highlightResultOnMap, openDirections } from "../../lib/mapViewStore";
 import { switchToTab } from "../../lib/uiStore";
 import { recordDomId } from "../../lib/recordScroll";
 import type { ReportPrefill } from "../ReportDialog/ReportDialog";
@@ -18,11 +18,29 @@ export default function ProjectCard({ card, onReport }: ProjectCardProps) {
   const showOnMap = () => {
     if (card.lat === null || card.lng === null) return;
     switchToTab("map");
-    requestAnimationFrame(() => panToCoords(card.lat!, card.lng!));
+    requestAnimationFrame(() =>
+      focusResultOnMap({
+        lat: card.lat!,
+        lng: card.lng!,
+        label: card.title || card.id,
+        recordId: card.id || undefined,
+        status: card.status || undefined,
+        location: card.location || undefined,
+      }),
+    );
   };
 
   return (
-    <div className="proj-card" id={card.id ? recordDomId(card.id) : undefined}>
+    <div
+      className="proj-card"
+      id={card.id ? recordDomId(card.id) : undefined}
+      onMouseEnter={() => {
+        if (hasCoords) highlightResultOnMap(card.id || card.title || null);
+      }}
+      onMouseLeave={() => {
+        if (hasCoords) highlightResultOnMap(null);
+      }}
+    >
       <div className="card-tag card-tag-board">🏛 Board Record</div>
       <div className="proj-title">{card.title || card.id || "Project"}</div>
       {meta && <div className="proj-meta">{meta}</div>}

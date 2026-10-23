@@ -1,6 +1,6 @@
 import type { NormalizedCard } from "../../types";
 import { statusClass, statusEmoji } from "../../lib/parseAnswer";
-import { openDirections, panToCoords } from "../../lib/mapViewStore";
+import { focusResultOnMap, highlightResultOnMap, openDirections } from "../../lib/mapViewStore";
 import { switchToTab } from "../../lib/uiStore";
 import { recordDomId } from "../../lib/recordScroll";
 
@@ -13,11 +13,29 @@ export default function VillageCouncilCard({ card }: { card: NormalizedCard }) {
     if (card.lat === null || card.lng === null) return;
     switchToTab("map");
     // Give the map tab a frame to become visible/sized before panning.
-    requestAnimationFrame(() => panToCoords(card.lat!, card.lng!));
+    requestAnimationFrame(() =>
+      focusResultOnMap({
+        lat: card.lat!,
+        lng: card.lng!,
+        label: card.title || card.id,
+        recordId: card.id || undefined,
+        status: card.status || undefined,
+        location: card.location || undefined,
+      }),
+    );
   };
 
   return (
-    <div className="proj-card village-card" id={card.id ? recordDomId(card.id) : undefined}>
+    <div
+      className="proj-card village-card"
+      id={card.id ? recordDomId(card.id) : undefined}
+      onMouseEnter={() => {
+        if (hasCoords) highlightResultOnMap(card.id || card.title || null);
+      }}
+      onMouseLeave={() => {
+        if (hasCoords) highlightResultOnMap(null);
+      }}
+    >
       <div className="card-tag card-tag-village">🏘️ Village Council</div>
       <div className="proj-title">{card.title || card.id || "Agenda Item"}</div>
       {meta && <div className="proj-meta">{meta}</div>}

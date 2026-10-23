@@ -1248,6 +1248,130 @@
 #viewDiv {
   flex: 1;
 }
+.map-selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--navy);
+  color: #fff;
+  border-top: 2px solid var(--gold);
+  animation: fadeInUp 0.18s ease-out;
+}
+.map-selection-info {
+  min-width: 0;
+  flex: 1;
+}
+.map-selection-info strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-selection-info span {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.map-selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.map-ask-btn {
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.15s, transform 0.1s;
+}
+.map-ask-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.map-attach-btn {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 16px;
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.map-attach-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+.map-selection-dismiss {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-selection-dismiss:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.chat-map-context-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--navy-light);
+  border: 1px solid rgba(26, 51, 86, 0.22);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--navy);
+  animation: fadeInUp 0.15s ease-out;
+}
+.chat-map-context-text {
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-map-context-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.chat-map-context-clear:hover {
+  background: rgba(26, 51, 86, 0.1);
+  color: var(--navy);
+}
 #map-footer {
   padding: 6px 14px;
   background: var(--white);

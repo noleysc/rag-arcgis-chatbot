@@ -74,7 +74,7 @@ export default function RightPanel({ expanded, onToggleExpand, mobileVisible, on
           so the two panes can crossfade instead of hard-swapping. */}
       <div className="right-tab-panes">
         <div className={`right-tab-content right-tab-pane ${activeTab === "map" ? "active" : ""}`}>
-          <MapPanel expanded={expanded} onToggleExpand={onToggleExpand} onRecordCount={onRecordCount} />
+          <MapPanel expanded={expanded} onToggleExpand={onToggleExpand} onRecordCount={onRecordCount} onSend={onSend} />
         </div>
         <div
           className={`right-tab-content right-tab-content-scroll right-tab-pane ${activeTab === "pulse" ? "active" : ""}`}

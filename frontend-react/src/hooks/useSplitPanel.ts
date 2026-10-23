@@ -37,11 +37,9 @@ function savePersisted(state: PersistedSplit): void {
   }
 }
 
-/** Nudge anything listening for window resizes (notably the Map tab's Esri
- * iframe, which has no JS-SDK view to call .resize()/.invalidateSize() on —
- * it's a plain cross-origin iframe that already reflows with its container
- * via CSS, but this gives its own internal app a resize event to react to
- * too). Delayed slightly so it fires after the width transition settles. */
+/** Nudge layout listeners after the split width settles. MapView watches its
+ * container with a ResizeObserver, but a window resize event still helps
+ * widgets (Search, Zoom) and any CSS flex recalculation catch up. */
 function nudgeResize(delay = 0): void {
   window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay);
 }

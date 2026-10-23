@@ -1,12 +1,24 @@
 import type MapView from "@arcgis/core/views/MapView";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
+import type Graphic from "@arcgis/core/Graphic";
+import type Point from "@arcgis/core/geometry/Point";
 
 // Small singleton so non-map components (e.g. the "Directions" button on a
 // chat card) can reach the live MapView instance without prop-drilling it
 // through the whole tree. Set by MapPanel on mount, cleared on unmount.
 let currentView: MapView | null = null;
 
+// Query-result pins live on a dedicated GraphicsLayer owned by the MapView's
+// map. Declared here so setMapView can clear the handle when the view dies.
+let resultLayer: GraphicsLayer | null = null;
+
 export function setMapView(view: MapView | null) {
+  // The query-result GraphicsLayer is owned by the MapView's map. When the
+  // view is destroyed (tab remount / StrictMode), drop the stale handle so
+  // the next showResultsOnMap creates a fresh layer on the live map.
+  if (view !== currentView) {
+    resultLayer = null;
+  }
   currentView = view;
 }
 
@@ -53,16 +65,80 @@ export interface ResultPoint {
   lat: number;
   lng: number;
   label?: string;
+  recordId?: string;
+  status?: string;
+  location?: string;
+  index?: number;
 }
 
-// A dedicated layer for "results of the current query" markers, kept separate
-// from the webmap's own feature layers so we can clear it on every new answer
-// without touching the base data. Lazily created on first use.
-let resultLayer: GraphicsLayer | null = null;
-
-// Zoom level used when centring on a result. Higher = closer; 18 is roughly
-// building/parcel level, so the specific location fills the map.
+// Zoom level used when centring on a single result. Higher = closer; 18 is
+// roughly building/parcel level, so the specific location fills the map.
 const RESULT_ZOOM = 18;
+
+function pinColorForStatus(status?: string): [number, number, number, number] {
+  const s = (status || "").toLowerCase();
+  if (s.includes("approved")) return [22, 163, 74, 0.95];
+  if (s.includes("denied")) return [220, 38, 38, 0.95];
+  if (s.includes("continued")) return [217, 119, 6, 0.95];
+  return [37, 99, 235, 0.92];
+}
+
+function makeMarkerSymbol(status?: string, highlighted = false) {
+  return {
+    type: "simple-marker" as const,
+    style: "circle" as const,
+    color: pinColorForStatus(status),
+    size: highlighted ? 22 : 16,
+    outline: {
+      color: highlighted ? [201, 151, 58, 1] : [255, 255, 255, 1],
+      width: highlighted ? 3 : 2,
+    },
+  };
+}
+
+/** Highlight or un-highlight a result pin on the map when hovering a chat card. */
+export function highlightResultOnMap(recordId: string | null): void {
+  if (!resultLayer) return;
+  for (const g of resultLayer.graphics.toArray()) {
+    if (g.attributes?.isLabel) continue;
+    const isMatch =
+      recordId !== null &&
+      recordId !== "" &&
+      (g.attributes?.recordId === recordId || g.attributes?.label === recordId);
+    g.symbol = makeMarkerSymbol(g.attributes?.status as string | undefined, isMatch);
+  }
+}
+
+/** Pan/zoom to a card's coordinates, highlight its pin, and open its popup. */
+export function focusResultOnMap(point: ResultPoint): void {
+  const view = currentView;
+  if (!view) return;
+  if (point.recordId) {
+    highlightResultOnMap(point.recordId);
+  }
+  view
+    .goTo({ center: [point.lng, point.lat], zoom: RESULT_ZOOM })
+    .then(() => {
+      if (!resultLayer || !view.popup) return;
+      const match = resultLayer.graphics
+        .toArray()
+        .find(
+          (g) =>
+            !g.attributes?.isLabel &&
+            ((point.recordId && g.attributes?.recordId === point.recordId) ||
+              (g.attributes?.lat === point.lat && g.attributes?.lng === point.lng)),
+        );
+      if (match && match.geometry) {
+        view.openPopup({
+          features: [match],
+          location: match.geometry as Point,
+        });
+      }
+    })
+    .catch(() => {
+      // view may still be mid-resize right after a tab switch — best-effort only
+    });
+}
 
 /** Drop a marker on each result point and centre the map on the top result
  * (the first, best-ranked one) so the location the user asked about sits in the
@@ -83,33 +159,77 @@ export async function showResultsOnMap(points: ResultPoint[]): Promise<void> {
       view.map.add(resultLayer);
     }
     resultLayer.removeAll();
-    const symbol = {
-      type: "simple-marker" as const,
-      style: "circle" as const,
-      color: [37, 99, 235, 0.9],
-      size: 12,
-      outline: { color: [255, 255, 255], width: 1.75 },
-    };
-    const graphics = points.map(
-      (p) =>
+
+    const markerGraphics: Graphic[] = [];
+    const labelGraphics: Graphic[] = [];
+
+    points.forEach((p, idx) => {
+      const geom = new Point({ longitude: p.lng, latitude: p.lat });
+      const num = p.index ?? idx + 1;
+      const subtitleParts = [p.recordId, p.status, p.location].filter(Boolean);
+      markerGraphics.push(
         new Graphic({
-          geometry: new Point({ longitude: p.lng, latitude: p.lat }),
-          symbol,
-          attributes: { label: p.label ?? "" },
-          popupTemplate: p.label ? { title: "{label}" } : undefined,
+          geometry: geom,
+          symbol: makeMarkerSymbol(p.status, false),
+          attributes: {
+            label: p.label ?? "",
+            recordId: p.recordId ?? "",
+            status: p.status ?? "",
+            location: p.location ?? "",
+            lat: p.lat,
+            lng: p.lng,
+            isLabel: false,
+          },
+          popupTemplate: p.label
+            ? {
+                title: "{label}",
+                content: subtitleParts.length > 0 ? subtitleParts.join(" · ") : undefined,
+              }
+            : undefined,
         }),
-    );
-    resultLayer.addMany(graphics);
+      );
+      labelGraphics.push(
+        new Graphic({
+          geometry: geom,
+          symbol: {
+            type: "text" as const,
+            color: [255, 255, 255, 1],
+            text: String(num),
+            font: { size: 9, weight: "bold" as const },
+            yoffset: -0.5,
+          },
+          attributes: {
+            recordId: p.recordId ?? "",
+            label: p.label ?? "",
+            location: p.location ?? "",
+            status: p.status ?? "",
+            isLabel: true,
+          },
+        }),
+      );
+    });
+
+    resultLayer.addMany([...markerGraphics, ...labelGraphics]);
 
     // Let the view settle to its real size before recentring, so the target
     // lands at the true visual centre rather than being offset by a resize
     // that's still pending (e.g. right after the Map tab becomes visible).
     await view.when();
 
-    // Always centre on the top (best-ranked) result. goTo({ center }) puts that
-    // point at the exact centre of the map view.
-    const top = points[0];
-    await view.goTo({ center: [top.lng, top.lat], zoom: RESULT_ZOOM });
+    if (points.length === 1) {
+      const top = points[0];
+      await view.goTo({ center: [top.lng, top.lat], zoom: RESULT_ZOOM });
+    } else {
+      // Several hits: fit them all, with a little padding so pins aren't
+      // clipped by the panel chrome. Fall back to the top result if goTo
+      // rejects an empty/degenerate extent.
+      try {
+        await view.goTo(markerGraphics);
+      } catch {
+        const top = points[0];
+        await view.goTo({ center: [top.lng, top.lat], zoom: RESULT_ZOOM });
+      }
+    }
   } catch {
     // best-effort — never let a map hiccup break the chat flow
   }
