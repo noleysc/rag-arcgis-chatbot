@@ -1408,12 +1408,16 @@
    COMMUNITY PULSE DASHBOARD
    ═══════════════════════════════════════════════ */
 #pulse-dashboard {
-  flex: 1;
-  padding: 18px 16px 28px;
-  background: var(--bg);
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.pulse-side {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 .pulse-widget {
   background: var(--white);
@@ -1424,17 +1428,14 @@
   min-width: 0;
 }
 /* Stagger in on load, ~50ms apart. */
-#pulse-dashboard > .pulse-widget {
+#pulse-dashboard .pulse-widget {
   opacity: 0;
   animation: fadeInUp 0.3s ease-out forwards;
 }
-#pulse-dashboard > .pulse-widget:nth-child(1) {
-  animation-delay: 0ms;
-}
-#pulse-dashboard > .pulse-widget:nth-child(2) {
+.pulse-side .pulse-widget:nth-child(1) {
   animation-delay: 50ms;
 }
-#pulse-dashboard > .pulse-widget:nth-child(3) {
+.pulse-side .pulse-widget:nth-child(2) {
   animation-delay: 100ms;
 }
 .pulse-widget-header {
@@ -1802,6 +1803,21 @@ a.meeting-row-link:hover .meeting-name {
   color: var(--text-muted);
   margin-top: 1px;
 }
+#pulse-dashboard .mini-cal-label {
+  font-size: 13px;
+}
+#pulse-dashboard .mini-cal-weekday {
+  font-size: 11px;
+  padding-bottom: 6px;
+}
+#pulse-dashboard .mini-cal-day {
+  min-height: 38px;
+}
+#pulse-dashboard .mini-cal-day-circle {
+  width: 32px;
+  height: 32px;
+  font-size: 12.5px;
+}
 .mini-cal-legend {
   display: flex;
   gap: 14px;
@@ -1846,19 +1862,17 @@ a.meeting-row-link:hover .meeting-name {
 .events-category-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .events-cat-chip {
   border: 1px solid var(--border);
   background: var(--white);
-  color: var(--text-muted);
+  color: var(--navy);
   border-radius: 99px;
-  padding: 3px 10px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
   transition:
     transform 0.15s ease-out,
@@ -1867,13 +1881,12 @@ a.meeting-row-link:hover .meeting-name {
     border-color 0.2s ease-out;
 }
 .events-cat-chip:hover {
-  border-color: var(--navy);
-  color: var(--navy);
-  transform: scale(1.06);
+  border-color: var(--green);
+  color: var(--green-dark);
 }
 .events-cat-chip-active {
-  background: var(--navy);
-  border-color: var(--navy);
+  background: var(--green);
+  border-color: var(--green);
   color: #fff;
 }
 .events-filter-chip {
@@ -2069,9 +2082,17 @@ a.meeting-row-link:hover .meeting-name {
   gap: 7px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   #pulse-dashboard {
-    padding: 16px 14px 24px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Stacked: the short cards (meetings, news) first, then the long events
+     list, so they aren't buried below it. */
+  .pulse-side {
+    display: contents;
+  }
+  #pulse-dashboard > .pulse-widget {
+    order: 3;
   }
 }
 

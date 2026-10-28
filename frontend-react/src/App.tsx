@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import TopBar from "./components/TopBar/TopBar";
-import PageHeader from "./components/PageHeader/PageHeader";
-import Dashboard from "./components/Dashboard/Dashboard";
 import ReportDialog, { type ReportPrefill } from "./components/ReportDialog/ReportDialog";
 import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
 import HomePage from "./pages/HomePage";
@@ -10,8 +8,8 @@ import AskPage from "./pages/AskPage";
 import MapPage from "./pages/MapPage";
 import RecordsPage from "./pages/RecordsPage";
 import MeetingsPage from "./pages/MeetingsPage";
+import PulsePage from "./pages/PulsePage";
 import { useChat } from "./hooks/useChat";
-import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useRecordCount } from "./hooks/useRecordCount";
 import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
@@ -24,7 +22,6 @@ export default function App() {
   const route = useRoute();
   const { messages, send, newChat } = useChat();
   const recordCount = useRecordCount();
-  const { meetings, loading: meetingsLoading, error: meetingsError } = useMeetings(3);
   const drawer = useMediaQuery("(max-width: 900px)");
   const [navOpen, setNavOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -83,11 +80,7 @@ export default function App() {
       case "meetings":
         return <MeetingsPage />;
       case "pulse":
-        return (
-          <Dashboard meetings={meetings} meetingsLoading={meetingsLoading} meetingsError={meetingsError} onSend={ask} />
-        );
-      default:
-        return <PageHeader title={ROUTE_LABELS[r]} />;
+        return <PulsePage onAsk={ask} />;
     }
   };
 

@@ -15,9 +15,11 @@ interface DashboardProps {
 export default function Dashboard({ meetings, meetingsLoading, meetingsError, onSend: _onSend }: DashboardProps) {
   return (
     <div id="pulse-dashboard">
-      <NextMeetings meetings={meetings} loading={meetingsLoading} error={meetingsError} />
-      <LatestNews />
       <UpcomingEvents />
+      <div className="pulse-side">
+        <NextMeetings meetings={meetings} loading={meetingsLoading} error={meetingsError} />
+        <LatestNews />
+      </div>
     </div>
   );
 }
