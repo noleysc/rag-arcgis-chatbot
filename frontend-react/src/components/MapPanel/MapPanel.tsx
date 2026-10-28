@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { setMapView } from "../../lib/mapViewStore";
+import { ExternalIcon, MapIcon, RecordsIcon } from "../Icons/Icons";
 
 // Esri "Nearby" Instant App wrapping webmap 84a56d2f741d49f5a70c547923fb45d5
 // (same webmap this panel used to load directly via the JS SDK). Embedding
@@ -7,7 +8,7 @@ import { setMapView } from "../../lib/mapViewStore";
 // picks up the app's own theme/search config, at the cost of native SDK
 // control. See mapViewStore.ts: every pan/capture/restore call there already
 // no-ops safely when there's no live MapView (setMapView is never called
-// here), so "Show on map" on a chat card still switches to this tab, it just
+// here), so "Show on map" on a chat card still opens this page, it just
 // can't zoom to the specific coordinates inside an opaque cross-origin iframe.
 const INSTANT_APP_ID = "4bd1bf488ac943d7966af9f3ccd22302";
 const INSTANT_APP_URL = `https://eccl-swfl-safety.maps.arcgis.com/apps/instant/nearby/index.html?appid=${INSTANT_APP_ID}`;
@@ -24,18 +25,16 @@ const STORY_MAP_URL = `https://storymaps.arcgis.com/stories/${STORY_MAP_ID}`;
 
 export type MapPanelView = "map" | "story";
 
-const VIEWS: Record<MapPanelView, { url: string; title: string; subtitle: string; label: string }> = {
+const VIEWS: Record<MapPanelView, { url: string; title: string; subtitle: string }> = {
   map: {
     url: INSTANT_APP_URL,
-    title: "Project Map",
-    subtitle: "Village of Estero · Live ArcGIS",
-    label: "Estero Board Records",
+    title: "Estero Board Records",
+    subtitle: "Live ArcGIS map · Village of Estero",
   },
   story: {
     url: STORY_MAP_URL,
     title: "Where Estero Decides",
-    subtitle: "Village of Estero · ArcGIS StoryMap",
-    label: "10 Years of Village Decisions",
+    subtitle: "ArcGIS StoryMap · 10 Years of Village Decisions",
   },
 };
 
@@ -69,7 +68,7 @@ export default function MapPanel({ onViewChange }: MapPanelProps) {
     <section id="map-panel">
       <div id="map-header">
         <div id="map-header-left">
-          <div id="map-icon">{view === "map" ? "🗺" : "📖"}</div>
+          <div id="map-icon">{view === "map" ? <MapIcon size={18} /> : <RecordsIcon size={18} />}</div>
           <div id="map-title">
             <strong>{active.title}</strong>
             <span>{active.subtitle}</span>
@@ -95,11 +94,10 @@ export default function MapPanel({ onViewChange }: MapPanelProps) {
             </button>
           </div>
           <a className="map-btn" href={active.url} target="_blank" rel="noopener noreferrer">
-            ↗ Open
+            <ExternalIcon size={14} /> Open<span className="sr-only"> {active.title} in a new tab</span>
           </a>
         </div>
       </div>
-      <div id="map-label">{active.label}</div>
       {loadError[view] && (
         <div id="map-error-banner" role="alert">
           ⚠️ The {view === "map" ? "map" : "story"} failed to load.{" "}

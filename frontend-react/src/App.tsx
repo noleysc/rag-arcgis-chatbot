@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import TopBar from "./components/TopBar/TopBar";
 import PageHeader from "./components/PageHeader/PageHeader";
-import MapPanel from "./components/MapPanel/MapPanel";
 import Dashboard from "./components/Dashboard/Dashboard";
 import ReportDialog, { type ReportPrefill } from "./components/ReportDialog/ReportDialog";
 import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
 import HomePage from "./pages/HomePage";
 import AskPage from "./pages/AskPage";
+import MapPage from "./pages/MapPage";
 import { useChat } from "./hooks/useChat";
 import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
@@ -98,7 +98,7 @@ export default function App() {
           <main id="main" ref={mainRef} tabIndex={-1} className={`app-main app-main-${route}`}>
             {mapVisited && (
               <div className="page page-map" hidden={route !== "map"}>
-                <MapPanel />
+                <MapPage onAsk={ask} />
               </div>
             )}
             {route !== "map" && <div className={`page page-${route}`}>{renderPage(route)}</div>}
