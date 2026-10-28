@@ -97,6 +97,107 @@ export function equalsClause(field: string, value: string): string {
  * row per item so lists don't repeat. */
 const PRIMARY_ONLY = "IsPrimary = 'true'";
 
+/** Agenda item types that record a formal board action — the "Decisions"
+ * tab, and the gold decision tag in the records table. */
+export const DECISION_ITEM_TYPES = ["Vote", "Ordinance", "Resolution", "Contract Approval", "Budget", "Consent Agenda"];
+
+export function isDecisionType(itemType: string): boolean {
+  return DECISION_ITEM_TYPES.includes(itemType);
+}
+
+export type RecordSort = "newest" | "oldest" | "title";
+
+const SORT_FIELDS: Record<RecordSort, string> = {
+  newest: "MeetingDate DESC,ObjectId DESC",
+  oldest: "MeetingDate ASC,ObjectId ASC",
+  title: "ProjectName ASC,MeetingDate DESC",
+};
+
+const SEARCH_FIELDS = ["ProjectName", "ActionTaken", "ApplicationID"];
+
+function recordsWhere(opts: { decisionsOnly?: boolean; board?: string; search?: string }): string {
+  const clauses = [PRIMARY_ONLY];
+  if (opts.decisionsOnly) {
+    clauses.push(`AgendaItemType IN (${DECISION_ITEM_TYPES.map(sqlString).join(",")})`);
+  }
+  if (opts.board) clauses.push(equalsClause("Board", opts.board));
+  const search = opts.search ? searchClause(opts.search, SEARCH_FIELDS) : null;
+  if (search) clauses.push(search);
+  return clauses.join(" AND ");
+}
+
+/** One page of agenda items plus the total matching count. */
+export async function fetchRecordsPage(opts: {
+  decisionsOnly: boolean;
+  board: string;
+  search: string;
+  sort: RecordSort;
+  offset: number;
+  pageSize: number;
+}): Promise<{ records: BoardRecord[]; total: number }> {
+  const where = recordsWhere(opts);
+  const [countRes, pageRes] = await Promise.all([
+    queryLayer({ where, returnCountOnly: true }),
+    queryLayer<LayerRow>({
+      where,
+      outFields: RECORD_FIELDS,
+      orderByFields: SORT_FIELDS[opts.sort],
+      resultOffset: opts.offset,
+      resultRecordCount: opts.pageSize,
+      returnGeometry: false,
+    }),
+  ]);
+  return {
+    records: (pageRes.features || []).map((f) => toRecord(f.attributes)),
+    total: countRes.count ?? 0,
+  };
+}
+
+/** Distinct board names on the layer, for the board filter. */
+export async function fetchBoards(): Promise<string[]> {
+  const data = await queryLayer<{ Board: string | null }>({
+    where: "1=1",
+    outFields: "Board",
+    returnDistinctValues: true,
+    orderByFields: "Board ASC",
+    returnGeometry: false,
+  });
+  return (data.features || []).map((f) => f.attributes.Board || "").filter(Boolean);
+}
+
+/** A meeting's minutes PDF, as linked from its agenda items. */
+export interface MinutesDoc {
+  /** YYYY-MM-DD */
+  date: string;
+  board: string;
+  url: string;
+}
+
+/** Every distinct minutes PDF (newest first), optionally narrowed to
+ * meetings with an agenda item matching `search`. Fetched whole — a few
+ * hundred rows — because the layer can't count distinct values for paging. */
+export async function fetchMinutesDocs(opts: { board?: string; search?: string } = {}): Promise<MinutesDoc[]> {
+  const clauses = ["Document_Link IS NOT NULL"];
+  if (opts.board) clauses.push(equalsClause("Board", opts.board));
+  const search = opts.search ? searchClause(opts.search, SEARCH_FIELDS) : null;
+  if (search) clauses.push(search);
+  const data = await queryLayer<{ MeetingDate: string | null; Board: string | null; Document_Link: string | null }>({
+    where: clauses.join(" AND "),
+    outFields: "MeetingDate,Board,Document_Link",
+    returnDistinctValues: true,
+    orderByFields: "MeetingDate DESC",
+    returnGeometry: false,
+  });
+  const seen = new Set<string>();
+  const docs: MinutesDoc[] = [];
+  for (const { attributes: a } of data.features || []) {
+    if (!a.Document_Link || seen.has(a.Document_Link)) continue;
+    seen.add(a.Document_Link);
+    docs.push({ date: a.MeetingDate || "", board: a.Board || "", url: a.Document_Link });
+  }
+  return docs;
+}
+
 /** Latest mapped items, one per project name, newest meeting first. */
 export async function fetchRecentProjects(opts: {
   category?: string;
