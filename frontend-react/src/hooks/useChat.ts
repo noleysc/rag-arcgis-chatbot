@@ -12,26 +12,23 @@ import {
   parseStructuredResponse,
 } from "../lib/parseAnswer";
 import { clearResultsOnMap, showResultsOnMap } from "../lib/mapViewStore";
-import { switchToTab } from "../lib/uiStore";
 import type { ChatApiResponse, ChatMessage, NormalizedCard, StreamDonePayload } from "../types";
 
 function makeId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** After an answer lands, if any result cards carry coordinates, reveal the map
- * and zoom/fit to them so the map tracks what the user asked about. Queries with
- * no located results (e.g. "how many approved items") leave the map untouched. */
+/** After an answer lands, if any result cards carry coordinates, zoom/fit the
+ * map to them so it tracks what the user asked about. Queries with no located
+ * results (e.g. "how many approved items") leave the map untouched. The map is
+ * its own page now, so this never navigates — that would yank the visitor out
+ * of the conversation; each card's "Show on map" button does that on request. */
 function focusMapOnCards(cards: NormalizedCard[]): void {
   const points = cards
     .filter((c) => c.lat !== null && c.lng !== null)
     .map((c) => ({ lat: c.lat as number, lng: c.lng as number, label: c.title || c.id }));
   if (points.length === 0) return;
-  switchToTab("map");
-  // Double rAF: if the Map tab was hidden, this lets it become visible and
-  // resize to its real dimensions before we recentre, so the target lands at
-  // the true centre (same guard RightPanel uses when restoring view state).
-  requestAnimationFrame(() => requestAnimationFrame(() => void showResultsOnMap(points)));
+  void showResultsOnMap(points);
 }
 
 type Setter = React.Dispatch<React.SetStateAction<ChatMessage[]>>;

@@ -95,7 +95,6 @@ export interface StreamDonePayload {
 // ─────────────────────────────────────────────
 // Community Pulse dashboard
 // ─────────────────────────────────────────────
-export type RightTab = "map" | "pulse";
 
 /** One row of public/meetings.json — manually maintained, see that file's header comment. */
 export interface Meeting {

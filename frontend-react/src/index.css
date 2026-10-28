@@ -10,8 +10,21 @@
   --navy: #1a3356;
   --navy-dark: #122440;
   --navy-light: #e8ecf2;
+  /* App shell (sidebar + header) */
+  --shell-bg: #0f2744;
+  --shell-hover: rgba(255, 255, 255, 0.07);
+  --shell-text: rgba(255, 255, 255, 0.82);
+  --shell-muted: rgba(255, 255, 255, 0.6);
+  --shell-focus: #9be7c0;
+  /* Green accent: active nav, primary actions, links */
+  --green: #1f7a4f;
+  --green-dark: #17613e;
+  --green-light: #e8f4ee;
+  /* Gold: board-decision markers and decorative accents (fails contrast as
+     body text on white — use --gold-text for that) */
   --gold: #c9973a;
   --gold-light: #fdf3e3;
+  --gold-text: #8a6514;
   --village: #0e7490;
   --village-dark: #0b5a70;
   --village-light: #e3f2f4;
@@ -27,6 +40,13 @@
   --denied-bg: #fef2f2;
   --denied: #b91c1c;
   --font: "Inter", system-ui, sans-serif;
+  /* Cards */
+  --radius-card: 12px;
+  --shadow-card: 0 1px 2px rgba(15, 39, 68, 0.05), 0 4px 14px rgba(15, 39, 68, 0.06);
+  --shadow-card-hover: 0 2px 4px rgba(15, 39, 68, 0.06), 0 10px 24px rgba(15, 39, 68, 0.1);
+  /* Layout */
+  --sidebar-w: 232px;
+  --header-h: 64px;
 }
 
 html,
@@ -65,4 +85,8 @@ a {
 :focus-visible {
   outline: 2px solid var(--navy);
   outline-offset: 2px;
+}
+#sidebar :focus-visible,
+#topbar :focus-visible {
+  outline-color: var(--shell-focus);
 }

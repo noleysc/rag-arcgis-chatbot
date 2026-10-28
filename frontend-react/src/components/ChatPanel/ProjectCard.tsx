@@ -1,7 +1,7 @@
 import type { NormalizedCard } from "../../types";
 import { statusClass, statusEmoji } from "../../lib/parseAnswer";
 import { openDirections, panToCoords } from "../../lib/mapViewStore";
-import { switchToTab } from "../../lib/uiStore";
+import { navigate } from "../../lib/router";
 import { recordDomId } from "../../lib/recordScroll";
 import type { ReportPrefill } from "../ReportDialog/ReportDialog";
 
@@ -17,7 +17,7 @@ export default function ProjectCard({ card, onReport }: ProjectCardProps) {
 
   const showOnMap = () => {
     if (card.lat === null || card.lng === null) return;
-    switchToTab("map");
+    navigate("map");
     requestAnimationFrame(() => panToCoords(card.lat!, card.lng!));
   };
 

@@ -1,41 +1,64 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Sidebar from "./components/Sidebar/Sidebar";
 import TopBar from "./components/TopBar/TopBar";
+import PageHeader from "./components/PageHeader/PageHeader";
 import ChatPanel from "./components/ChatPanel/ChatPanel";
-import RightPanel from "./components/RightPanel/RightPanel";
-import SplitDivider from "./components/SplitDivider/SplitDivider";
+import MapPanel from "./components/MapPanel/MapPanel";
+import Dashboard from "./components/Dashboard/Dashboard";
 import ReportDialog, { type ReportPrefill } from "./components/ReportDialog/ReportDialog";
 import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
 import { useChat } from "./hooks/useChat";
-import { useSplitPanel } from "./hooks/useSplitPanel";
-import type { MapPanelView } from "./components/MapPanel/MapPanel";
+import { useMeetings } from "./hooks/useMeetings";
+import { useMediaQuery } from "./hooks/useMediaQuery";
+import { useRecordCount } from "./hooks/useRecordCount";
+import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
 import "./App.css";
 
-const STORY_MIN_WIDTH_PX = 1100;
+const BASE_TITLE = "Ask Engage Estero — Planning & Zoning Decisions";
 
 export default function App() {
+  const route = useRoute();
   const { messages, send, newChat } = useChat();
-  const [recordCount, setRecordCount] = useState<number | null | undefined>(undefined);
-  const [mapExpanded, setMapExpanded] = useState(false);
-  const [mobileMapVisible, setMobileMapVisible] = useState(false);
+  const recordCount = useRecordCount();
+  const { meetings, loading: meetingsLoading, error: meetingsError } = useMeetings(3);
+  const drawer = useMediaQuery("(max-width: 900px)");
+  const [navOpen, setNavOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportPrefill, setReportPrefill] = useState<ReportPrefill | null>(null);
-  const split = useSplitPanel();
+  const mainRef = useRef<HTMLElement | null>(null);
 
-  const handleRecordCount = useCallback((count: number | null) => setRecordCount(count), []);
-  const toggleExpand = useCallback(() => setMapExpanded((v) => !v), []);
-  const toggleMobileMap = useCallback(() => setMobileMapVisible((v) => !v), []);
+  // The map iframe is mounted on first visit and then only hidden, never
+  // unmounted — reloading the Esri app is slow and loses the visitor's
+  // pan/zoom (same reason the old Map/Pulse tabs kept it mounted).
+  const [mapVisited, setMapVisited] = useState(route === "map");
+  if (route === "map" && !mapVisited) setMapVisited(true);
 
-  // The StoryMap swaps its inline dashboards for link cards when its iframe is
-  // too narrow, so widen the right panel while it's shown and put the user's
-  // split back when they switch to the map. 1100px is a width verified to show
-  // the dashboards inline; the exact cutoff is Esri's and undocumented.
-  const { widenRightTo, restoreRightWidth } = split;
-  const handleMapViewChange = useCallback(
-    (view: MapPanelView) => {
-      if (view === "story") widenRightTo(STORY_MIN_WIDTH_PX);
-      else restoreRightWidth();
+  const closeNav = useCallback(() => {
+    if (navOpen) document.getElementById("nav-toggle")?.focus();
+    setNavOpen(false);
+  }, [navOpen]);
+
+  // Page change: retitle, start at the top, and move focus to the new page
+  // so screen readers announce it (skipped on first load).
+  const firstRouteRef = useRef(true);
+  useEffect(() => {
+    document.title = route === "home" ? BASE_TITLE : `${ROUTE_LABELS[route]} · Ask Engage Estero`;
+    if (firstRouteRef.current) {
+      firstRouteRef.current = false;
+      return;
+    }
+    mainRef.current?.scrollTo(0, 0);
+    mainRef.current?.focus({ preventScroll: true });
+  }, [route]);
+
+  /** Send a question from anywhere (Home quick search, record rows, …) and
+   * take the visitor to the conversation. */
+  const ask = useCallback(
+    (text: string) => {
+      navigate("ask");
+      void send(text);
     },
-    [widenRightTo, restoreRightWidth],
+    [send],
   );
 
   const openReport = useCallback((prefill?: ReportPrefill) => {
@@ -45,56 +68,41 @@ export default function App() {
 
   const busy = messages.some((m) => m.role === "bot" && m.streaming);
 
-  const appClassName = [
-    mapExpanded && "map-expanded",
-    split.dragging && "dragging",
-    split.collapsed && "right-collapsed",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  // #app.map-expanded already forces a single 1fr column via CSS (and the
-  // divider isn't rendered in that mode, see below) — an inline style here
-  // would win specificity over that stylesheet rule, so only set it when the
-  // split panel is actually in control of the layout.
-  const appStyle = mapExpanded
-    ? undefined
-    : {
-        gridTemplateColumns: split.collapsed
-          ? "1fr 0px 0px"
-          : `${split.fraction}fr 6px ${1 - split.fraction}fr`,
-      };
+  const renderPage = (r: Exclude<Route, "map">) => {
+    switch (r) {
+      case "ask":
+        return (
+          <ChatPanel messages={messages} onSend={send} disabled={busy} onReport={openReport} onNewChat={newChat} />
+        );
+      case "pulse":
+        return (
+          <Dashboard meetings={meetings} meetingsLoading={meetingsLoading} meetingsError={meetingsError} onSend={ask} />
+        );
+      default:
+        return <PageHeader title={ROUTE_LABELS[r]} />;
+    }
+  };
 
   return (
     <>
       <DisclaimerModal />
-      <TopBar recordCount={recordCount} onToggleMobileMap={toggleMobileMap} />
-      <div id="app" ref={split.containerRef} className={appClassName} style={appStyle}>
-        <ChatPanel messages={messages} onSend={send} disabled={busy} onReport={openReport} onNewChat={newChat} />
-        {!mapExpanded && (
-          <SplitDivider
-            fraction={split.fraction}
-            dragging={split.dragging}
-            onPointerDown={split.onPointerDown}
-            onDoubleClick={split.onDoubleClick}
-            onKeyDown={split.onKeyDown}
-            onCollapse={split.toggleCollapsed}
-          />
-        )}
-        <RightPanel
-          expanded={mapExpanded}
-          onToggleExpand={toggleExpand}
-          mobileVisible={mobileMapVisible}
-          onRecordCount={handleRecordCount}
-          onMapViewChange={handleMapViewChange}
-          onSend={send}
-        />
+      <button type="button" className="skip-link" onClick={() => mainRef.current?.focus()}>
+        Skip to content
+      </button>
+      <div id="app-shell">
+        <Sidebar route={route} drawer={drawer} open={navOpen} onClose={closeNav} />
+        <div id="app-body">
+          <TopBar recordCount={recordCount} onOpenNav={drawer ? () => setNavOpen(true) : undefined} navOpen={navOpen} />
+          <main id="main" ref={mainRef} tabIndex={-1} className={`app-main app-main-${route}`}>
+            {mapVisited && (
+              <div className="page page-map" hidden={route !== "map"}>
+                <MapPanel />
+              </div>
+            )}
+            {route !== "map" && <div className={`page page-${route}`}>{renderPage(route)}</div>}
+          </main>
+        </div>
       </div>
-      {!mapExpanded && split.collapsed && (
-        <button type="button" className="split-reopen-tab" onClick={split.toggleCollapsed}>
-          Map / Pulse
-        </button>
-      )}
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} prefill={reportPrefill} />
     </>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "../../assets/logo.png";
+import { MenuIcon } from "../Icons/Icons";
 
 const ADMIN_TOKEN_KEY = "ee_admin_token";
 
@@ -13,10 +13,12 @@ function hasAdminToken(): boolean {
 
 interface TopBarProps {
   recordCount: number | null | undefined;
-  onToggleMobileMap: () => void;
+  /** Hamburger for the off-canvas sidebar; omitted on wide screens. */
+  onOpenNav?: () => void;
+  navOpen: boolean;
 }
 
-export default function TopBar({ recordCount, onToggleMobileMap }: TopBarProps) {
+export default function TopBar({ recordCount, onOpenNav, navOpen }: TopBarProps) {
   const [isAdmin, setIsAdmin] = useState(hasAdminToken);
 
   useEffect(() => {
@@ -33,19 +35,29 @@ export default function TopBar({ recordCount, onToggleMobileMap }: TopBarProps) 
 
   const liveLabel =
     recordCount === undefined
-      ? "Live data · loading…"
+      ? "Loading records…"
       : recordCount === null
-        ? "Live data · connected"
-        : `Live data · ${recordCount} records`;
+        ? "Live data"
+        : `${recordCount.toLocaleString()} records`;
 
   return (
     <header id="topbar">
       <div id="topbar-left">
-        <img id="topbar-logo" src={logo} alt="Engage Estero" />
-        <div id="topbar-divider" />
+        {onOpenNav && (
+          <button
+            type="button"
+            id="nav-toggle"
+            onClick={onOpenNav}
+            aria-label="Open menu"
+            aria-controls="sidebar"
+            aria-expanded={navOpen}
+          >
+            <MenuIcon size={22} />
+          </button>
+        )}
         <div id="topbar-title">
-          <h1>Ask Engage Estero</h1>
-          <p>Planning &amp; Zoning Decisions · Village of Estero</p>
+          <p className="topbar-name">Ask Engage Estero</p>
+          <p className="topbar-sub">Planning &amp; Zoning Decisions · Village of Estero</p>
         </div>
       </div>
       <div id="topbar-right">
@@ -58,13 +70,17 @@ export default function TopBar({ recordCount, onToggleMobileMap }: TopBarProps) 
             Admin
           </a>
         )}
-        <div id="live-badge">
-          <div id="live-dot" />
+        <div
+          id="live-badge"
+          title={
+            typeof recordCount === "number"
+              ? "Live count of board records on the Estero map layer"
+              : undefined
+          }
+        >
+          <span id="live-dot" aria-hidden="true" />
           <span id="record-count">{liveLabel}</span>
         </div>
-        <button type="button" id="mobile-map-toggle" className="map-btn" onClick={onToggleMobileMap}>
-          🗺 Map
-        </button>
       </div>
     </header>
   );

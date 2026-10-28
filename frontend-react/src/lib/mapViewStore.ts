@@ -119,32 +119,3 @@ export async function showResultsOnMap(points: ResultPoint[]): Promise<void> {
 export function clearResultsOnMap(): void {
   resultLayer?.removeAll();
 }
-
-interface ViewState {
-  center: [number, number];
-  zoom: number;
-}
-
-let savedViewState: ViewState | null = null;
-
-/** The MapView's container goes through display:none <-> display:flex when
- * the Map/Pulse tab switches (kept mounted rather than unmounted so the
- * expensive WebGL view survives). Toggling a WebGL canvas's container to/from
- * zero size isn't something ArcGIS's own resize handling reliably preserves
- * center/zoom across, so RightPanel calls these explicitly around every
- * switch as a belt-and-suspenders fix. */
-export function captureViewState(): void {
-  const view = currentView;
-  const { longitude, latitude } = view?.center ?? {};
-  if (longitude == null || latitude == null) return;
-  savedViewState = { center: [longitude, latitude], zoom: view!.zoom };
-}
-
-export function restoreViewState(): void {
-  const view = currentView;
-  if (!view || !savedViewState) return;
-  const { center, zoom } = savedViewState;
-  view.goTo({ center, zoom }, { animate: false }).catch(() => {
-    // best-effort — if this races with something else, worst case the pan is off by a frame
-  });
-}

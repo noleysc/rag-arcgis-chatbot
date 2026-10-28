@@ -16,17 +16,11 @@ const INSTANT_APP_URL = `https://eccl-swfl-safety.maps.arcgis.com/apps/instant/n
 // alternate view behind the Map | Story switch. It must stay *published*, not
 // just shared publicly: an unpublished story redirects anonymous visitors to
 // an ArcGIS sign-in page that refuses to render in an iframe. The story sizes
-// itself to the iframe, not the window, and below some width it swaps its
-// inline dashboards for link cards, so App widens the panel while it's shown
-// (see STORY_MIN_WIDTH_PX in App.tsx).
+// itself to the iframe, not the window, and below roughly 1100px it swaps its
+// inline dashboards for link cards — MapPage hides the legend while the story
+// is shown so the iframe gets the full page width.
 const STORY_MAP_ID = "185eb6332dbf45be8be5213258916b49";
 const STORY_MAP_URL = `https://storymaps.arcgis.com/stories/${STORY_MAP_ID}`;
-
-// The app's underlying feature layer is public on its own, so the record
-// count in TopBar ("Live data · N records") can still be queried directly —
-// no need to lose that just because the map itself moved into an iframe.
-const RECORD_COUNT_URL =
-  "https://services2.arcgis.com/UzlfiFv8kzq0Q4vo/arcgis/rest/services/Estero_Board_Records_%E2%80%94_All_Categories/FeatureServer/0/query?where=1%3D1&returnCountOnly=true&f=json";
 
 export type MapPanelView = "map" | "story";
 
@@ -46,13 +40,10 @@ const VIEWS: Record<MapPanelView, { url: string; title: string; subtitle: string
 };
 
 interface MapPanelProps {
-  expanded: boolean;
-  onToggleExpand: () => void;
-  onRecordCount: (count: number | null) => void;
-  onViewChange: (view: MapPanelView) => void;
+  onViewChange?: (view: MapPanelView) => void;
 }
 
-export default function MapPanel({ expanded, onToggleExpand, onRecordCount, onViewChange }: MapPanelProps) {
+export default function MapPanel({ onViewChange }: MapPanelProps) {
   const [view, setView] = useState<MapPanelView>("map");
   // The story iframe is only created on first switch (so the default Map view
   // doesn't pay for loading it), then kept mounted so switching back and forth
@@ -65,33 +56,13 @@ export default function MapPanel({ expanded, onToggleExpand, onRecordCount, onVi
     if (next === view) return;
     if (next === "story") setStoryLoaded(true);
     setView(next);
-    onViewChange(next);
+    onViewChange?.(next);
   };
 
   useEffect(() => {
     // No live MapView to hand out from an iframe — clear any stale reference
     // so "Show on map" etc. degrade to their already-safe no-op path.
     setMapView(null);
-
-    let cancelled = false;
-    fetch(RECORD_COUNT_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<{ count?: number; error?: unknown }>;
-      })
-      .then((data) => {
-        if (cancelled) return;
-        if (typeof data.count === "number") onRecordCount(data.count);
-        else onRecordCount(null);
-      })
-      .catch(() => {
-        if (!cancelled) onRecordCount(null);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -123,9 +94,6 @@ export default function MapPanel({ expanded, onToggleExpand, onRecordCount, onVi
               Story
             </button>
           </div>
-          <button type="button" className="map-btn" id="expand-btn" onClick={onToggleExpand}>
-            {expanded ? "⤡ Collapse" : "⤢ Expand"}
-          </button>
           <a className="map-btn" href={active.url} target="_blank" rel="noopener noreferrer">
             ↗ Open
           </a>

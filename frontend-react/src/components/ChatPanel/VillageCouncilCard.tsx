@@ -1,7 +1,7 @@
 import type { NormalizedCard } from "../../types";
 import { statusClass, statusEmoji } from "../../lib/parseAnswer";
 import { openDirections, panToCoords } from "../../lib/mapViewStore";
-import { switchToTab } from "../../lib/uiStore";
+import { navigate } from "../../lib/router";
 import { recordDomId } from "../../lib/recordScroll";
 
 export default function VillageCouncilCard({ card }: { card: NormalizedCard }) {
@@ -11,7 +11,7 @@ export default function VillageCouncilCard({ card }: { card: NormalizedCard }) {
 
   const showOnMap = () => {
     if (card.lat === null || card.lng === null) return;
-    switchToTab("map");
+    navigate("map");
     // Give the map tab a frame to become visible/sized before panning.
     requestAnimationFrame(() => panToCoords(card.lat!, card.lng!));
   };
