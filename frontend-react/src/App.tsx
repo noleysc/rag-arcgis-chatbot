@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import AskPage from "./pages/AskPage";
 import MapPage from "./pages/MapPage";
 import RecordsPage from "./pages/RecordsPage";
+import MeetingsPage from "./pages/MeetingsPage";
 import { useChat } from "./hooks/useChat";
 import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
@@ -79,6 +80,8 @@ export default function App() {
         return <AskPage messages={messages} onSend={send} busy={busy} onReport={openReport} onNewChat={newChat} />;
       case "records":
         return <RecordsPage onAsk={ask} />;
+      case "meetings":
+        return <MeetingsPage />;
       case "pulse":
         return (
           <Dashboard meetings={meetings} meetingsLoading={meetingsLoading} meetingsError={meetingsError} onSend={ask} />

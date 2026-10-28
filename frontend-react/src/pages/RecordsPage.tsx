@@ -28,12 +28,18 @@ const TABS: Array<{ id: Tab; label: string }> = [
 
 const PAGE_SIZE = 25;
 
+/** Deep links like #/records?tab=minutes open on that tab. */
+function initialTab(): Tab {
+  const tab = new URLSearchParams(window.location.hash.split("?")[1] || "").get("tab");
+  return TABS.some((t) => t.id === tab) ? (tab as Tab) : "all";
+}
+
 interface RecordsPageProps {
   onAsk: (question: string) => void;
 }
 
 export default function RecordsPage({ onAsk }: RecordsPageProps) {
-  const [tab, setTab] = useState<Tab>("all");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput.trim(), 350);
   const [board, setBoard] = useState("");

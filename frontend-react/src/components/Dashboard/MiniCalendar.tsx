@@ -9,6 +9,8 @@ interface MiniCalendarProps {
   selectedDateKey: string | null;
   onNavigate: (year: number, month: number) => void;
   onSelectDate: (dateKey: string) => void;
+  /** Event-category legend; off where every dot means the same thing. */
+  showLegend?: boolean;
 }
 
 interface DayCell {
@@ -98,6 +100,7 @@ export default function MiniCalendar({
   selectedDateKey,
   onNavigate,
   onSelectDate,
+  showLegend = true,
 }: MiniCalendarProps) {
   const cells = useMemo(() => buildGrid(viewYear, viewMonth, dayEvents), [viewYear, viewMonth, dayEvents]);
   const [hoveredDateKey, setHoveredDateKey] = useState<string | null>(null);
@@ -199,28 +202,30 @@ export default function MiniCalendar({
         })}
       </div>
 
-      <div className="mini-cal-legend">
-        <span className="mini-cal-legend-item">
-          <span className="mini-cal-legend-swatch mini-cal-legend-swatch-government" />
-          Government
-        </span>
-        <span className="mini-cal-legend-item">
-          <span className="mini-cal-legend-swatch mini-cal-legend-swatch-community" />
-          Community
-        </span>
-        <span className="mini-cal-legend-item">
-          <span className="mini-cal-legend-swatch mini-cal-legend-swatch-sports" />
-          Sports
-        </span>
-        <span className="mini-cal-legend-item">
-          <span className="mini-cal-legend-swatch mini-cal-legend-swatch-music" />
-          Music
-        </span>
-        <span className="mini-cal-legend-item">
-          <span className="mini-cal-legend-swatch mini-cal-legend-swatch-market" />
-          Markets / Fairs
-        </span>
-      </div>
+      {showLegend && (
+        <div className="mini-cal-legend">
+          <span className="mini-cal-legend-item">
+            <span className="mini-cal-legend-swatch mini-cal-legend-swatch-government" />
+            Government
+          </span>
+          <span className="mini-cal-legend-item">
+            <span className="mini-cal-legend-swatch mini-cal-legend-swatch-community" />
+            Community
+          </span>
+          <span className="mini-cal-legend-item">
+            <span className="mini-cal-legend-swatch mini-cal-legend-swatch-sports" />
+            Sports
+          </span>
+          <span className="mini-cal-legend-item">
+            <span className="mini-cal-legend-swatch mini-cal-legend-swatch-music" />
+            Music
+          </span>
+          <span className="mini-cal-legend-item">
+            <span className="mini-cal-legend-swatch mini-cal-legend-swatch-market" />
+            Markets / Fairs
+          </span>
+        </div>
+      )}
     </div>
   );
 }

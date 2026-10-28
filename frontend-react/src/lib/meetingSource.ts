@@ -3,7 +3,8 @@ import type { Meeting } from "../types";
 /** Official Village pages that pipeline/discover.py scrapes for new minutes PDFs. */
 const COUNCIL_MINUTES_URL = "https://estero-fl.gov/villagecouncilminutes/";
 const PZDB_MINUTES_URL = "https://estero-fl.gov/pzdbminutes/";
-const AGENDAS_FALLBACK_URL = "https://estero-fl.gov/agendas-minutes/";
+/** The Village's agendas & minutes calendar — where upcoming agendas post. */
+export const VILLAGE_AGENDAS_URL = "https://estero-fl.gov/agendas-minutes/";
 
 /** Resolve the public page a meeting was (or will be) scraped from. */
 export function meetingSourceUrl(meeting: Pick<Meeting, "board" | "url">): string {
@@ -15,5 +16,5 @@ export function meetingSourceUrl(meeting: Pick<Meeting, "board" | "url">): strin
   if (board.includes("council")) {
     return COUNCIL_MINUTES_URL;
   }
-  return AGENDAS_FALLBACK_URL;
+  return VILLAGE_AGENDAS_URL;
 }

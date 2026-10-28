@@ -5,7 +5,13 @@ import LatestNews from "../components/Dashboard/LatestNews";
 import { ArrowRightIcon, CalendarIcon, ChatIcon, MapIcon, RecordsIcon, SearchIcon } from "../components/Icons/Icons";
 import { routeHref, type Route } from "../lib/router";
 
-const ACTIONS: Array<{ route: Route; title: string; text: string; Icon: ComponentType<{ size?: number }> }> = [
+const ACTIONS: Array<{
+  route: Route;
+  query?: string;
+  title: string;
+  text: string;
+  Icon: ComponentType<{ size?: number }>;
+}> = [
   {
     route: "ask",
     title: "Ask about Estero",
@@ -20,6 +26,7 @@ const ACTIONS: Array<{ route: Route; title: string; text: string; Icon: Componen
   },
   {
     route: "records",
+    query: "?tab=decisions",
     title: "Recent decisions",
     text: "See the latest board actions and open the original minutes.",
     Icon: RecordsIcon,
@@ -65,9 +72,9 @@ export default function HomePage({ onAsk }: HomePageProps) {
       </section>
 
       <ul className="home-actions">
-        {ACTIONS.map(({ route, title, text, Icon }) => (
+        {ACTIONS.map(({ route, query, title, text, Icon }) => (
           <li key={route}>
-            <a className="card action-card" href={routeHref(route)}>
+            <a className="card action-card" href={routeHref(route) + (query || "")}>
               <span className="action-icon">
                 <Icon size={26} />
               </span>

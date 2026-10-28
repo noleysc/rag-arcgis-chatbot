@@ -1,12 +1,13 @@
 import type { Meeting } from "../../types";
 import { meetingIsThisWeek } from "../../hooks/useMeetings";
-import { meetingSourceUrl } from "../../lib/meetingSource";
+import { meetingSourceUrl, VILLAGE_AGENDAS_URL } from "../../lib/meetingSource";
 import { SkeletonRows } from "./Skeleton";
 
 interface NextMeetingsProps {
   meetings: Meeting[];
   loading: boolean;
   error: string | null;
+  title?: string;
 }
 
 function formatMonthDay(dateStr: string): { month: string; day: number } {
@@ -14,20 +15,30 @@ function formatMonthDay(dateStr: string): { month: string; day: number } {
   return { month: d.toLocaleDateString("en-US", { month: "short" }).toUpperCase(), day: d.getDate() };
 }
 
-export default function NextMeetings({ meetings, loading, error }: NextMeetingsProps) {
+export default function NextMeetings({ meetings, loading, error, title = "Next Meetings" }: NextMeetingsProps) {
   return (
-    <section className="pulse-widget pulse-widget-navy">
+    <section className="pulse-widget">
       <div className="pulse-widget-header">
-        <h2>Next Meetings</h2>
+        <h2>{title}</h2>
       </div>
 
       {loading && <SkeletonRows count={2} />}
 
-      {!loading && error && <p className="pulse-empty">Couldn't load the meeting schedule.</p>}
+      {!loading && error && (
+        <p className="pulse-empty">
+          Couldn't load the meeting schedule —{" "}
+          <a href={VILLAGE_AGENDAS_URL} target="_blank" rel="noopener noreferrer">
+            check the Village calendar ↗
+          </a>
+        </p>
+      )}
 
       {!loading && !error && meetings.length === 0 && (
         <p className="pulse-empty">
-          No upcoming meetings listed here yet — check the Village calendar directly.
+          No upcoming meetings are listed here yet. For the latest schedule and agendas, check the{" "}
+          <a href={VILLAGE_AGENDAS_URL} target="_blank" rel="noopener noreferrer">
+            Village of Estero meeting calendar ↗
+          </a>
         </p>
       )}
 
@@ -65,14 +76,11 @@ export default function NextMeetings({ meetings, loading, error }: NextMeetingsP
         </ul>
       )}
 
-      <a
-        className="pulse-widget-link"
-        href="https://estero-fl.gov/agendas-minutes/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Agendas ↗
-      </a>
+      {meetings.length > 0 && (
+        <a className="pulse-widget-link" href={VILLAGE_AGENDAS_URL} target="_blank" rel="noopener noreferrer">
+          View agendas ↗
+        </a>
+      )}
     </section>
   );
 }

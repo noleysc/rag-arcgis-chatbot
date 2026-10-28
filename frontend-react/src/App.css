@@ -1450,12 +1450,12 @@
   color: var(--navy);
 }
 .pulse-empty {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--text-muted);
   line-height: 1.6;
 }
 .pulse-empty a {
-  color: var(--navy);
+  color: var(--green);
   font-weight: 600;
 }
 .pulse-retry {

@@ -27,8 +27,9 @@ export function meetingIsThisWeek(dateStr: string): boolean {
 
 /** Loads public/meetings.json (manually maintained — see that file's header
  * comment) and filters to upcoming occurrences only, so the widget stays
- * accurate between manual updates instead of showing stale past dates. */
-export function useMeetings(limit = 3): UseMeetingsResult {
+ * accurate between manual updates instead of showing stale past dates.
+ * `includePast` keeps past entries too (the Meetings calendar). */
+export function useMeetings(limit = 3, includePast = false): UseMeetingsResult {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export function useMeetings(limit = 3): UseMeetingsResult {
         if (cancelled) return;
         const todayStr = new Date().toISOString().slice(0, 10);
         const upcoming = (data.meetings || [])
-          .filter((m) => m.date >= todayStr)
+          .filter((m) => includePast || m.date >= todayStr)
           .sort((a, b) => a.date.localeCompare(b.date))
           .slice(0, limit);
         setMeetings(upcoming);
@@ -62,7 +63,7 @@ export function useMeetings(limit = 3): UseMeetingsResult {
     return () => {
       cancelled = true;
     };
-  }, [limit]);
+  }, [limit, includePast]);
 
   const hasUpcomingWithinWeek = meetings.some((m) => meetingIsThisWeek(m.date));
 
