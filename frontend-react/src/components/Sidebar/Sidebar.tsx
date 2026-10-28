@@ -19,10 +19,15 @@ interface SidebarProps {
   /** Off-canvas drawer mode (narrow screens). */
   drawer: boolean;
   open: boolean;
+  /** Dismiss the drawer without navigating (Esc, backdrop, close button). */
   onClose: () => void;
+  /** A nav link was followed; the page change takes focus from here. */
+  onNavigate: () => void;
+  /** Gold dot on Meetings when a scheduled meeting is within 7 days. */
+  meetingThisWeek?: boolean;
 }
 
-export default function Sidebar({ route, drawer, open, onClose }: SidebarProps) {
+export default function Sidebar({ route, drawer, open, onClose, onNavigate, meetingThisWeek }: SidebarProps) {
   const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
@@ -45,7 +50,7 @@ export default function Sidebar({ route, drawer, open, onClose }: SidebarProps) 
         inert={drawer && !open}
       >
         <div className="sidebar-brand">
-          <a href={routeHref("home")} onClick={onClose}>
+          <a href={routeHref("home")} onClick={route === "home" ? onClose : onNavigate}>
             <img src={logo} alt="Engage Estero — home" />
           </a>
           {drawer && (
@@ -63,10 +68,16 @@ export default function Sidebar({ route, drawer, open, onClose }: SidebarProps) 
                   className="sidebar-link"
                   href={routeHref(r)}
                   aria-current={route === r ? "page" : undefined}
-                  onClick={onClose}
+                  // Same page: nothing will take focus, so hand it back to the menu button.
+                  onClick={route === r ? onClose : onNavigate}
                 >
                   <Icon size={19} />
                   <span>{ROUTE_LABELS[r]}</span>
+                  {r === "meetings" && meetingThisWeek && (
+                    <span className="sidebar-dot">
+                      <span className="sr-only">(meeting this week)</span>
+                    </span>
+                  )}
                 </a>
               </li>
             ))}

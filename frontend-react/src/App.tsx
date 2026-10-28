@@ -10,6 +10,7 @@ import RecordsPage from "./pages/RecordsPage";
 import MeetingsPage from "./pages/MeetingsPage";
 import PulsePage from "./pages/PulsePage";
 import { useChat } from "./hooks/useChat";
+import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useRecordCount } from "./hooks/useRecordCount";
 import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
@@ -22,6 +23,7 @@ export default function App() {
   const route = useRoute();
   const { messages, send, newChat } = useChat();
   const recordCount = useRecordCount();
+  const { hasUpcomingWithinWeek } = useMeetings(3);
   const drawer = useMediaQuery("(max-width: 900px)");
   const [navOpen, setNavOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -34,10 +36,14 @@ export default function App() {
   const [mapVisited, setMapVisited] = useState(route === "map");
   if (route === "map" && !mapVisited) setMapVisited(true);
 
+  // Dismissing the drawer returns focus to the menu button — after the
+  // re-render, since #app-body is inert until the drawer is closed.
   const closeNav = useCallback(() => {
-    if (navOpen) document.getElementById("nav-toggle")?.focus();
+    if (!navOpen) return;
     setNavOpen(false);
+    requestAnimationFrame(() => document.getElementById("nav-toggle")?.focus());
   }, [navOpen]);
+  const navigateFromNav = useCallback(() => setNavOpen(false), []);
 
   // Page change: retitle, start at the top, and move focus to the new page
   // so screen readers announce it (skipped on first load).
@@ -91,8 +97,16 @@ export default function App() {
         Skip to content
       </button>
       <div id="app-shell">
-        <Sidebar route={route} drawer={drawer} open={navOpen} onClose={closeNav} />
-        <div id="app-body">
+        <Sidebar
+          route={route}
+          drawer={drawer}
+          open={navOpen}
+          onClose={closeNav}
+          onNavigate={navigateFromNav}
+          meetingThisWeek={hasUpcomingWithinWeek}
+        />
+        {/* inert while the drawer is open, so focus can't wander behind it */}
+        <div id="app-body" inert={drawer && navOpen}>
           <TopBar recordCount={recordCount} onOpenNav={drawer ? () => setNavOpen(true) : undefined} navOpen={navOpen} />
           <main id="main" ref={mainRef} tabIndex={-1} className={`app-main app-main-${route}`}>
             {mapVisited && (

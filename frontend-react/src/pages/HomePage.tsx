@@ -41,7 +41,7 @@ const ACTIONS: Array<{
 
 /** Starter questions — each checked against the live backend to return a
  * grounded answer, not just a "no records" fallback. */
-export const HOME_SAMPLE_QUESTIONS = [
+const HOME_SAMPLE_QUESTIONS = [
   "What happened with Corkscrew Road?",
   "What rezonings has the Village Council approved?",
   "What has been approved on Via Coconut Point?",

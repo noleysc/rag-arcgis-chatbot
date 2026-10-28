@@ -830,6 +830,16 @@
 }
 
 /* Phones: each row becomes a stacked card with inline labels. */
+@media (max-width: 400px) {
+  .records-tabs {
+    gap: 0;
+    padding: 10px 6px 0;
+  }
+  .records-tab {
+    padding: 10px 10px;
+    font-size: 13.5px;
+  }
+}
 @media (max-width: 760px) {
   .records-panel {
     padding: 14px 14px 16px;
