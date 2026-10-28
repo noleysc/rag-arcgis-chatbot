@@ -7,12 +7,14 @@ import MapPanel from "./components/MapPanel/MapPanel";
 import Dashboard from "./components/Dashboard/Dashboard";
 import ReportDialog, { type ReportPrefill } from "./components/ReportDialog/ReportDialog";
 import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
+import HomePage from "./pages/HomePage";
 import { useChat } from "./hooks/useChat";
 import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useRecordCount } from "./hooks/useRecordCount";
 import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
 import "./App.css";
+import "./pages/pages.css";
 
 const BASE_TITLE = "Ask Engage Estero — Planning & Zoning Decisions";
 
@@ -70,6 +72,8 @@ export default function App() {
 
   const renderPage = (r: Exclude<Route, "map">) => {
     switch (r) {
+      case "home":
+        return <HomePage onAsk={ask} />;
       case "ask":
         return (
           <ChatPanel messages={messages} onSend={send} disabled={busy} onReport={openReport} onNewChat={newChat} />

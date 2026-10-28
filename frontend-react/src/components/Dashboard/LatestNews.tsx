@@ -1,4 +1,6 @@
+import { useId } from "react";
 import { useNews } from "../../hooks/useNews";
+import { ArrowRightIcon } from "../Icons/Icons";
 import { SkeletonRows } from "./Skeleton";
 
 function formatDate(iso: string): string {
@@ -8,11 +10,16 @@ function formatDate(iso: string): string {
 
 export default function LatestNews() {
   const { posts, loading, error, retry } = useNews();
+  const titleId = useId();
 
   return (
-    <section className="pulse-widget pulse-widget-gold">
+    <section className="pulse-widget" aria-labelledby={titleId}>
       <div className="pulse-widget-header">
-        <h3>Latest from EsteroToday</h3>
+        <h2 id={titleId}>Latest from Estero Today</h2>
+        <a className="card-link" href="https://esterotoday.com/" target="_blank" rel="noopener noreferrer">
+          View all <ArrowRightIcon size={14} />
+          <span className="sr-only">(opens esterotoday.com in a new tab)</span>
+        </a>
       </div>
 
       {loading && <SkeletonRows count={3} />}

@@ -18,7 +18,7 @@ export default function NextMeetings({ meetings, loading, error }: NextMeetingsP
   return (
     <section className="pulse-widget pulse-widget-navy">
       <div className="pulse-widget-header">
-        <h3>Next Meetings</h3>
+        <h2>Next Meetings</h2>
       </div>
 
       {loading && <SkeletonRows count={2} />}

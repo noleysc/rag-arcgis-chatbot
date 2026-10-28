@@ -133,7 +133,7 @@ export default function UpcomingEvents() {
   return (
     <section className="pulse-widget pulse-widget-gold">
       <div className="pulse-widget-header">
-        <h3>Upcoming Events</h3>
+        <h2>Upcoming Events</h2>
       </div>
 
       {loading && <SkeletonRows count={3} />}

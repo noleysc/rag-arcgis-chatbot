@@ -1483,20 +1483,12 @@
 .pulse-widget {
   background: var(--white);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  transition:
-    transform 0.15s ease-out,
-    box-shadow 0.15s ease-out;
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  min-width: 0;
 }
-.pulse-widget:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-/* Stagger in on load, ~50ms apart. Dashboard's widgets stay mounted for the
-   app's lifetime (see RightPanel.tsx), so this plays once on first load, not
-   on every Map/Pulse tab switch. */
+/* Stagger in on load, ~50ms apart. */
 #pulse-dashboard > .pulse-widget {
   opacity: 0;
   animation: fadeInUp 0.3s ease-out forwards;
@@ -1510,21 +1502,17 @@
 #pulse-dashboard > .pulse-widget:nth-child(3) {
   animation-delay: 100ms;
 }
-.pulse-widget-navy {
-  border-left: 3px solid var(--navy);
+.pulse-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
 }
-.pulse-widget-gold {
-  border-left: 3px solid var(--gold);
-}
-.pulse-widget-header h3 {
-  font-size: 12px;
+.pulse-widget-header h2 {
+  font-size: 16px;
   font-weight: 700;
   color: var(--navy);
-  text-transform: uppercase;
-  letter-spacing: 1.1px;
-  padding-bottom: 9px;
-  margin-bottom: 13px;
-  border-bottom: 2px solid var(--gold);
 }
 .pulse-empty {
   font-size: 12.5px;

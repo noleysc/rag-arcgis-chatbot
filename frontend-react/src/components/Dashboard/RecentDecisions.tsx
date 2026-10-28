@@ -15,7 +15,7 @@ export default function RecentDecisions({ onSend }: RecentDecisionsProps) {
   return (
     <section className="pulse-widget pulse-widget-navy">
       <div className="pulse-widget-header">
-        <h3>Recent Board Decisions</h3>
+        <h2>Recent Board Decisions</h2>
       </div>
 
       {loading && <SkeletonRows count={3} />}
