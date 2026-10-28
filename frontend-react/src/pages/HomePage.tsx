@@ -36,7 +36,7 @@ const ACTIONS: Array<{ route: Route; title: string; text: string; Icon: Componen
  * grounded answer, not just a "no records" fallback. */
 export const HOME_SAMPLE_QUESTIONS = [
   "What happened with Corkscrew Road?",
-  "Show me recent board decisions",
+  "What rezonings has the Village Council approved?",
   "What has been approved on Via Coconut Point?",
   "Find meetings about traffic safety",
 ];

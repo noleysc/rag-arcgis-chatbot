@@ -16,15 +16,12 @@ const SUGGESTED: Array<{ heading: string; questions: string[] }> = [
     heading: "Board Decisions",
     questions: [
       "What did the Village Council decide at its most recent meeting?",
-      "Show me recent land use approvals",
+      "What has the Village Council approved on Broadway Avenue?",
     ],
   },
   {
     heading: "Meetings",
-    questions: [
-      "When is the next Planning, Zoning & Design Board meeting?",
-      "What was discussed at the June 17, 2026 Village Council meeting?",
-    ],
+    questions: ["Find meetings about traffic safety", "Which meetings discussed the Estero River?"],
   },
 ];
 
