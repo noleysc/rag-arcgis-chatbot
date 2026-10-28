@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import TopBar from "./components/TopBar/TopBar";
 import PageHeader from "./components/PageHeader/PageHeader";
-import ChatPanel from "./components/ChatPanel/ChatPanel";
 import MapPanel from "./components/MapPanel/MapPanel";
 import Dashboard from "./components/Dashboard/Dashboard";
 import ReportDialog, { type ReportPrefill } from "./components/ReportDialog/ReportDialog";
 import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
 import HomePage from "./pages/HomePage";
+import AskPage from "./pages/AskPage";
 import { useChat } from "./hooks/useChat";
 import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
@@ -75,9 +75,7 @@ export default function App() {
       case "home":
         return <HomePage onAsk={ask} />;
       case "ask":
-        return (
-          <ChatPanel messages={messages} onSend={send} disabled={busy} onReport={openReport} onNewChat={newChat} />
-        );
+        return <AskPage messages={messages} onSend={send} busy={busy} onReport={openReport} onNewChat={newChat} />;
       case "pulse":
         return (
           <Dashboard meetings={meetings} meetingsLoading={meetingsLoading} meetingsError={meetingsError} onSend={ask} />
