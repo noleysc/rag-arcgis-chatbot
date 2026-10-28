@@ -1,6 +1,6 @@
 import type { Meeting } from "../../types";
 import { meetingIsThisWeek } from "../../hooks/useMeetings";
-import { meetingSourceUrl } from "../../lib/meetingSource";
+import { AGENDAS_URL, meetingSourceUrl } from "../../lib/meetingSource";
 import { SkeletonRows } from "./Skeleton";
 
 interface NextMeetingsProps {
@@ -43,7 +43,7 @@ export default function NextMeetings({ meetings, loading, error }: NextMeetingsP
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={`Open ${m.board} minutes on estero-fl.gov`}
+                  title={`Open ${m.board} agendas on estero-fl.gov`}
                 >
                   <div className="date-leaf">
                     <span className="date-leaf-month">{month}</span>
@@ -67,7 +67,7 @@ export default function NextMeetings({ meetings, loading, error }: NextMeetingsP
 
       <a
         className="pulse-widget-link"
-        href="https://estero-fl.gov/agendas-minutes/"
+        href={AGENDAS_URL}
         target="_blank"
         rel="noopener noreferrer"
       >

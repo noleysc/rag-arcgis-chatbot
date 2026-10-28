@@ -104,7 +104,7 @@ export interface Meeting {
   date: string; // YYYY-MM-DD
   time: string; // e.g. "5:30 PM"
   venue: string;
-  /** Village minutes index the pipeline scrapes (estero-fl.gov). */
+  /** Public Village page for this meeting (usually agendas at /meetings/). */
   url?: string;
 }
 
@@ -164,7 +164,7 @@ export interface DayEvent {
   title: string;
   time: string; // display string, e.g. "4:30 PM" or "All day"
   venue: string | null;
-  url: string | null; // event page, or Village minutes index for meetings
+  url: string | null; // event page, or Village agendas hub for meetings
   category: EventCategory;
 }
 
