@@ -37,7 +37,7 @@
   flex-shrink: 0;
   width: 46px;
   border: none;
-  background: var(--green);
+  background: var(--green-solid);
   color: #fff;
   display: flex;
   align-items: center;
@@ -46,7 +46,7 @@
   transition: background 0.15s;
 }
 .search-field-btn:hover:not(:disabled) {
-  background: var(--green-dark);
+  background: var(--green-solid-hover);
 }
 .search-field-btn:disabled {
   opacity: 0.55;
@@ -571,7 +571,7 @@
   height: 44px;
   margin-top: 14px;
   border-radius: 999px;
-  background: var(--green);
+  background: var(--green-solid);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -579,7 +579,7 @@
   transition: background 0.15s;
 }
 .home-ask-cta:hover {
-  background: var(--green-dark);
+  background: var(--green-solid-hover);
 }
 
 /* Right rail: Our Community */
@@ -1577,7 +1577,7 @@
   font-size: 13px;
 }
 .meetings-cal .mini-cal-day-circle-today {
-  background: var(--green);
+  background: var(--green-solid);
   border-color: var(--green);
   color: #fff;
 }
@@ -1716,7 +1716,7 @@
   width: 64px;
   height: 64px;
   border-radius: 15px;
-  background: linear-gradient(140deg, #2b9d66, var(--green));
+  background: linear-gradient(140deg, #2b9d66, var(--green-solid));
   box-shadow:
     0 8px 18px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -1969,7 +1969,7 @@
   border-radius: 50%;
 }
 .pulse-cal-swatch.is-event {
-  background: var(--green);
+  background: var(--green-solid);
 }
 .pulse-cal-swatch.is-meeting {
   background: #14264c;

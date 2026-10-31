@@ -40,7 +40,7 @@
   left: 8px;
   z-index: 400;
   transform: translateY(-160%);
-  background: var(--green);
+  background: var(--green-solid);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -124,7 +124,7 @@
 }
 /* Gradient stays ≥4.5:1 against white text at its lightest corner. */
 .sidebar-link[aria-current="page"] {
-  background: linear-gradient(135deg, #1f8455, var(--green-dark));
+  background: linear-gradient(135deg, #1f8455, var(--green-solid-hover));
   box-shadow: 0 6px 16px rgba(23, 97, 62, 0.4);
   color: #fff;
   font-weight: 600;
@@ -288,7 +288,7 @@
   height: 32px;
   border: none;
   border-radius: 8px;
-  background: var(--green);
+  background: var(--green-solid);
   color: #fff;
   display: flex;
   align-items: center;
@@ -297,7 +297,7 @@
   transition: background 0.15s;
 }
 .topbar-search-btn:hover:not(:disabled) {
-  background: var(--green-dark);
+  background: var(--green-solid-hover);
 }
 .topbar-search-btn:disabled {
   background: transparent;
@@ -332,6 +332,26 @@
   border-radius: 50%;
   background: var(--success);
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
+.theme-toggle {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--navy);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.theme-toggle:hover {
+  background: var(--bg);
+  border-color: var(--navy);
 }
 .topbar-btn {
   background: var(--white);
@@ -481,7 +501,7 @@
   color: var(--green-dark);
 }
 .chip[aria-pressed="true"] {
-  background: var(--green);
+  background: var(--green-solid);
   border-color: var(--green);
   color: #fff;
 }
@@ -605,7 +625,7 @@
   align-items: flex-end;
 }
 .msg-user .bubble {
-  background: var(--navy);
+  background: var(--navy-solid);
   color: #fff;
   border-radius: 20px 20px 4px 20px;
   padding: 11px 18px;
@@ -629,7 +649,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--navy);
+  background: var(--navy-solid);
   color: #fff;
   display: flex;
   align-items: center;
@@ -900,7 +920,7 @@
   flex-wrap: wrap;
 }
 .btn-minutes {
-  background: var(--navy);
+  background: var(--navy-solid);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -914,7 +934,7 @@
   gap: 5px;
 }
 .btn-minutes:hover {
-  background: var(--navy-dark);
+  background: var(--navy-solid-hover);
 }
 .btn-minutes-village {
   background: var(--village);
@@ -1268,7 +1288,7 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: var(--green);
+  background: var(--green-solid);
   border: none;
   cursor: pointer;
   display: flex;
@@ -1280,7 +1300,7 @@
     transform 0.1s;
 }
 #send-btn:hover:not(:disabled) {
-  background: var(--green-dark);
+  background: var(--green-solid-hover);
   transform: scale(1.05);
 }
 #send-btn:disabled {
@@ -1360,7 +1380,7 @@
 #load-btn {
   padding: 5px 14px;
   border-radius: 8px;
-  background: var(--navy);
+  background: var(--navy-solid);
   color: #fff;
   border: none;
   font-size: 12px;
@@ -1368,7 +1388,7 @@
   cursor: pointer;
 }
 #load-btn:hover {
-  background: var(--navy-dark);
+  background: var(--navy-solid-hover);
 }
 #load-status {
   font-size: 12px;
@@ -1465,7 +1485,7 @@
   border-left: none;
 }
 .map-view-switch .map-btn.active {
-  background: var(--green);
+  background: var(--green-solid);
   border-color: var(--green);
   color: #fff;
 }
@@ -1635,7 +1655,7 @@ a.meeting-row-link:hover .meeting-name {
   transform: scale(1.08);
 }
 .date-leaf-month {
-  background: var(--navy);
+  background: var(--navy-solid);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -1860,7 +1880,7 @@ a.meeting-row-link:hover .meeting-name {
   font-weight: 700;
 }
 .mini-cal-day-circle-event {
-  background: var(--green);
+  background: var(--green-solid);
   color: #fff;
   font-weight: 700;
 }
@@ -1979,7 +1999,7 @@ a.meeting-row-link:hover .meeting-name {
   color: var(--green-dark);
 }
 .events-cat-chip-active {
-  background: var(--green);
+  background: var(--green-solid);
   border-color: var(--green);
   color: #fff;
 }
@@ -2433,12 +2453,12 @@ a.meeting-row-link:hover .meeting-name {
   font-family: var(--font);
 }
 .btn-prompt-primary {
-  background: var(--navy);
-  color: var(--white);
+  background: var(--navy-solid);
+  color: #fff;
   border: none;
 }
 .btn-prompt-primary:hover:not(:disabled) {
-  background: var(--navy-dark);
+  background: var(--navy-solid-hover);
 }
 .btn-prompt-primary:disabled {
   opacity: 0.5;

@@ -1,0 +1,209 @@
+/* ═══════════════════════════════════════════════
+   DARK THEME — colors that aren't tokens
+   The tokens flip in index.css. These rules cover the hard-coded light
+   tints, scoped to :root[data-theme="dark"] so light mode is untouched
+   and they outrank the originals whatever the file order.
+   ═══════════════════════════════════════════════ */
+
+/* Shell */
+:root[data-theme="dark"] .topbar-search {
+  background: #0f1a2c;
+}
+:root[data-theme="dark"] .topbar-search-btn:disabled {
+  color: #5f6d80;
+}
+:root[data-theme="dark"] .theme-toggle {
+  color: #f5c76b;
+}
+
+/* Loading shimmer */
+:root[data-theme="dark"] .skeleton-bar,
+:root[data-theme="dark"] .loc-thumb.is-loading {
+  background: linear-gradient(90deg, #18263b 25%, #1f3049 37%, #18263b 63%);
+  background-size: 400% 100%;
+}
+
+/* Ask page */
+:root[data-theme="dark"] #messages:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+:root[data-theme="dark"] #messages:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+}
+:root[data-theme="dark"] .feedback-btn.selected {
+  background: #22344f;
+}
+:root[data-theme="dark"] .prose hr {
+  border-top-color: var(--border);
+}
+:root[data-theme="dark"] .prose code {
+  background: #1c2b42;
+}
+:root[data-theme="dark"] .card-tag-board {
+  background: rgba(220, 230, 243, 0.08);
+  color: var(--navy);
+  border-color: rgba(220, 230, 243, 0.2);
+}
+:root[data-theme="dark"] .card-tag-article,
+:root[data-theme="dark"] .category-badge,
+:root[data-theme="dark"] .chip-thisweek,
+:root[data-theme="dark"] .events-filter-chip {
+  color: var(--gold-text);
+}
+:root[data-theme="dark"] #dataset-bar {
+  border-top-color: #4a3b1c;
+}
+:root[data-theme="dark"] #map-error-banner {
+  border-bottom-color: #5a2a2a;
+}
+/* The Ask page's logo is navy type; swap in the light version. */
+.chat-empty-logo-dark {
+  display: none;
+}
+:root[data-theme="dark"] .chat-empty-logo-light {
+  display: none;
+}
+:root[data-theme="dark"] .chat-empty-logo-dark {
+  display: block;
+}
+
+/* Home */
+:root[data-theme="dark"] .tone-green {
+  --tone: #3fb47a;
+  --tone-bg: #173a2a;
+}
+:root[data-theme="dark"] .tone-blue {
+  --tone: #6b9bff;
+  --tone-ink: #9dbcff;
+  --tone-bg: #1a2a4f;
+}
+:root[data-theme="dark"] .tone-purple {
+  --tone: #a57cf5;
+  --tone-ink: #c4a8ff;
+  --tone-bg: #2a1f48;
+}
+:root[data-theme="dark"] .tone-amber {
+  --tone: #f0a43a;
+  --tone-ink: #f5bd6b;
+  --tone-bg: #3a2a12;
+}
+:root[data-theme="dark"] .action-watermark {
+  opacity: 0.1;
+}
+:root[data-theme="dark"] .map-preview-callout {
+  background: rgba(19, 31, 51, 0.95);
+}
+:root[data-theme="dark"] .home-ask .home-card-icon {
+  background: linear-gradient(135deg, #173a2a, #133340);
+}
+:root[data-theme="dark"] .home-ask-list button {
+  border-color: #2a3d5a;
+  background: #172539;
+}
+/* White button on the dark community card: keep its text dark. */
+:root[data-theme="dark"] .home-community-btn:hover {
+  color: #0f2744;
+}
+
+/* Explore Map */
+:root[data-theme="dark"] .loc-thumb {
+  background: color-mix(in srgb, var(--tint) 18%, #131f33);
+}
+:root[data-theme="dark"] .loc-thumb-empty-icon {
+  background: color-mix(in srgb, var(--tint) 28%, #131f33);
+  color: color-mix(in srgb, var(--tint) 55%, #ffffff);
+}
+
+/* Board Records */
+:root[data-theme="dark"] .records-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Meetings + calendars: lift the meeting navy off the dark surface. */
+:root[data-theme="dark"] a.meeting-row-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+:root[data-theme="dark"] .mini-cal-day-circle-government,
+:root[data-theme="dark"] .mini-cal-day-circle-village,
+:root[data-theme="dark"] .mini-cal-legend-swatch-government,
+:root[data-theme="dark"] .mini-cal-legend-swatch-village,
+:root[data-theme="dark"] .meetings-cal-swatch,
+:root[data-theme="dark"] .pulse-cal-swatch.is-meeting {
+  background: #2f5592;
+}
+:root[data-theme="dark"] .mini-cal-day-circle-mixed,
+:root[data-theme="dark"] .mini-cal-day-circle-split,
+:root[data-theme="dark"] .pulse-cal-swatch.is-multi {
+  background: linear-gradient(90deg, #2f5592 50%, #c9a227 50%);
+}
+:root[data-theme="dark"] .pulse-calendar-card .mini-cal-day-circle-today,
+:root[data-theme="dark"] .pulse-cal-swatch.is-today {
+  background: #24453a;
+  color: #a6e3c4;
+}
+
+/* Event category pills */
+:root[data-theme="dark"] .event-pill-government,
+:root[data-theme="dark"] .event-pill-village {
+  background: rgba(120, 160, 230, 0.14);
+  color: #a9c4ee;
+  border-color: rgba(120, 160, 230, 0.35);
+}
+:root[data-theme="dark"] .event-pill-community,
+:root[data-theme="dark"] .event-pill-engage {
+  background: rgba(201, 162, 39, 0.16);
+  color: #e3c160;
+  border-color: rgba(201, 162, 39, 0.4);
+}
+:root[data-theme="dark"] .event-pill-sports {
+  background: rgba(76, 195, 138, 0.12);
+  color: #7dd6a9;
+  border-color: rgba(76, 195, 138, 0.35);
+}
+:root[data-theme="dark"] .event-pill-music {
+  background: rgba(94, 190, 160, 0.12);
+  color: #8fd9c1;
+  border-color: rgba(94, 190, 160, 0.35);
+}
+:root[data-theme="dark"] .event-pill-market,
+:root[data-theme="dark"] .event-pill-fair {
+  background: rgba(201, 162, 39, 0.12);
+  color: #d9b75a;
+  border-color: rgba(201, 162, 39, 0.35);
+}
+:root[data-theme="dark"] .event-pill-other {
+  background: rgba(156, 163, 175, 0.12);
+  color: #c3c8d0;
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+/* Community Pulse */
+:root[data-theme="dark"] .pulse-stat-green {
+  background: linear-gradient(100deg, #12291f, #173a2a);
+  border-color: #23503b;
+}
+:root[data-theme="dark"] .pulse-stat-blue {
+  background: linear-gradient(100deg, #121f36, #18294a);
+  border-color: #263c63;
+}
+:root[data-theme="dark"] .pulse-stat-green .pulse-stat-icon {
+  background: #1d4a35;
+}
+:root[data-theme="dark"] .pulse-stat-blue .pulse-stat-icon {
+  background: #213a63;
+  color: #9dbcff;
+}
+:root[data-theme="dark"] .pulse-page .events-reset,
+:root[data-theme="dark"] .pulse-page .events-load-more {
+  background: #1b2a40;
+  border-color: #2c3f5c;
+}
+:root[data-theme="dark"] .pulse-page .events-reset:disabled {
+  color: #6c7a8d;
+}
+:root[data-theme="dark"] .pulse-empty-art {
+  background:
+    radial-gradient(circle at 28% 66%, #17352a 0 25px, transparent 26px),
+    radial-gradient(circle at 52% 48%, #17352a 0 34px, transparent 35px),
+    radial-gradient(circle at 76% 66%, #17352a 0 23px, transparent 24px);
+}

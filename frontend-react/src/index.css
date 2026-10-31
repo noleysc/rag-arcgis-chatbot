@@ -40,6 +40,12 @@
   --warning: #b45309;
   --denied-bg: #fef2f2;
   --denied: #b91c1c;
+  /* Solid fills behind white text. Equal to --green / --navy here; dark mode
+     keeps these deep while --green / --navy turn light for text. */
+  --green-solid: #1f7a4f;
+  --green-solid-hover: #17613e;
+  --navy-solid: #1a3356;
+  --navy-solid-hover: #122440;
   --font: "Inter", system-ui, sans-serif;
   /* Cards */
   --radius-card: 12px;
@@ -48,6 +54,42 @@
   /* Layout */
   --sidebar-w: 232px;
   --header-h: 64px;
+}
+
+/* Dark theme, switched by the top-bar toggle (data-theme on <html>). The
+   same tokens, re-pointed: --white is the card surface, --navy and --green
+   are text colors. Colors that aren't tokens are overridden in
+   theme-dark.css. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --navy: #dce6f3;
+  --navy-dark: #eef3fa;
+  --navy-light: #1b2a40;
+  --green: #4cc38a;
+  --green-dark: #7dd6a9;
+  --green-light: #17352a;
+  --gold-light: #3a2f19;
+  --gold-text: #e3b865;
+  --village: #4fb8d0;
+  --village-dark: #7fcde0;
+  --village-light: #133340;
+  --text: #e4e9f1;
+  --text-muted: #9eaabb;
+  --border: #283a53;
+  --bg: #0b1525;
+  --white: #131f33;
+  --success: #34c46a;
+  --success-bg: #12301f;
+  --warning-bg: #33280f;
+  --warning: #f0b45a;
+  --denied-bg: #3a1919;
+  --denied: #f28b8b;
+  --green-solid: #1f7a4f;
+  --green-solid-hover: #23905e;
+  --navy-solid: #2b4b7a;
+  --navy-solid-hover: #345a90;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 html,

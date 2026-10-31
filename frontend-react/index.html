@@ -8,6 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet" />
     <title>Ask Engage Estero — Planning & Zoning Decisions</title>
+    <script>
+      // Apply a saved dark-mode choice before first paint (see src/lib/theme.ts).
+      try {
+        if (localStorage.getItem("engage-estero:theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

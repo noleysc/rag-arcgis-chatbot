@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { Moon, Sun } from "lucide-react";
 import { useLayerData } from "../../hooks/useLayerData";
+import { useTheme } from "../../hooks/useTheme";
 import { fetchLayerUpdated } from "../../lib/boardRecords";
 import { ArrowRightIcon, MenuIcon, SearchIcon } from "../Icons/Icons";
 
@@ -31,6 +33,8 @@ export default function TopBar({ onOpenNav, navOpen, onAsk }: TopBarProps) {
   const [isAdmin, setIsAdmin] = useState(hasAdminToken);
   const [query, setQuery] = useState("");
   const updated = useLayerData(fetchLayerUpdated);
+  const [theme, toggleTheme] = useTheme();
+  const dark = theme === "dark";
 
   useEffect(() => {
     // admin.html runs in its own tab/bundle and writes this key on login —
@@ -105,6 +109,16 @@ export default function TopBar({ onOpenNav, navOpen, onAsk }: TopBarProps) {
             Admin
           </a>
         )}
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-pressed={dark}
+          title={dark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {dark ? <Sun size={18} strokeWidth={1.8} /> : <Moon size={18} strokeWidth={1.8} />}
+          <span className="sr-only">Dark mode</span>
+        </button>
       </div>
     </header>
   );

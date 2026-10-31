@@ -15,6 +15,7 @@ import { useMediaQuery } from "./hooks/useMediaQuery";
 import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
 import "./App.css";
 import "./pages/pages.css";
+import "./theme-dark.css";
 
 const BASE_TITLE = "Engage Estero — Planning & Zoning Records";
 
