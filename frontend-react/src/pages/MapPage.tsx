@@ -1,15 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
+import ImageryCredit from "../components/ImageryCredit/ImageryCredit";
+import LocationThumb from "../components/LocationThumb/LocationThumb";
 import MapPanel, { type MapPanelView } from "../components/MapPanel/MapPanel";
 import PageHeader from "../components/PageHeader/PageHeader";
 import { SkeletonRows } from "../components/Dashboard/Skeleton";
 import { ArrowRightIcon, ChevronRightIcon, MapPinIcon, SearchIcon } from "../components/Icons/Icons";
-import { fetchRecentProjects, type BoardRecord } from "../lib/boardRecords";
+import { useParcelOutlines } from "../hooks/useParcelOutlines";
+import { fetchRecentProjects, type MappedRecord } from "../lib/boardRecords";
 import { formatShortDate } from "../lib/dates";
+import { isVillageWide } from "../lib/locationFrame";
 import { fetchLegend, shortCategory, type LegendEntry } from "../lib/mapLegend";
 import { routeHref } from "../lib/router";
 
 const PROJECT_LIMIT = 8;
+
+/** "Shadow Wood, Estero, FL" → "Shadow Wood": every place here is in Estero. */
+function placeLabel(name: string): string {
+  return name.replace(/,\s*Estero,?\s*FL\b.*$/i, "").trim();
+}
 
 interface MapPageProps {
   onAsk: (question: string) => void;
@@ -22,7 +31,7 @@ export default function MapPage({ onAsk }: MapPageProps) {
   const [category, setCategory] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [projects, setProjects] = useState<BoardRecord[]>([]);
+  const [projects, setProjects] = useState<MappedRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -56,6 +65,12 @@ export default function MapPage({ onAsk }: MapPageProps) {
       cancelled = true;
     };
   }, [category, search, attempt]);
+
+  const parcelIds = useMemo(
+    () => projects.flatMap((p) => (p.location?.parcelId ? [p.location.parcelId] : [])),
+    [projects],
+  );
+  const outlines = useParcelOutlines(parcelIds);
 
   const iconFor = useMemo(() => {
     const icons = new Map((legend || []).map((e) => [e.category, e.icon]));
@@ -182,33 +197,58 @@ export default function MapPage({ onAsk }: MapPageProps) {
         )}
 
         {!loading && !error && projects.length > 0 && (
-          <ul className="project-grid">
-            {projects.map((p) => {
-              const icon = iconFor(p.category);
-              return (
-                <li key={p.id}>
-                  <button type="button" className="project-card" onClick={() => onAsk(`Tell me about ${p.title}`)}>
-                    <span className="project-top">
-                      <span className="project-thumb">
-                        {icon ? <img src={icon} alt="" /> : <MapPinIcon size={22} />}
+          <>
+            <ul className="project-grid">
+              {projects.map((p) => {
+                const icon = iconFor(p.category);
+                const place = p.location && !isVillageWide(p.title) ? placeLabel(p.location.name) : "";
+                return (
+                  <li key={p.id}>
+                    <button type="button" className="project-card" onClick={() => onAsk(`Tell me about ${p.title}`)}>
+                      <LocationThumb
+                        title={p.title}
+                        category={p.category}
+                        location={p.location}
+                        outline={p.location?.parcelId ? outlines?.get(p.location.parcelId) : null}
+                      />
+                      {p.category && (
+                        <span className="tag project-tag">
+                          {icon && <img src={icon} alt="" />}
+                          {shortCategory(p.category)}
+                        </span>
+                      )}
+                      <span className="project-title">
+                        <span className="sr-only">Ask about </span>
+                        {p.title}
                       </span>
-                      {p.category && <span className="tag">{shortCategory(p.category)}</span>}
-                    </span>
-                    <span className="project-title">
-                      <span className="sr-only">Ask about </span>
-                      {p.title}
-                    </span>
-                    <span className="project-foot">
-                      <span className="project-meta">
-                        {[formatShortDate(p.date), p.board].filter(Boolean).join(" · ")}
+                      {place && (
+                        <span className="project-place">
+                          <MapPinIcon size={13} />
+                          <span>
+                            <span className="sr-only">Mapped at </span>
+                            {place}
+                          </span>
+                        </span>
+                      )}
+                      <span className="project-foot">
+                        <span className="project-meta">
+                          {[formatShortDate(p.date), p.board].filter(Boolean).join(" · ")}
+                        </span>
+                        <ChevronRightIcon size={18} className="project-chevron" />
                       </span>
-                      <ChevronRightIcon size={18} className="project-chevron" />
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="project-imagery-note">
+              <p>
+                Thumbnails show where each agenda item is mapped, in recent aerial imagery. They aren't renderings
+                of what was proposed, and don't mean it has been built.
+              </p>
+              <ImageryCredit />
+            </div>
+          </>
         )}
       </section>
     </>

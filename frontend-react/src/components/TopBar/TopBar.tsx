@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { MenuIcon } from "../Icons/Icons";
+import type { FormEvent } from "react";
+import { useLayerData } from "../../hooks/useLayerData";
+import { fetchLayerUpdated } from "../../lib/boardRecords";
+import { ArrowRightIcon, MenuIcon, SearchIcon } from "../Icons/Icons";
 
 const ADMIN_TOKEN_KEY = "ee_admin_token";
 
@@ -11,15 +14,23 @@ function hasAdminToken(): boolean {
   }
 }
 
+function formatUpdated(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 interface TopBarProps {
-  recordCount: number | null | undefined;
   /** Hamburger for the off-canvas sidebar; omitted on wide screens. */
   onOpenNav?: () => void;
   navOpen: boolean;
+  /** Ask the assistant from the header search. Omitted on the Ask page,
+   * where the chat composer is the input. */
+  onAsk?: (question: string) => void;
 }
 
-export default function TopBar({ recordCount, onOpenNav, navOpen }: TopBarProps) {
+export default function TopBar({ onOpenNav, navOpen, onAsk }: TopBarProps) {
   const [isAdmin, setIsAdmin] = useState(hasAdminToken);
+  const [query, setQuery] = useState("");
+  const updated = useLayerData(fetchLayerUpdated);
 
   useEffect(() => {
     // admin.html runs in its own tab/bundle and writes this key on login —
@@ -33,12 +44,13 @@ export default function TopBar({ recordCount, onOpenNav, navOpen }: TopBarProps)
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const liveLabel =
-    recordCount === undefined
-      ? "Loading records…"
-      : recordCount === null
-        ? "Live data"
-        : `${recordCount.toLocaleString()} records`;
+  const submit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q || !onAsk) return;
+    onAsk(q);
+    setQuery("");
+  };
 
   return (
     <header id="topbar">
@@ -55,12 +67,35 @@ export default function TopBar({ recordCount, onOpenNav, navOpen }: TopBarProps)
             <MenuIcon size={22} />
           </button>
         )}
-        <div id="topbar-title">
-          <p className="topbar-name">Ask Engage Estero</p>
-          <p className="topbar-sub">Planning &amp; Zoning Decisions · Village of Estero</p>
-        </div>
+        {onAsk && (
+          <form className="topbar-search" role="search" onSubmit={submit}>
+            <SearchIcon size={18} />
+            <label htmlFor="topbar-search-input" className="sr-only">
+              Ask about a project, meeting, or place in Estero
+            </label>
+            <input
+              id="topbar-search-input"
+              type="search"
+              placeholder="Ask about a project, meeting, or place in Estero…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <button type="submit" className="topbar-search-btn" aria-label="Ask" disabled={!query.trim()}>
+              <ArrowRightIcon size={16} />
+            </button>
+          </form>
+        )}
       </div>
       <div id="topbar-right">
+        {typeof updated === "number" && (
+          <p className="topbar-updated" title="Last edit to the Estero Board Records layer on ArcGIS Online">
+            <span className="topbar-updated-dot" aria-hidden="true" />
+            <span>
+              Records updated
+              <strong>{formatUpdated(updated)}</strong>
+            </span>
+          </p>
+        )}
         {isAdmin && (
           <a
             className="topbar-btn"
@@ -70,17 +105,6 @@ export default function TopBar({ recordCount, onOpenNav, navOpen }: TopBarProps)
             Admin
           </a>
         )}
-        <div
-          id="live-badge"
-          title={
-            typeof recordCount === "number"
-              ? "Live count of board records on the Estero map layer"
-              : undefined
-          }
-        >
-          <span id="live-dot" aria-hidden="true" />
-          <span id="record-count">{liveLabel}</span>
-        </div>
       </div>
     </header>
   );

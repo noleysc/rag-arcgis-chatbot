@@ -17,8 +17,14 @@ export default function Dashboard({ meetings, meetingsLoading, meetingsError, on
     <div id="pulse-dashboard">
       <UpcomingEvents />
       <div className="pulse-side">
-        <NextMeetings meetings={meetings} loading={meetingsLoading} error={meetingsError} />
-        <LatestNews />
+        <NextMeetings
+          meetings={meetings}
+          loading={meetingsLoading}
+          error={meetingsError}
+          title="Official Village Meetings"
+          variant="feature"
+        />
+        <LatestNews variant="feature" limit={3} />
       </div>
     </div>
   );

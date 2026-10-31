@@ -47,6 +47,23 @@ export function shortCategory(category: string): string {
   return SHORT_LABELS[category] || category;
 }
 
+/** Main color of each category's marker image in the webmap, for places that
+ * draw plain dots instead of the markers (the Home map preview). */
+const CATEGORY_COLORS: Record<string, string> = {
+  "Commercial & Mixed-Use Development": "#8335a8",
+  "Transportation & Mobility": "#ffd700",
+  "Meetings, Records & Public Input": "#c12e00",
+  "Utilities, Stormwater & Environment": "#71c96e",
+  "Residential Development": "#e29c00",
+  "Public Facilities & Services": "#74cdaa",
+  "Budget, Contracts & Purchasing": "#31a066",
+  "Industry, Mining & Agriculture": "#707175",
+};
+
+export function categoryColor(category: string): string {
+  return CATEGORY_COLORS[category] || "#9aa3ad";
+}
+
 function symbolIcon(symbol: WebmapSymbol | undefined): string | null {
   if (!symbol || symbol.type !== "esriPMS") return null;
   if (symbol.imageData) return `data:${symbol.contentType || "image/png"};base64,${symbol.imageData}`;

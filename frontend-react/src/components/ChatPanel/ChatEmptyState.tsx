@@ -1,4 +1,4 @@
-import logo from "../../assets/logo.png";
+import logo from "../../assets/engage-estero-logo.png";
 
 export default function ChatEmptyState() {
   return (

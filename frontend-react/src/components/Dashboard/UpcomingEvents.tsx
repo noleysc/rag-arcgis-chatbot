@@ -1,23 +1,39 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Users } from "lucide-react";
 import { useEvents } from "../../hooks/useEvents";
 import { useMeetings } from "../../hooks/useMeetings";
+import { CalendarIcon, ClockIcon, MapPinIcon, SearchIcon } from "../Icons/Icons";
 import { SkeletonRows } from "./Skeleton";
 import MiniCalendar from "./MiniCalendar";
 import type { CalendarEvent, DayEvent, EventCategory, Meeting } from "../../types";
-import {
-  EVENT_CHIP_LABELS,
-  normalizeEventCategory,
-} from "../../types";
+import { EVENT_CHIP_LABELS, normalizeEventCategory } from "../../types";
 import { meetingSourceUrl } from "../../lib/meetingSource";
+
+type CategoryFilter = "all" | EventCategory | "markets-fairs";
+
+const PAGE_SIZE = 12;
+
+const CATEGORY_OPTIONS: Array<{ value: CategoryFilter; label: string; matches: EventCategory[] }> = [
+  { value: "government", label: "Government", matches: ["government"] },
+  { value: "community", label: "Community", matches: ["community"] },
+  { value: "music", label: "Music", matches: ["music"] },
+  { value: "markets-fairs", label: "Markets & Fairs", matches: ["market", "fair"] },
+  { value: "sports", label: "Sports", matches: ["sports"] },
+  { value: "other", label: "Other", matches: ["other"] },
+];
 
 function formatDateBadge(dateKey: string): { month: string; day: number } {
   const d = new Date(`${dateKey}T00:00:00`);
   return { month: d.toLocaleDateString("en-US", { month: "short" }).toUpperCase(), day: d.getDate() };
 }
 
-function formatChipDate(dateKey: string): string {
-  const d = new Date(`${dateKey}T00:00:00`);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function formatDate(dateKey: string): string {
+  return new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function formatEventTime(ev: CalendarEvent): string {
@@ -26,9 +42,6 @@ function formatEventTime(ev: CalendarEvent): string {
   return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
-/** "9:30 AM" -> "09:30", so a meeting's display time can be combined with its
- * date into a string that sorts chronologically alongside CalendarEvent's
- * full ISO-ish `start` strings. */
 function meetingTimeToSortable(time: string): string {
   const match = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(time.trim());
   if (!match) return "00:00";
@@ -45,7 +58,7 @@ function eventToDayEvent(ev: CalendarEvent): DayEvent {
     sortKey: ev.start,
     title: ev.title,
     time: formatEventTime(ev),
-    venue: ev.venue,
+    venue: ev.venue || ev.location || null,
     url: ev.url,
     category: normalizeEventCategory(ev.category),
   };
@@ -65,7 +78,6 @@ function meetingToDayEvent(m: Meeting): DayEvent {
   };
 }
 
-/** Merges /api/events (EsteroToday + FGCU + manual) with meetings.json. */
 function buildDayEvents(events: CalendarEvent[], meetings: Meeting[]): Map<string, DayEvent[]> {
   const map = new Map<string, DayEvent[]>();
   const push = (entry: DayEvent) => {
@@ -75,74 +87,187 @@ function buildDayEvents(events: CalendarEvent[], meetings: Meeting[]): Map<strin
   };
   events.forEach((ev) => push(eventToDayEvent(ev)));
   meetings.forEach((m) => push(meetingToDayEvent(m)));
-  for (const list of map.values()) {
-    list.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
-  }
+  for (const list of map.values()) list.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   return map;
 }
 
-const NEXT_N = 25;
+function categoryLabel(category: EventCategory): string {
+  if (category === "market" || category === "fair") return "Markets & Fairs";
+  return EVENT_CHIP_LABELS[category] || category;
+}
 
-const FILTER_CHIPS: Array<"all" | EventCategory> = [
-  "all",
-  "government",
-  "music",
-  "market",
-  "sports",
-  "fair",
-  "community",
-  "other",
-];
+function localDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export default function UpcomingEvents() {
   const { events, loading, error, retry } = useEvents();
-  const { meetings } = useMeetings(Infinity);
-
+  const { meetings, loading: meetingsLoading, error: meetingsError } = useMeetings(Infinity);
   const today = new Date();
+  const todayKey = localDateKey(today);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<"all" | EventCategory>("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const dayEvents = useMemo(() => buildDayEvents(events, meetings), [events, meetings]);
-
-  const filteredEvents = useMemo(() => {
-    if (categoryFilter === "all") return events;
-    return events.filter((ev) => normalizeEventCategory(ev.category) === categoryFilter);
-  }, [events, categoryFilter]);
-
-  const defaultList = useMemo(
-    () => filteredEvents.slice(0, NEXT_N).map(eventToDayEvent),
-    [filteredEvents],
+  const upcomingEvents = useMemo(
+    () => events.filter((event) => event.start.slice(0, 10) >= todayKey),
+    [events, todayKey],
   );
+  const dayEvents = useMemo(() => buildDayEvents(upcomingEvents, meetings), [upcomingEvents, meetings]);
+  const allItems = useMemo(
+    () => [...dayEvents.values()].flat().sort((a, b) => a.sortKey.localeCompare(b.sortKey)),
+    [dayEvents],
+  );
+  const categoriesInData = useMemo(
+    () => new Set(allItems.map((item) => normalizeEventCategory(item.category))),
+    [allItems],
+  );
+  const categoryOptions = CATEGORY_OPTIONS.filter((option) =>
+    option.matches.some((category) => categoriesInData.has(category)),
+  );
+  const matchingItems = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return allItems.filter((item) => {
+      const categoryMatches =
+        categoryFilter === "all" ||
+        CATEGORY_OPTIONS.find((option) => option.value === categoryFilter)?.matches.includes(
+          normalizeEventCategory(item.category),
+        );
+      const searchMatches =
+        !query ||
+        [item.title, item.venue, item.source === "meeting" ? "official village meeting" : ""]
+          .filter(Boolean)
+          .some((value) => value?.toLocaleLowerCase().includes(query));
+      return (
+        categoryMatches &&
+        searchMatches &&
+        (!dateFilter || item.dateKey === dateFilter)
+      );
+    });
+  }, [allItems, categoryFilter, dateFilter, search]);
+  const calendarDayEvents = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return new Map(
+      [...dayEvents.entries()].map(([date, items]) => [
+        date,
+        items.filter((item) => {
+          const categoryMatches =
+            categoryFilter === "all" ||
+            CATEGORY_OPTIONS.find((option) => option.value === categoryFilter)?.matches.includes(
+              normalizeEventCategory(item.category),
+            );
+          const searchMatches =
+            !query ||
+            [item.title, item.venue, item.source === "meeting" ? "official village meeting" : ""]
+              .filter(Boolean)
+              .some((value) => value?.toLocaleLowerCase().includes(query));
+          return categoryMatches && searchMatches;
+        }),
+      ]),
+    );
+  }, [categoryFilter, dayEvents, search]);
 
-  const filteredList = useMemo(() => {
-    if (!selectedDateKey) return null;
-    const day = dayEvents.get(selectedDateKey) || [];
-    if (categoryFilter === "all") return day;
-    return day.filter((item) => normalizeEventCategory(item.category) === categoryFilter);
-  }, [selectedDateKey, dayEvents, categoryFilter]);
+  const displayItems = useMemo(() => {
+    if (dateFilter) return matchingItems;
+    return matchingItems.filter((item) => {
+      const [year, month] = item.dateKey.split("-").map(Number);
+      return year === viewYear && month === viewMonth + 1;
+    });
+  }, [dateFilter, matchingItems, viewMonth, viewYear]);
+  const visibleItems = displayItems.slice(0, visibleCount);
 
-  const displayList = filteredList ?? defaultList;
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [categoryFilter, dateFilter, search, viewMonth, viewYear]);
 
-  const handleSelectDate = (dateKey: string) => {
-    setSelectedDateKey((prev) => (prev === dateKey ? null : dateKey));
+  const resetFilters = () => {
+    setSearch("");
+    setCategoryFilter("all");
+    setDateFilter("");
+    setSelectedDateKey(null);
+    setVisibleCount(PAGE_SIZE);
   };
-  const clearFilter = () => setSelectedDateKey(null);
+
+  const selectDate = (dateKey: string) => {
+    setSelectedDateKey((previous) => (previous === dateKey ? null : dateKey));
+    setDateFilter((previous) => (previous === dateKey ? "" : dateKey));
+    const [year, month] = dateKey.split("-").map(Number);
+    setViewYear(year);
+    setViewMonth(month - 1);
+  };
+
+  const changeDateFilter = (dateKey: string) => {
+    setDateFilter(dateKey);
+    setSelectedDateKey(dateKey || null);
+    if (dateKey) {
+      const [year, month] = dateKey.split("-").map(Number);
+      setViewYear(year);
+      setViewMonth(month - 1);
+    }
+  };
+
+  const changeMonth = (year: number, month: number) => {
+    setViewYear(year);
+    setViewMonth(month);
+    setSelectedDateKey(null);
+    setDateFilter("");
+  };
+
+  const communityEventsCount = upcomingEvents.length;
+  const monthPrefix = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`;
+  const meetingsThisMonth = meetings.some((m) => m.date.startsWith(monthPrefix));
+  const listHasMeetings = displayItems.some((item) => item.source === "meeting");
 
   return (
-    <section className="pulse-widget pulse-widget-gold">
-      <div className="pulse-widget-header">
-        <h2>Upcoming Events</h2>
+    <section className="pulse-events" aria-labelledby="pulse-events-title">
+      <h2 id="pulse-events-title" className="sr-only">
+        Community events
+      </h2>
+
+      <div className="pulse-stats" role="group" aria-label="Upcoming activity summary">
+        <div className="pulse-stat pulse-stat-green">
+          <span className="pulse-stat-icon" aria-hidden="true">
+            <CalendarIcon size={28} />
+          </span>
+          <span>
+            <span className="pulse-stat-value">
+              {loading ? "…" : error ? "—" : communityEventsCount.toLocaleString()}
+            </span>
+            <span className="pulse-stat-label">Upcoming community events</span>
+          </span>
+        </div>
+        <div className="pulse-stat pulse-stat-blue">
+          <span className="pulse-stat-icon" aria-hidden="true">
+            <Users size={28} strokeWidth={1.8} />
+          </span>
+          <span>
+            <span className="pulse-stat-value">
+              {meetingsLoading ? "…" : meetingsError ? "—" : meetings.length.toLocaleString()}
+            </span>
+            <span className="pulse-stat-label">Official Village meetings</span>
+          </span>
+        </div>
       </div>
 
-      {loading && <SkeletonRows count={3} />}
+      {loading && (
+        <div className="pulse-card">
+          <SkeletonRows count={3} />
+        </div>
+      )}
 
       {!loading && error && (
-        <p className="pulse-empty">
-          Couldn't load events —{" "}
+        <p className="pulse-card pulse-empty" role="status">
+          Couldn’t load community events.{" "}
           <a href="https://esterotoday.com/events/" target="_blank" rel="noopener noreferrer">
-            visit esterotoday.com/events ↗
+            Visit the Estero Today calendar
+            <span className="sr-only"> (opens in a new tab)</span>
           </a>
           <button type="button" className="pulse-retry" onClick={retry}>
             Retry
@@ -152,85 +277,191 @@ export default function UpcomingEvents() {
 
       {!loading && !error && (
         <>
-          <div className="events-category-chips" role="toolbar" aria-label="Filter events by type">
-            {FILTER_CHIPS.map((chip) => {
-              const label = chip === "all" ? "All" : EVENT_CHIP_LABELS[chip] || chip;
-              const active = categoryFilter === chip;
-              return (
-                <button
-                  key={chip}
-                  type="button"
-                  className={`events-cat-chip${active ? " events-cat-chip-active" : ""}`}
-                  aria-pressed={active}
-                  onClick={() => setCategoryFilter(chip)}
-                >
-                  {label}
-                </button>
-              );
-            })}
+          <div className="pulse-card events-toolbar">
+            <label className="events-search">
+              <span className="sr-only">Search events and meetings</span>
+              <SearchIcon size={18} />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search events…"
+              />
+            </label>
+            <span className="events-toolbar-divider" aria-hidden="true" />
+            <label className="events-select">
+              <span className="sr-only">Filter by category</span>
+              <select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value as CategoryFilter)}
+              >
+                <option value="all">All categories</option>
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="events-date">
+              <span className="sr-only">Filter by date</span>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(event) => changeDateFilter(event.target.value)}
+              />
+            </label>
+            <button
+              type="button"
+              className="events-reset"
+              onClick={resetFilters}
+              disabled={!search && categoryFilter === "all" && !dateFilter}
+            >
+              Reset
+            </button>
           </div>
 
-          <MiniCalendar
-            dayEvents={dayEvents}
-            viewYear={viewYear}
-            viewMonth={viewMonth}
-            selectedDateKey={selectedDateKey}
-            onNavigate={(year, month) => {
-              setViewYear(year);
-              setViewMonth(month);
-            }}
-            onSelectDate={handleSelectDate}
-          />
+          <div className="pulse-calendar-layout">
+            <section className="pulse-card pulse-calendar-card" aria-label="Community events calendar">
+              <MiniCalendar
+                dayEvents={calendarDayEvents}
+                viewYear={viewYear}
+                viewMonth={viewMonth}
+                selectedDateKey={selectedDateKey}
+                onNavigate={changeMonth}
+                onSelectDate={selectDate}
+                showLegend={false}
+                marker="count"
+              />
+              <ul className="pulse-cal-legend" aria-label="Calendar key">
+                <li>
+                  <span className="pulse-cal-swatch is-event" aria-hidden="true" />
+                  Community event
+                </li>
+                {meetingsThisMonth && (
+                  <li>
+                    <span className="pulse-cal-swatch is-meeting" aria-hidden="true" />
+                    Village meeting
+                  </li>
+                )}
+                <li>
+                  <span className="pulse-cal-swatch is-multi" aria-hidden="true" />
+                  Multiple events
+                </li>
+                <li>
+                  <span className="pulse-cal-swatch is-today" aria-hidden="true" />
+                  Today
+                </li>
+              </ul>
+            </section>
+            <EventsList
+              items={visibleItems}
+              total={displayItems.length}
+              visibleCount={visibleCount}
+              loadingMeetings={meetingsLoading}
+              onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              heading={
+                dateFilter
+                  ? `Events on ${formatDate(dateFilter)}`
+                  : `${listHasMeetings ? "Events & Meetings" : "Community Events"} in ${new Date(
+                      viewYear,
+                      viewMonth,
+                    ).toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
+              }
+            />
+          </div>
 
-          {selectedDateKey && (
-            <div className="events-filter-chip">
-              Showing {formatChipDate(selectedDateKey)} —{" "}
-              <button type="button" className="events-filter-clear" onClick={clearFilter}>
-                clear
-              </button>
-            </div>
-          )}
-
-          {displayList.length === 0 ? (
-            <p className="pulse-empty">
-              {selectedDateKey ? "No events that day." : "No upcoming events in this filter."}{" "}
-              <a href="https://esterotoday.com/events/" target="_blank" rel="noopener noreferrer">
-                See the full calendar ↗
+          {meetingsError && (
+            <p className="events-source-note" role="status">
+              Official Village meeting dates are unavailable right now.{" "}
+              <a href="https://estero-fl.gov/meetings/" target="_blank" rel="noopener noreferrer">
+                Check the official meeting page
+                <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </p>
-          ) : (
-            <ul className="events-list">
-              {displayList.map((item) => {
-                const { month, day } = formatDateBadge(item.dateKey);
-                const cat = normalizeEventCategory(item.category);
-                return (
-                  <li key={item.id} className="event-row">
-                    <div className="date-leaf">
-                      <span className="date-leaf-month">{month}</span>
-                      <span className="date-leaf-day">{day}</span>
-                    </div>
-                    <div className="event-info">
-                      <div className="event-title-row">
-                        {item.url ? (
-                          <a className="event-title" href={item.url} target="_blank" rel="noopener noreferrer">
-                            {item.title}
-                          </a>
-                        ) : (
-                          <span className="event-title event-title-plain">{item.title}</span>
-                        )}
-                        <span className={`event-pill event-pill-${cat}`}>
-                          {EVENT_CHIP_LABELS[cat] || cat}
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+interface EventsListProps {
+  items: DayEvent[];
+  total: number;
+  visibleCount: number;
+  loadingMeetings: boolean;
+  onLoadMore: () => void;
+  heading: string;
+}
+
+function EventsList({ items, total, visibleCount, loadingMeetings, onLoadMore, heading }: EventsListProps) {
+  return (
+    <section className="pulse-card events-results" aria-live="polite">
+      <div className="events-results-header">
+        <h3>{heading}</h3>
+        <span>{total.toLocaleString()} {total === 1 ? "result" : "results"}</span>
+      </div>
+      {items.length === 0 ? (
+        <p className="pulse-empty">
+          {loadingMeetings
+            ? "Loading Village meeting dates…"
+            : "No events match these filters. Try changing or resetting your search."}
+        </p>
+      ) : (
+        <>
+          <ul className="events-list">
+            {items.map((item) => {
+              const { month, day } = formatDateBadge(item.dateKey);
+              const category = normalizeEventCategory(item.category);
+              const venue = item.venue;
+              return (
+                <li key={item.id} className="event-row">
+                  <time className="date-leaf" dateTime={item.dateKey} aria-label={formatDate(item.dateKey)}>
+                    <span className="date-leaf-month">{month}</span>
+                    <span className="date-leaf-day">{day}</span>
+                  </time>
+                  <details className="event-details">
+                    <summary className="event-summary">
+                      <span className="event-summary-main">
+                        <span className="event-title">{item.title}</span>
+                        <span className="event-meta">
+                          {venue && (
+                            <span className="event-meta-item">
+                              <MapPinIcon size={14} />
+                              {venue}
+                            </span>
+                          )}
+                          <span className="event-meta-item">
+                            <ClockIcon size={14} />
+                            {item.time}
+                          </span>
                         </span>
-                      </div>
-                      <div className="event-meta">
-                        {item.time}
-                        {item.venue ? ` · ${item.venue}` : ""}
-                      </div>
+                      </span>
+                      <span className={`event-pill event-pill-${category}`}>{categoryLabel(category)}</span>
+                    </summary>
+                    <div className="event-details-body">
+                      <p>
+                        {formatDate(item.dateKey)} · {item.time}
+                        {venue ? ` · ${venue}` : ""}
+                      </p>
+                      {item.source === "meeting" && <p className="official-meeting-label">Official Village meeting</p>}
+                      {item.url && (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer">
+                          {item.source === "meeting" ? "Meeting information" : "Event details"}
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </a>
+                      )}
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
+                  </details>
+                </li>
+              );
+            })}
+          </ul>
+          {visibleCount < total && (
+            <button type="button" className="events-load-more" onClick={onLoadMore}>
+              Load more events
+            </button>
           )}
         </>
       )}

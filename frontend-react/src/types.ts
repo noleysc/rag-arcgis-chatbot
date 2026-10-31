@@ -112,6 +112,8 @@ export interface NewsPost {
   title: string;
   link: string;
   date: string; // ISO datetime from WordPress
+  /** Featured image (WordPress "medium" size), when requested and present. */
+  image?: string | null;
 }
 
 export interface RecentDecision {

@@ -59,28 +59,31 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto;
-  background: var(--shell-bg);
+  /* Faint teal glow behind the Village footer. */
+  background:
+    radial-gradient(140% 38% at 0% 100%, rgba(14, 116, 144, 0.32), transparent 70%),
+    var(--shell-bg);
   color: var(--shell-text);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 .sidebar-brand {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-  min-height: var(--header-h);
-  padding: 10px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 22px 16px 8px 20px;
 }
 .sidebar-brand a {
   display: inline-flex;
   border-radius: 6px;
 }
+/* engage-estero-logo-light.png: the logo recolored pale/bright blue for the
+   navy shell (the original is navy-on-white). */
 .sidebar-brand img {
   display: block;
-  height: 40px;
-  width: auto;
-  filter: brightness(0) invert(1);
+  width: 172px;
+  max-width: 100%;
+  height: auto;
 }
 .sidebar-close {
   width: 38px;
@@ -98,17 +101,17 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   padding: 18px 12px;
 }
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
-  border-radius: 8px;
+  gap: 13px;
+  padding: 12px 16px;
+  border-radius: 10px;
   color: var(--shell-text);
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 500;
   text-decoration: none;
   transition:
@@ -119,10 +122,56 @@
   background: var(--shell-hover);
   color: #fff;
 }
+/* Gradient stays ≥4.5:1 against white text at its lightest corner. */
 .sidebar-link[aria-current="page"] {
-  background: var(--green);
+  background: linear-gradient(135deg, #1f8455, var(--green-dark));
+  box-shadow: 0 6px 16px rgba(23, 97, 62, 0.4);
   color: #fff;
   font-weight: 600;
+}
+.sidebar-village {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* auto top margin pins it to the foot of the sidebar */
+  margin: auto 14px 18px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.sidebar-village:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sidebar-village-emblem {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-village-emblem img {
+  width: 32px;
+  height: auto;
+}
+.sidebar-village-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.sidebar-village-text strong {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.sidebar-village-text span {
+  font-size: 12px;
+  color: var(--shell-muted);
 }
 .sidebar-dot {
   width: 8px;
@@ -132,23 +181,6 @@
   background: var(--gold);
   box-shadow: 0 0 0 3px rgba(201, 151, 58, 0.3);
   animation: pulse 2s infinite;
-}
-.sidebar-footer {
-  margin-top: auto;
-  padding: 16px 18px 22px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: var(--shell-muted);
-  font-size: 12.5px;
-  letter-spacing: 0.3px;
-}
-.skyline-art {
-  width: 100%;
-  max-width: 176px;
-  height: auto;
-  color: rgba(255, 255, 255, 0.3);
 }
 /* Narrow screens: off-canvas drawer opened from the header menu button. */
 .sidebar-drawer {
@@ -175,19 +207,21 @@
   background: rgba(15, 39, 68, 0.5);
 }
 
-/* TOP BAR */
+/* TOP BAR — white strip holding the site-wide ask box. Branding lives in
+   the sidebar. */
 #topbar {
   flex-shrink: 0;
   height: var(--header-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 0 24px;
-  background: var(--shell-bg);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 16px;
+  padding: 0 28px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
 }
 #topbar-left {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -198,46 +232,111 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: transparent;
-  color: #fff;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--navy);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 #nav-toggle:hover {
-  background: var(--shell-hover);
+  background: var(--bg);
 }
-#topbar-title {
+.topbar-search {
+  flex: 1;
+  max-width: 560px;
   min-width: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 5px 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f7f9fc;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
 }
-.topbar-name {
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.25;
+.topbar-search:focus-within {
+  background: var(--white);
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(31, 122, 79, 0.15);
+}
+.topbar-search > svg {
+  flex-shrink: 0;
+  color: var(--navy);
+}
+.topbar-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+}
+.topbar-search input::placeholder {
+  color: var(--text-muted);
+}
+.topbar-search-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--green);
   color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
 }
-.topbar-sub {
-  font-size: 12px;
-  color: var(--shell-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.topbar-search-btn:hover:not(:disabled) {
+  background: var(--green-dark);
+}
+.topbar-search-btn:disabled {
+  background: transparent;
+  color: #a3acb8;
+  cursor: default;
 }
 #topbar-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   flex-shrink: 0;
 }
+.topbar-updated {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.topbar-updated > span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+.topbar-updated strong {
+  font-weight: 600;
+  color: var(--navy);
+}
+.topbar-updated-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
 .topbar-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #fff;
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: var(--navy);
   border-radius: 20px;
   padding: 6px 14px;
   font-size: 12px;
@@ -248,7 +347,7 @@
   white-space: nowrap;
 }
 .topbar-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--bg);
 }
 #live-badge {
   display: flex;
@@ -291,12 +390,9 @@
     padding: 18px 16px 32px;
   }
 }
-@media (max-width: 600px) {
-  .topbar-sub {
+@media (max-width: 700px) {
+  .topbar-updated {
     display: none;
-  }
-  .topbar-name {
-    font-size: 15px;
   }
 }
 
@@ -1418,13 +1514,13 @@
    ═══════════════════════════════════════════════ */
 #pulse-dashboard {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
 .pulse-side {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   min-width: 0;
 }
@@ -1452,7 +1548,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .pulse-widget-header h2 {
   font-size: 16px;
@@ -1497,7 +1593,6 @@
   color: var(--gold);
   text-decoration: underline;
 }
-
 /* Next Meetings */
 .meeting-list {
   list-style: none;
@@ -1764,6 +1859,11 @@ a.meeting-row-link:hover .meeting-name {
   color: #fff;
   font-weight: 700;
 }
+.mini-cal-day-circle-event {
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+}
 .mini-cal-day-circle-mixed,
 .mini-cal-day-circle-split {
   background: linear-gradient(90deg, #14264c 50%, #c9a227 50%);
@@ -1811,21 +1911,6 @@ a.meeting-row-link:hover .meeting-name {
   font-size: 10.5px;
   color: var(--text-muted);
   margin-top: 1px;
-}
-#pulse-dashboard .mini-cal-label {
-  font-size: 13px;
-}
-#pulse-dashboard .mini-cal-weekday {
-  font-size: 11px;
-  padding-bottom: 6px;
-}
-#pulse-dashboard .mini-cal-day {
-  min-height: 38px;
-}
-#pulse-dashboard .mini-cal-day-circle {
-  width: 32px;
-  height: 32px;
-  font-size: 12.5px;
 }
 .mini-cal-legend {
   display: flex;
@@ -2091,17 +2176,9 @@ a.meeting-row-link:hover .meeting-name {
   gap: 7px;
 }
 
-@media (max-width: 1000px) {
-  #pulse-dashboard {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  /* Stacked: the short cards (meetings, news) first, then the long events
-     list, so they aren't buried below it. */
-  .pulse-side {
-    display: contents;
-  }
-  #pulse-dashboard > .pulse-widget {
-    order: 3;
+@media (max-width: 480px) {
+  .pulse-widget {
+    padding: 15px;
   }
 }
 

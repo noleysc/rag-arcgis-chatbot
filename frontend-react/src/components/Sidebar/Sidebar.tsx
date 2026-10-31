@@ -1,16 +1,16 @@
 import { useEffect, useRef } from "react";
 import type { ComponentType } from "react";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/engage-estero-logo-light.png";
+import villageEmblem from "../../assets/village-emblem.png";
 import { ROUTE_LABELS, routeHref, type Route } from "../../lib/router";
 import { CalendarIcon, ChatIcon, CloseIcon, HomeIcon, MapPinIcon, PulseIcon, RecordsIcon } from "../Icons/Icons";
-import SkylineArt from "./SkylineArt";
 
 const NAV_ITEMS: Array<{ route: Route; Icon: ComponentType<{ size?: number }> }> = [
   { route: "home", Icon: HomeIcon },
   { route: "map", Icon: MapPinIcon },
   { route: "ask", Icon: ChatIcon },
-  { route: "records", Icon: RecordsIcon },
   { route: "meetings", Icon: CalendarIcon },
+  { route: "records", Icon: RecordsIcon },
   { route: "pulse", Icon: PulseIcon },
 ];
 
@@ -83,10 +83,16 @@ export default function Sidebar({ route, drawer, open, onClose, onNavigate, meet
             ))}
           </ul>
         </nav>
-        <div className="sidebar-footer">
-          <SkylineArt />
-          <span>Village of Estero</span>
-        </div>
+        <a className="sidebar-village" href="https://estero-fl.gov/" target="_blank" rel="noopener noreferrer">
+          <span className="sidebar-village-emblem">
+            <img src={villageEmblem} alt="" />
+          </span>
+          <span className="sidebar-village-text">
+            <strong>Village of Estero</strong>
+            <span>Florida</span>
+          </span>
+          <span className="sr-only"> (opens estero-fl.gov in a new tab)</span>
+        </a>
       </aside>
     </>
   );

@@ -5,7 +5,7 @@ const LAYER_URL =
   "https://services2.arcgis.com/UzlfiFv8kzq0Q4vo/arcgis/rest/services/Estero_Board_Records_%E2%80%94_All_Categories/FeatureServer/0";
 
 interface QueryResponse<T> {
-  features?: Array<{ attributes: T }>;
+  features?: Array<{ attributes: T; geometry?: { x: number; y: number } }>;
   count?: number;
   error?: { message?: string };
 }
@@ -28,6 +28,23 @@ export async function fetchRecordCount(): Promise<number> {
   return data.count;
 }
 
+/** When the layer's records were last edited (epoch ms) — the header's
+ * "updated" stamp. Falls back to the overall edit date, which also moves on
+ * schema-only changes. */
+export async function fetchLayerUpdated(): Promise<number> {
+  const res = await fetch(`${LAYER_URL}?f=json`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const info = (await res.json()) as { editingInfo?: { dataLastEditDate?: number; lastEditDate?: number } };
+  const edited = info.editingInfo?.dataLastEditDate ?? info.editingInfo?.lastEditDate;
+  if (typeof edited !== "number") throw new Error("No edit date on layer");
+  return edited;
+}
+
+function countOf(data: QueryResponse<unknown>): number {
+  if (typeof data.count !== "number") throw new Error("No count in response");
+  return data.count;
+}
+
 interface LayerRow {
   ObjectId: number;
   ProjectName: string | null;
@@ -38,6 +55,12 @@ interface LayerRow {
   ActionTaken: string | null;
   ApplicationID: string | null;
   Document_Link: string | null;
+  // Location fields, requested only by fetchRecentProjects.
+  Latitude?: number | null;
+  Longitude?: number | null;
+  GeocodeConfidence?: number | null;
+  ParcelID?: string | null;
+  LocationName?: string | null;
 }
 
 /** One agenda item as the UI uses it. Note the layer's own `Status` field is
@@ -126,6 +149,79 @@ function recordsWhere(opts: { decisionsOnly?: boolean; board?: string; search?: 
   return clauses.join(" AND ");
 }
 
+/** Headline numbers for the Home hero, all counted live on the layer. */
+export interface LayerStats {
+  /** Distinct minutes PDFs, i.e. meetings with minutes on file. */
+  meetings: number;
+  /** Distinct project names. */
+  projects: number;
+  /** Agenda items recording a formal board action. */
+  decisions: number;
+  /** Year of the earliest meeting on the layer. */
+  firstYear: number;
+}
+
+export async function fetchLayerStats(): Promise<LayerStats> {
+  const distinct = (where: string, field: string) =>
+    queryLayer({ where, outFields: field, returnDistinctValues: true, returnCountOnly: true, returnGeometry: false });
+  const [meetings, projects, decisions, range] = await Promise.all([
+    distinct("Document_Link IS NOT NULL", "Document_Link"),
+    distinct(PRIMARY_ONLY, "ProjectName"),
+    queryLayer({ where: recordsWhere({ decisionsOnly: true }), returnCountOnly: true }),
+    queryLayer<{ first: string | null }>({
+      where: "1=1",
+      outStatistics: JSON.stringify([
+        { statisticType: "min", onStatisticField: "MeetingDate", outStatisticFieldName: "first" },
+      ]),
+    }),
+  ]);
+  const firstYear = Number(range.features?.[0]?.attributes.first?.slice(0, 4));
+  if (!firstYear) throw new Error("No meeting dates on layer");
+  return {
+    meetings: countOf(meetings),
+    projects: countOf(projects),
+    decisions: countOf(decisions),
+    firstYear,
+  };
+}
+
+/** One point on the map layer. A located agenda item can have several. */
+export interface MapPoint {
+  id: number;
+  title: string;
+  category: string;
+  /** YYYY-MM-DD */
+  date: string;
+  /** Web Mercator (EPSG:3857) meters, the layer's own spatial reference. */
+  x: number;
+  y: number;
+}
+
+/** Every point on the layer, newest meeting first (~800 today, so one
+ * request under the layer's 1,000-row cap). */
+export async function fetchMapPoints(): Promise<MapPoint[]> {
+  const data = await queryLayer<LayerRow>({
+    where: "1=1",
+    outFields: "ObjectId,ProjectName,LayerCategory,MeetingDate",
+    orderByFields: "MeetingDate DESC,ObjectId DESC",
+    outSR: 3857,
+    resultRecordCount: 1000,
+  });
+  const points: MapPoint[] = [];
+  for (const { attributes: a, geometry: g } of data.features || []) {
+    if (!g) continue;
+    points.push({
+      id: a.ObjectId,
+      title: (a.ProjectName || "").trim() || "Untitled agenda item",
+      category: a.LayerCategory || "",
+      date: a.MeetingDate || "",
+      x: g.x,
+      y: g.y,
+    });
+  }
+  return points;
+}
+
 /** One page of agenda items plus the total matching count. */
 export async function fetchRecordsPage(opts: {
   decisionsOnly: boolean;
@@ -198,32 +294,69 @@ export async function fetchMinutesDocs(opts: { board?: string; search?: string }
   return docs;
 }
 
+/** Where an agenda item sits on the map, for the Recent Projects thumbnails. */
+export interface MappedLocation {
+  lat: number;
+  lon: number;
+  /** The pipeline's name for the place: an address, subdivision, corridor… */
+  name: string;
+  /** Lee County parcel (STRAP) when the point resolved to one, else "". */
+  parcelId: string;
+  /** The pipeline's GeocodeConfidence, 0–1. 0.5 means the point was
+   * inherited from a related item (pipeline/eaglegis/location_propagation.py). */
+  confidence: number;
+}
+
+export interface MappedRecord extends BoardRecord {
+  /** null when the row has no usable coordinates. */
+  location: MappedLocation | null;
+}
+
+// Lee County with a margin. A point outside it is a geocoding slip (0,0, or
+// latitude and longitude swapped), not a place.
+const LEE_COUNTY = { south: 26.2, north: 26.9, west: -82.4, east: -81.4 };
+
+function toLocation(row: LayerRow): MappedLocation | null {
+  const lat = row.Latitude;
+  const lon = row.Longitude;
+  if (typeof lat !== "number" || typeof lon !== "number" || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (lat < LEE_COUNTY.south || lat > LEE_COUNTY.north || lon < LEE_COUNTY.west || lon > LEE_COUNTY.east) return null;
+  return {
+    lat,
+    lon,
+    name: (row.LocationName || "").trim(),
+    parcelId: (row.ParcelID || "").trim(),
+    // Unknown confidence is treated as approximate, the lowest mapped tier.
+    confidence: row.GeocodeConfidence ?? 0.5,
+  };
+}
+
 /** Latest mapped items, one per project name, newest meeting first. */
 export async function fetchRecentProjects(opts: {
   category?: string;
   search?: string;
   limit: number;
-}): Promise<BoardRecord[]> {
+}): Promise<MappedRecord[]> {
   const clauses = [PRIMARY_ONLY];
   if (opts.category) clauses.push(equalsClause("LayerCategory", opts.category));
   const search = opts.search ? searchClause(opts.search, ["ProjectName"]) : null;
   if (search) clauses.push(search);
   const data = await queryLayer<LayerRow>({
     where: clauses.join(" AND "),
-    outFields: RECORD_FIELDS,
+    outFields: `${RECORD_FIELDS},Latitude,Longitude,GeocodeConfidence,ParcelID,LocationName`,
     orderByFields: "MeetingDate DESC,ObjectId DESC",
     // Over-fetch, since the same project often has several items per meeting.
     resultRecordCount: opts.limit * 6,
     returnGeometry: false,
   });
   const seen = new Set<string>();
-  const out: BoardRecord[] = [];
+  const out: MappedRecord[] = [];
   for (const f of data.features || []) {
     const rec = toRecord(f.attributes);
     const key = rec.title.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push(rec);
+    out.push({ ...rec, location: toLocation(f.attributes) });
     if (out.length === opts.limit) break;
   }
   return out;

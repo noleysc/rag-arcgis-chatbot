@@ -12,17 +12,15 @@ import PulsePage from "./pages/PulsePage";
 import { useChat } from "./hooks/useChat";
 import { useMeetings } from "./hooks/useMeetings";
 import { useMediaQuery } from "./hooks/useMediaQuery";
-import { useRecordCount } from "./hooks/useRecordCount";
 import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
 import "./App.css";
 import "./pages/pages.css";
 
-const BASE_TITLE = "Ask Engage Estero — Planning & Zoning Decisions";
+const BASE_TITLE = "Engage Estero — Planning & Zoning Records";
 
 export default function App() {
   const route = useRoute();
   const { messages, send, newChat } = useChat();
-  const recordCount = useRecordCount();
   const { hasUpcomingWithinWeek } = useMeetings(3);
   const drawer = useMediaQuery("(max-width: 900px)");
   const [navOpen, setNavOpen] = useState(false);
@@ -49,7 +47,7 @@ export default function App() {
   // so screen readers announce it (skipped on first load).
   const firstRouteRef = useRef(true);
   useEffect(() => {
-    document.title = route === "home" ? BASE_TITLE : `${ROUTE_LABELS[route]} · Ask Engage Estero`;
+    document.title = route === "home" ? BASE_TITLE : `${ROUTE_LABELS[route]} · Engage Estero`;
     if (firstRouteRef.current) {
       firstRouteRef.current = false;
       return;
@@ -107,7 +105,11 @@ export default function App() {
         />
         {/* inert while the drawer is open, so focus can't wander behind it */}
         <div id="app-body" inert={drawer && navOpen}>
-          <TopBar recordCount={recordCount} onOpenNav={drawer ? () => setNavOpen(true) : undefined} navOpen={navOpen} />
+          <TopBar
+            onOpenNav={drawer ? () => setNavOpen(true) : undefined}
+            navOpen={navOpen}
+            onAsk={route === "ask" ? undefined : ask}
+          />
           <main id="main" ref={mainRef} tabIndex={-1} className={`app-main app-main-${route}`}>
             {mapVisited && (
               <div className="page page-map" hidden={route !== "map"}>

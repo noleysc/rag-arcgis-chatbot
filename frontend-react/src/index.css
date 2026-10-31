@@ -87,7 +87,6 @@ a {
   outline: 2px solid var(--navy);
   outline-offset: 2px;
 }
-#sidebar :focus-visible,
-#topbar :focus-visible {
+#sidebar :focus-visible {
   outline-color: var(--shell-focus);
 }

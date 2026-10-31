@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { DayEvent, EventCategory } from "../../types";
 import { normalizeEventCategory } from "../../types";
+import { ChevronLeftIcon, ChevronRightIcon } from "../Icons/Icons";
 
 interface MiniCalendarProps {
   dayEvents: Map<string, DayEvent[]>;
@@ -11,6 +12,10 @@ interface MiniCalendarProps {
   onSelectDate: (dateKey: string) => void;
   /** Event-category legend; off where every dot means the same thing. */
   showLegend?: boolean;
+  /** How marked days are colored: by event category, or by count — one
+   * event, a Village meeting, or several (Community Pulse, which draws its
+   * own key). */
+  marker?: "category" | "count";
 }
 
 interface DayCell {
@@ -86,6 +91,18 @@ function buildGrid(year: number, month: number, dayEvents: Map<string, DayEvent[
   return cells;
 }
 
+function markerClass(events: DayEvent[], marker: "category" | "count"): string | null {
+  if (events.length === 0) return null;
+  if (marker === "count") {
+    if (events.length > 1) return "mini-cal-day-circle-mixed";
+    return events[0].source === "meeting" ? "mini-cal-day-circle-government" : "mini-cal-day-circle-event";
+  }
+  const distinct = new Set(events.map((e) => normalizeEventCategory(e.category)));
+  if (distinct.size > 1) return "mini-cal-day-circle-mixed";
+  const primary = primaryCategory(events);
+  return primary && `mini-cal-day-circle-${primary}`;
+}
+
 function tooltipAlignForColumn(index: number): "left" | "center" | "right" {
   const col = index % 7;
   if (col <= 1) return "left";
@@ -101,6 +118,7 @@ export default function MiniCalendar({
   onNavigate,
   onSelectDate,
   showLegend = true,
+  marker = "category",
 }: MiniCalendarProps) {
   const cells = useMemo(() => buildGrid(viewYear, viewMonth, dayEvents), [viewYear, viewMonth, dayEvents]);
   const [hoveredDateKey, setHoveredDateKey] = useState<string | null>(null);
@@ -118,13 +136,13 @@ export default function MiniCalendar({
     <div className="mini-cal">
       <div className="mini-cal-header">
         <button type="button" className="mini-cal-nav" onClick={goPrev} aria-label="Previous month">
-          ‹
+          <ChevronLeftIcon size={16} />
         </button>
         <span className="mini-cal-label">
           {MONTH_LABELS[viewMonth]} {viewYear}
         </span>
         <button type="button" className="mini-cal-nav" onClick={goNext} aria-label="Next month">
-          ›
+          <ChevronRightIcon size={16} />
         </button>
       </div>
 
@@ -139,9 +157,6 @@ export default function MiniCalendar({
           const hasEvents = cell.events.length > 0;
           const isSelected = cell.dateKey === selectedDateKey;
           const isHovered = cell.dateKey === hoveredDateKey;
-          const primary = primaryCategory(cell.events);
-          const distinct = new Set(cell.events.map((e) => normalizeEventCategory(e.category)));
-          const isMixed = distinct.size > 1;
 
           const dayClasses = [
             "mini-cal-day",
@@ -154,9 +169,7 @@ export default function MiniCalendar({
 
           const circleClasses = [
             "mini-cal-day-circle",
-            cell.isToday && "mini-cal-day-circle-today",
-            !cell.isToday && isMixed && "mini-cal-day-circle-mixed",
-            !cell.isToday && !isMixed && primary && `mini-cal-day-circle-${primary}`,
+            cell.isToday ? "mini-cal-day-circle-today" : markerClass(cell.events, marker),
           ]
             .filter(Boolean)
             .join(" ");
