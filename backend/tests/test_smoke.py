@@ -1138,3 +1138,152 @@ def test_retrieval_searches_literal_query_alongside_rewrite(monkeypatch):
     assert seen["intents"] == {"DCI2021-E004"}  # recency/events intent reads the question
     assert meta["queries"][0] == "DCI2021-E004"
     assert meta["search_query"].startswith("DCI2021-E004")
+
+
+# --- query_focus: resident feedback (Aldi on Corkscrew, Williams Rd West) ---
+
+
+def _focus_store(docs, df=None):
+    import pandas as pd
+    from langchain_core.documents import Document  # noqa: F401
+    from rank_bm25 import BM25Okapi
+
+    from store import _tokenize
+
+    store = DataStore(dataframe=df if df is not None else pd.DataFrame(), documents=docs)
+    store.bm25 = BM25Okapi([_tokenize(d.page_content) for d in docs])
+    store.bm25_ids = [d.metadata["chunk_id"] for d in docs]
+    return store
+
+
+def _article(cid, text):
+    from langchain_core.documents import Document
+
+    return Document(page_content=text, metadata={"chunk_id": cid, "source_type": "website_article"})
+
+
+def test_anchor_term_keeps_only_hits_about_the_named_business():
+    import query_focus
+
+    docs = [_article("a1", "East Corkscrew update: an Aldi grocery store is planned on Corkscrew Road.")]
+    docs += [_article(f"c{i}", f"Corkscrew Road widening phase {i} and other Corkscrew Road projects.") for i in range(6)]
+    store = _focus_store(docs)
+    hits = [(d, 0.9 - i * 0.01) for i, d in enumerate(docs)]
+
+    focused = query_focus.focus_hits(store, hits, "Aldi on Corkscrew Rd")
+
+    assert [d.metadata["chunk_id"] for d, _ in focused] == ["a1"]
+
+
+def test_anchor_term_ignored_when_top_hit_does_not_contain_it():
+    import query_focus
+
+    docs = [_article(f"c{i}", f"Coconut Point approval number {i} at Coconut Point.") for i in range(6)]
+    docs.append(_article("x", "An unrelated memo about a pickleball court."))
+    store = _focus_store(docs)
+    hits = [(d, 0.9 - i * 0.01) for i, d in enumerate(docs)]
+
+    # "pickleball" is rare, but the best match isn't about it: no narrowing.
+    assert query_focus.focus_hits(store, hits, "Coconut Point pickleball") == hits
+    # A question that is only the rare term is already focused.
+    assert query_focus.anchor_terms(store, "aldi", hits) == set()
+
+
+@pytest.mark.parametrize(
+    ("question", "expected"),
+    [
+        ("Williams Rd west", ("williams", "west", "US 41")),
+        ("What is happening on Williams Road west of US 41?", ("williams", "west", "US 41")),
+        ("west side of Williams Road", ("williams", "west", "US 41")),
+        ("Broadway Avenue East projects", ("broadway", "east", "US 41")),
+        ("East Corkscrew Road developments", ("corkscrew", "east", "I-75")),
+        ("Corkscrew Rd east of US 41", ("corkscrew", "east", "US 41")),
+        ("What is happening on Williams Road?", None),
+        ("Road widening along Williams Road east/west", None),
+    ],
+)
+def test_query_road_side(question, expected):
+    import query_focus
+
+    got = query_focus.query_road_side(question)
+    assert (None if got is None else (got.road, got.side, got.divider)) == expected
+
+
+def test_road_side_filter_drops_other_side_by_text_and_geocode():
+    import pandas as pd
+    from langchain_core.documents import Document
+
+    import query_focus
+
+    df = pd.DataFrame(
+        [
+            # Williams Rd east of US 41 (geocode only, no direction in the text).
+            {"Latitude": 26.425, "Longitude": -81.8040, "GeocodeConfidence": 0.98, "LocationGrain": "parcel_address"},
+            # West side by geocode.
+            {"Latitude": 26.425, "Longitude": -81.8180, "GeocodeConfidence": 0.98, "LocationGrain": "parcel_address"},
+            # Whole-street geocode: side unknown, kept.
+            {"Latitude": 26.425, "Longitude": -81.8040, "GeocodeConfidence": 0.98, "LocationGrain": "whole_street"},
+        ]
+    )
+    board = [
+        Document(page_content="9000 Williams Road rezoning", metadata={"chunk_id": f"{i}-meta", "row_index": i})
+        for i in range(3)
+    ]
+    west_text = _article("w", "Williams Road West of US41 Update: the roundabout at Atlantic Gulf.")
+    east_text = _article("e", "A multi-use path on Williams Road east of US 41 will cost $4.1 million.")
+    store = _focus_store(board + [west_text, east_text], df=df)
+    hits = [(d, 0.5) for d in board + [west_text, east_text]]
+
+    kept = query_focus.filter_to_road_side(store, hits, "Williams Rd west")
+
+    assert [d.metadata["chunk_id"] for d, _ in kept] == ["1-meta", "2-meta", "w"]
+    # Nothing on the asked side: keep everything rather than answer from nothing.
+    only_east = [(board[0], 0.5), (east_text, 0.4)]
+    assert query_focus.filter_to_road_side(store, only_east, "Williams Rd west") == only_east
+
+
+def test_answer_prompt_covers_feedback_rules():
+    text = rag_path._load_answer_system_prompt()
+    assert "Aldi on Corkscrew Rd" in text
+    assert "west of US 41" in text
+    assert "Where is X" in text
+    assert "closest match" in text
+
+
+def test_focus_excerpt_keeps_only_sentences_about_the_anchor():
+    import query_focus
+
+    text = (
+        "True North Classical Academy will open in 2028. It serves K-12. "
+        "Safety Hot Spots Aldi's, vacant lot, Self-Storage right in - right out permits were issued. "
+        "The Village requires this access before Aldi's opens in December 2026. "
+        "A right-turn lane is planned. The multiuse path follows. "
+        "Wawa traffic signal timing changed."
+    )
+
+    store = _focus_store([_article("a", text)] + [_article(f"c{i}", "Corkscrew Road") for i in range(3)])
+    focus, anchors, _side = query_focus.excerpt_focus(store, "Aldi on Corkscrew Rd", [(store.documents[0], 0.9)])
+    out = query_focus.focus_excerpt(text, focus)
+
+    assert anchors == {"aldi"}
+    assert "Aldi's opens in December 2026" in out and "right-turn lane" in out
+    assert "True North" not in out and "Wawa" not in out
+    assert query_focus.focus_excerpt(text, lambda s: "pickleball" in s) == text
+
+
+def test_focus_excerpt_keeps_only_sentences_about_the_asked_road_side():
+    import query_focus
+
+    text = (
+        "Williams Road widening: design is nearing completion and easements are pending. "
+        "Pinewoods Elementary will be within walking distance. "
+        "Plans are in place to build intersection improvements on Williams Road west of US-41. "
+        "The roundabout will stop illegal left turns."
+    )
+    store = _focus_store([_article("a", text)])
+    focus, _anchors, side = query_focus.excerpt_focus(store, "Williams Rd west", [(store.documents[0], 0.9)])
+    out = query_focus.focus_excerpt(text, focus)
+
+    assert side.side == "west"
+    assert out.startswith("Plans are in place") and "roundabout" in out
+    assert "Pinewoods" not in out

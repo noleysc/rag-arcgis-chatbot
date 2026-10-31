@@ -5,6 +5,7 @@ import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
+from collections.abc import Callable
 from typing import Any
 
 from langchain_core.documents import Document
@@ -32,6 +33,7 @@ from config import (
     SPARSE_K,
 )
 from onnx_reranker import OnnxCrossEncoder, load_onnx_reranker
+from query_focus import focus_excerpt, focus_hits
 from schema_aliases import row_value
 from store import DataStore, _tokenize
 
@@ -717,6 +719,7 @@ def hybrid_retrieve(
             ranked += [(d, 1.0) for d in dev_docs if id(d) not in {id(r[0]) for r in ranked}]
         if query_wants_recent(intent) and not dev_docs:
             ranked = _reserve_recent(ranked, ranked, _RECENCY_TOPUP, query=intent)
+        ranked = focus_hits(store, ranked, intent)
         boosted = apply_recency_boost(ranked, query, intent_query=intent)
         return _finalize(boosted, intent)
 
@@ -748,6 +751,10 @@ def hybrid_retrieve(
         # query adds broad words ("construction", "status") that would let
         # corpus-wide newest docs through.
         pool = _reserve_recent(ranked, pool, _RECENCY_TOPUP, query=intent)
+    # "Aldi on Corkscrew Rd" is about Aldi, not the whole road; "Williams Rd
+    # West" is one side of US 41. Narrowed here, before the final cap, so the
+    # freed slots go to more on-subject hits (see query_focus).
+    pool = focus_hits(store, pool, intent)
     boosted = apply_recency_boost(pool, query, intent_query=intent)
     return _finalize(boosted, intent)
 
@@ -910,7 +917,11 @@ def _clip(text: str, limit: int) -> str:
     return (cut[: end + 1] if end > limit * 0.6 else cut.rstrip()) + " …"
 
 
-def merge_records_for_llm(store: DataStore, hits: list[tuple[Document, float]]) -> list[dict[str, Any]]:
+def merge_records_for_llm(
+    store: DataStore,
+    hits: list[tuple[Document, float]],
+    focus: Callable[[str], bool] | None = None,
+) -> list[dict[str, Any]]:
     """Merge hit chunks belonging to the same record into one entry, so a
     record isn't sent to the answer model twice (e.g. its 'meta' chunk and
     its 'summary' chunk both surviving rerank). IDs come from
@@ -921,6 +932,10 @@ def merge_records_for_llm(store: DataStore, hits: list[tuple[Document, float]]) 
     chunks of one article are joined in rank order). Title/date alone are not
     enough to answer from. Keeps the best rerank score across a record's
     chunks, for eval logging.
+
+    focus (query_focus.excerpt_focus) trims article excerpts to the sentences
+    about the question's subject or road side, so a roundup article doesn't
+    hand the model a dozen unrelated projects.
     """
     board_by_id: dict[str, dict[str, Any]] = {}
     supplemental_by_id: dict[str, dict[str, Any]] = {}
@@ -981,7 +996,8 @@ def merge_records_for_llm(store: DataStore, hits: list[tuple[Document, float]]) 
         }
 
     for entry in supplemental_by_id.values():
-        entry["text"] = _clip(" … ".join(entry.pop("_chunks")), _EXCERPT_CHARS_SUPPLEMENTAL)
+        joined = " … ".join(entry.pop("_chunks"))
+        entry["text"] = _clip(focus_excerpt(joined, focus), _EXCERPT_CHARS_SUPPLEMENTAL)
     return list(board_by_id.values()) + list(supplemental_by_id.values())
 
 

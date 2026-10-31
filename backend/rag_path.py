@@ -26,6 +26,7 @@ from langchain_core.documents import Document
 from config import ANSWER_MAX_TOKENS, ANSWER_TEMPERATURE, CRAG_MAX_ITERS, SCORE_THRESHOLD
 from models import ChatResponse, ProjectOut, RouteKind
 from prompt_loader import load_prompt
+from query_focus import excerpt_focus
 from config import RECENT_QUERY_MAX_AGE_YEARS
 from retrieval import (
     RETRIEVAL_POOL,
@@ -377,14 +378,27 @@ def _retrieve_with_crag(
     if len(scoped) != len(hits):
         meta["project_scoped"] = len(scoped)
     meta.update(hits_meta(scoped))
-    records = merge_records_for_llm(store, scoped)
+    focus, anchors, side = excerpt_focus(store, question, scoped)
+    if anchors:
+        meta["anchor_terms"] = sorted(anchors)
+    records = merge_records_for_llm(store, scoped, focus=focus)
     meta["record_count"] = len(records)
     # "Retrieved" (offered to the LLM) vs. "used" (what it actually cited,
     # set later in answer_rag from the LLM's used_record_ids) are logged
     # separately — see scripts/eval_answers.py.
     meta["retrieved_record_ids"] = [r["id"] for r in records if r.get("id")]
     meta["rerank_scores"] = {r["id"]: round(r.get("score", 0.0), 4) for r in records if r.get("id")}
-    return format_records_for_llm(records), meta, scoped
+    context = format_records_for_llm(records)
+    if side and records:
+        # "Williams Rd west" reads as loosely "west-ish" to the model; spell
+        # out the side so it drops sentences about the other stretch.
+        meta["road_side"] = f"{side.road} {side.side} of {side.divider}"
+        context = (
+            f"Note: the question is only about the part of {side.road.title()} "
+            f"{side.side.upper()} of {side.divider}. Leave out anything on the other side.\n\n"
+            f"{context}"
+        )
+    return context, meta, scoped
 
 
 def build_cards(

@@ -18,5 +18,9 @@
   { "id": "vague-development", "question": "new developments" },
   { "id": "specific-address", "question": "What's happening at 9301 Corkscrew Road?" },
   { "id": "council-vs-pzdb", "question": "What did the Village Council decide about the rail trail?" },
-  { "id": "no-decision-case", "question": "Is there a decision yet on the church special exception request?" }
+  { "id": "no-decision-case", "question": "Is there a decision yet on the church special exception request?" },
+  { "id": "feedback-business-on-road", "question": "Aldi on Corkscrew Rd" },
+  { "id": "feedback-road-side-bare", "question": "Williams Rd west" },
+  { "id": "feedback-road-side-question", "question": "What is happening on Williams Road west of US 41?" },
+  { "id": "feedback-place-location", "question": "Estero River Access" }
 ]
