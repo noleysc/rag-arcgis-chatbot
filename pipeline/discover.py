@@ -33,8 +33,12 @@ SOURCES = {
     "pzdb": "https://estero-fl.gov/pzdbminutes/",
 }
 
+# Village historically hosted minutes under library-ada/minutes/, but mid-2026
+# uploads moved to the generic /wp-content/uploads/YYYY/MM/ tree. Match any
+# estero-fl.gov upload PDF on the index pages; undated / non-minutes files are
+# filtered out later by iso_date_from_filename.
 PDF_RE = re.compile(
-    r'href="(https://estero-fl\.gov/wp-content/uploads/library-ada/minutes/[^"]+\.pdf[^"]*)"',
+    r'href="(https://estero-fl\.gov/wp-content/uploads/[^"]+\.pdf[^"]*)"',
     re.IGNORECASE,
 )
 
@@ -116,6 +120,39 @@ def iso_date_from_filename(filename: str) -> str | None:
     return None
 
 
+# /library-ada/minutes/2025 Minutes/... or /uploads/2026/09/...
+_PATH_YEAR_RE = re.compile(
+    r"/uploads/(?:library-ada/minutes/)?(\d{4})(?:(?:%20|\s)?minutes/|MINUTES/|/)",
+    re.IGNORECASE,
+)
+
+
+def path_year_from_url(url: str) -> int | None:
+    """Year folder in the Village upload path, if present."""
+    m = _PATH_YEAR_RE.search(url) or _PATH_YEAR_RE.search(urllib.parse.unquote(url))
+    if not m:
+        return None
+    year = int(m.group(1))
+    return year if 2000 <= year <= 2100 else None
+
+
+def iso_date_from_url(url: str) -> str | None:
+    """Meeting date from the PDF filename, repaired via the upload path year.
+
+    The Village has posted several 2025 PZDB minutes under filenames like
+    ``02112005 PZDB Minutes.pdf`` inside the ``2025 Minutes`` folder. Prefer
+    the path year when it disagrees with the filename year.
+    """
+    filename = urllib.parse.unquote(url.rsplit("/", 1)[-1])
+    iso = iso_date_from_filename(filename)
+    if not iso:
+        return None
+    path_year = path_year_from_url(url)
+    if path_year is None or path_year == int(iso[:4]):
+        return iso
+    return _safe_date(path_year, int(iso[5:7]), int(iso[8:10])) or iso
+
+
 def extract_pdf_urls(html: str) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
@@ -127,9 +164,16 @@ def extract_pdf_urls(html: str) -> list[str]:
     return out
 
 
-def _preference_score(name: str) -> int:
+def _preference_score(name: str, url: str = "") -> int:
     low = name.lower()
-    return sum(kw in low for kw in ("approved", "final", "signed"))
+    score = sum(kw in low for kw in ("approved", "final", "signed"))
+    # Prefer filenames whose embedded year matches the upload folder year so
+    # typo variants like 02112005.pdf lose to 02112025.pdf in the same folder.
+    path_year = path_year_from_url(url) if url else None
+    file_iso = iso_date_from_filename(name)
+    if path_year is not None and file_iso and int(file_iso[:4]) == path_year:
+        score += 10
+    return score
 
 
 def canonical_by_date(pdf_urls: list[str]) -> tuple[dict[str, str], list[str]]:
@@ -138,13 +182,13 @@ def canonical_by_date(pdf_urls: list[str]) -> tuple[dict[str, str], list[str]]:
     skipped: list[str] = []
     for url in pdf_urls:
         filename = urllib.parse.unquote(url.rsplit("/", 1)[-1])
-        iso = iso_date_from_filename(filename)
+        iso = iso_date_from_url(url)
         if not iso:
             skipped.append(filename)
             continue
         existing = mapping.get(iso)
-        if existing is None or _preference_score(filename) > _preference_score(
-            urllib.parse.unquote(existing.rsplit("/", 1)[-1])
+        if existing is None or _preference_score(filename, url) > _preference_score(
+            urllib.parse.unquote(existing.rsplit("/", 1)[-1]), existing
         ):
             mapping[iso] = url
     return mapping, skipped
@@ -154,8 +198,17 @@ def _filename_key(name: str) -> str:
     return re.sub(r"\s+", " ", urllib.parse.unquote(name).lower().strip())
 
 
+def _is_pzdb_filename(name: str) -> bool:
+    return bool(re.search(r"pzdb|pzb|planning", name, re.IGNORECASE))
+
+
 def load_known(pdf_dir: Path, urls_file: Path) -> tuple[set[str], set[str]]:
-    """Existing corpus: normalized PDF filenames and already-listed URLs."""
+    """Existing corpus: on-disk PDF filenames and already-listed URLs.
+
+    Filenames are taken only from pdf_dir — a URL listed in the bronze lookup
+    without a matching local PDF is treated as missing so discover can
+    re-download it (the mid-2026 corpus had several such gaps).
+    """
     known_files = {
         _filename_key(p.name) for p in pdf_dir.glob("*.pdf")
     } if pdf_dir.exists() else set()
@@ -165,12 +218,26 @@ def load_known(pdf_dir: Path, urls_file: Path) -> tuple[set[str], set[str]]:
             line = line.strip()
             if line:
                 known_urls.add(line)
-                known_files.add(_filename_key(line.rsplit("/", 1)[-1]))
     return known_files, known_urls
+
+
+def load_known_dates(pdf_dir: Path) -> dict[str, set[str]]:
+    """ISO meeting dates already covered on disk, keyed by body."""
+    out: dict[str, set[str]] = {"council": set(), "pzdb": set()}
+    if not pdf_dir.exists():
+        return out
+    for path in pdf_dir.glob("*.pdf"):
+        iso = iso_date_from_filename(path.name)
+        if not iso:
+            continue
+        body = "pzdb" if _is_pzdb_filename(path.name) else "council"
+        out[body].add(iso)
+    return out
 
 
 def discover(pdf_dir: Path, urls_file: Path, dry_run: bool = False) -> int:
     known_files, known_urls = load_known(pdf_dir, urls_file)
+    known_dates = load_known_dates(pdf_dir)
     new_entries: list[tuple[str, str, str]] = []  # (body, iso, url)
 
     for body, index_url in SOURCES.items():
@@ -180,7 +247,12 @@ def discover(pdf_dir: Path, urls_file: Path, dry_run: bool = False) -> int:
               f"({len(skipped)} undated/notice files ignored)")
         for iso, url in sorted(mapping.items()):
             filename = urllib.parse.unquote(url.rsplit("/", 1)[-1])
-            if url in known_urls or _filename_key(filename) in known_files:
+            # Skip when the PDF is already on disk, or when this body already
+            # has minutes for that date (covers Village filename typos like
+            # 02112005.pdf living in the 2025 Minutes folder).
+            if _filename_key(filename) in known_files:
+                continue
+            if iso in known_dates.get(body, set()):
                 continue
             new_entries.append((body, iso, url))
 
@@ -195,8 +267,12 @@ def discover(pdf_dir: Path, urls_file: Path, dry_run: bool = False) -> int:
             continue
         pdf_dir.mkdir(parents=True, exist_ok=True)
         (pdf_dir / filename).write_bytes(fetch(url))
-        with urls_file.open("a", encoding="utf-8", newline="\n") as fh:
-            fh.write(url + "\n")
+        if url not in known_urls:
+            with urls_file.open("a", encoding="utf-8", newline="\n") as fh:
+                fh.write(url + "\n")
+            known_urls.add(url)
+        known_files.add(_filename_key(filename))
+        known_dates.setdefault(body, set()).add(iso)
 
     verb = "Would download" if dry_run else "Downloaded"
     print(f"{verb} {len(new_entries)} new PDF(s).")
