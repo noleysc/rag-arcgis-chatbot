@@ -1,53 +1,53 @@
 {
-  "_comment": "MANUALLY MAINTAINED — see frontend-react/README.md for the update process. Seeds Community Pulse Next Meetings until the Village publishes a machine-readable calendar. Regular schedule: Planning, Zoning & Design Board meets mid-month (often 3rd Tuesday) at 5:30 PM; Village Council meets twice monthly (often 1st/3rd Wednesday, with summer/holiday shifts) at 9:30 AM. Both at Estero Village Hall, 9401 Corkscrew Palms Circle. Update monthly — drop past dates, add the next occurrence(s). Verify against https://estero-fl.gov/villagecouncilminutes/ and https://estero-fl.gov/pzdbminutes/ before publishing. Each meeting's url points at the Village minutes index page the pipeline scrapes (pipeline/discover.py).",
+  "_comment": "MANUALLY MAINTAINED — see frontend-react/README.md for the update process. Seeds Community Pulse Next Meetings until the Village publishes a machine-readable calendar. Regular schedule: Planning, Zoning & Design Board meets mid-month (often 3rd Tuesday) at 4:30 PM; Village Council meets twice monthly (often 1st/3rd Wednesday, with summer/holiday shifts) at 9:30 AM. Both at Estero Village Hall, 9401 Corkscrew Palms Circle. Update monthly — drop past dates, skip cancellations, add the next occurrence(s). Verify against https://estero-fl.gov/meetings/ and https://esterotoday.com/village-county-meetings/ before publishing. Each meeting's url points at the Village agendas hub (estero-fl.gov/meetings); board minutes indexes remain at villagecouncilminutes/ and pzdbminutes/ for the pipeline.",
   "meetings": [
     {
-      "id": "council-2026-09-09",
+      "id": "council-2026-10-28",
       "board": "Village Council",
-      "date": "2026-09-09",
+      "date": "2026-10-28",
       "time": "9:30 AM",
       "venue": "Estero Village Hall",
-      "url": "https://estero-fl.gov/villagecouncilminutes/"
+      "url": "https://estero-fl.gov/meetings/"
     },
     {
-      "id": "pzdb-2026-09-15",
+      "id": "pzdb-2026-11-17",
       "board": "Planning, Zoning & Design Board",
-      "date": "2026-09-15",
-      "time": "5:30 PM",
+      "date": "2026-11-17",
+      "time": "4:30 PM",
       "venue": "Estero Village Hall",
-      "url": "https://estero-fl.gov/pzdbminutes/"
+      "url": "https://estero-fl.gov/meetings/"
     },
     {
-      "id": "council-2026-09-16",
+      "id": "council-2026-11-18",
       "board": "Village Council",
-      "date": "2026-09-16",
+      "date": "2026-11-18",
       "time": "9:30 AM",
       "venue": "Estero Village Hall",
-      "url": "https://estero-fl.gov/villagecouncilminutes/"
+      "url": "https://estero-fl.gov/meetings/"
     },
     {
-      "id": "council-2026-10-07",
+      "id": "council-2026-12-02",
       "board": "Village Council",
-      "date": "2026-10-07",
+      "date": "2026-12-02",
       "time": "9:30 AM",
       "venue": "Estero Village Hall",
-      "url": "https://estero-fl.gov/villagecouncilminutes/"
+      "url": "https://estero-fl.gov/meetings/"
     },
     {
-      "id": "pzdb-2026-10-20",
+      "id": "pzdb-2026-12-15",
       "board": "Planning, Zoning & Design Board",
-      "date": "2026-10-20",
-      "time": "5:30 PM",
+      "date": "2026-12-15",
+      "time": "4:30 PM",
       "venue": "Estero Village Hall",
-      "url": "https://estero-fl.gov/pzdbminutes/"
+      "url": "https://estero-fl.gov/meetings/"
     },
     {
-      "id": "council-2026-10-21",
+      "id": "council-2026-12-16",
       "board": "Village Council",
-      "date": "2026-10-21",
+      "date": "2026-12-16",
       "time": "9:30 AM",
       "venue": "Estero Village Hall",
-      "url": "https://estero-fl.gov/villagecouncilminutes/"
+      "url": "https://estero-fl.gov/meetings/"
     }
   ]
 }

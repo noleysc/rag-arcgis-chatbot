@@ -77,8 +77,8 @@ unmounting, since re-creating the ArcGIS `MapView` is expensive and would lose p
 
 Three widgets on the Pulse tab:
 - **Next Meetings** — reads `public/meetings.json`, a **manually maintained** file. Update it
-  monthly: drop past dates, add the next occurrence(s), and verify against
-  https://estero-fl.gov/agendas-minutes/. Cadence notes live in the file's `_comment` field.
+  monthly: drop past dates, skip cancellations, add the next occurrence(s), and verify against
+  https://estero-fl.gov/meetings/ (and EsteroToday’s Village calendar). Cadence notes live in the file's `_comment` field.
 - **Latest from EsteroToday** — fetches the 5 newest posts from EsteroToday's public WordPress
   REST API (`useNews.ts`).
 - **Upcoming Events** — `GET /api/events` aggregates EsteroToday's Events Calendar (all
