@@ -1,8 +1,8 @@
 {
   "project": "rag-arcgis-chatbot",
   "product": "Ask Engage Estero",
-  "updated_at": "2026-10-16T18:04:00Z",
-  "updated_by": "nolan",
+  "updated_at": "2026-10-31T17:50:00Z",
+  "updated_by": "cloud-agent",
   "team": {
     "nolan": {
       "github": "noleysc",
@@ -17,12 +17,12 @@
       "role": "frontend Pulse / React UI"
     }
   },
-  "active_focus": "VPS health + security; hold map churn while ArcGIS storyboards develop",
+  "active_focus": "Pipeline discover fix for post-June-2026 council minutes; VPS health",
   "priorities": [
+    "Merge discover.py fix so pipeline-refresh ingests Jul/Sep 2026 council minutes + missing Jan–Jun 2026 PDFs",
     "Production is https://tracker.esterotoday.com/ only (Cloud Run rag-arcgis-chatbot deleted; Pages unused)",
     "Keep health-watch.yml green; follow deploy/vps/SECURITY.md on the box",
-    "Coordinate Instant App / StoryMap embed with GIS storyboard owners before MapPanel changes",
-    "Mac SSH key + password-disable only after a second working session"
+    "Coordinate Instant App / StoryMap embed with GIS storyboard owners before MapPanel changes"
   ],
   "owners": {
     "backend/events_sources": "nolan",
