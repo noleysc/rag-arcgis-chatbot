@@ -234,7 +234,7 @@ def _extract_action_marker_entries(text: str) -> list[AgendaEntry]:
         flags=re.I,
     ):
         action = _clean_action(match.group(1))
-        if len(action) <= 8:
+        if len(action) <= 8 or _is_procedural_meeting_motion(action):
             continue
         vote_text = _extract_following_vote_text(text[match.end():])
         title = _infer_agenda_title(text[max(0, match.start() - 5000):match.start()])
@@ -460,22 +460,43 @@ def _title_prefix(sub_text: str) -> str:
     return sub_text[:cutoff].strip(" .;:-")
 
 
+# Motions about the meeting itself (continuing/recessing past a time,
+# adjourning) rather than a decision on the agenda item being discussed —
+# e.g. "A motion to continue the meeting past 9:00 pm was made and duly
+# passed." These match NARRATIVE_MOTION_PATTERN/PASSIVE_MOTION_PATTERN just
+# as readily as a real decision, so without this check they'd be captured as
+# the item's action even though they have nothing to do with its subject.
+# Deliberately narrower than a bare "continued"/"recessed" check — legitimate
+# outcomes like "Continued deliberations to 9:00 a.m. on January 20, 2016"
+# (continuing the AGENDA ITEM, a real disposition) must still match through.
+_PROCEDURAL_MEETING_MOTION_RE = re.compile(
+    r"\b(?:continue|recess(?:ed)?|adjourn(?:ed)?)\s+(?:the\s+)?meeting\b",
+    flags=re.I,
+)
+
+
+def _is_procedural_meeting_motion(text: str) -> bool:
+    return bool(_PROCEDURAL_MEETING_MOTION_RE.search(text))
+
+
+def _first_real_action_match(sub_text: str) -> re.Match | None:
+    """First INTERNAL_ACTION_PATTERN/NARRATIVE_MOTION_PATTERN/
+    PASSIVE_MOTION_PATTERN match whose text isn't a procedural
+    continue/recess/adjourn-the-meeting motion — shared by
+    _extract_sub_item_action and _action_end so they can't drift apart on
+    which match was actually used."""
+    for pattern, group in ((INTERNAL_ACTION_PATTERN, 1), (NARRATIVE_MOTION_PATTERN, 0), (PASSIVE_MOTION_PATTERN, 0)):
+        m = pattern.search(sub_text)
+        if m and len(_clean_action(m.group(group))) > 8 and not _is_procedural_meeting_motion(m.group(group)):
+            return m
+    return None
+
+
 def _extract_sub_item_action(sub_text: str) -> str | None:
-    m = INTERNAL_ACTION_PATTERN.search(sub_text)
+    m = _first_real_action_match(sub_text)
     if m:
-        action = _clean_action(m.group(1))
-        if len(action) > 8:
-            return action
-    m = NARRATIVE_MOTION_PATTERN.search(sub_text)
-    if m:
-        action = _clean_action(m.group(0))
-        if len(action) > 8:
-            return action
-    m = PASSIVE_MOTION_PATTERN.search(sub_text)
-    if m:
-        action = _clean_action(m.group(0))
-        if len(action) > 8:
-            return action
+        group = 1 if m.re is INTERNAL_ACTION_PATTERN else 0
+        return _clean_action(m.group(group))
     if re.search(r"\bDeferred(?:\s+to)?\b", sub_text, flags=re.I):
         return _clean_action(re.search(r"\bDeferred[^.]{0,200}", sub_text, flags=re.I).group(0))
     if re.search(r"\bContinued(?:\s+to)?\b", sub_text, flags=re.I):
@@ -484,16 +505,8 @@ def _extract_sub_item_action(sub_text: str) -> str | None:
 
 
 def _action_end(sub_text: str) -> int:
-    m = INTERNAL_ACTION_PATTERN.search(sub_text)
-    if m:
-        return m.end()
-    m = NARRATIVE_MOTION_PATTERN.search(sub_text)
-    if m:
-        return m.end()
-    m = PASSIVE_MOTION_PATTERN.search(sub_text)
-    if m:
-        return m.end()
-    return 0
+    m = _first_real_action_match(sub_text)
+    return m.end() if m else 0
 
 
 def _extract_narrative_motion_entries(text: str) -> list[AgendaEntry]:
@@ -613,12 +626,25 @@ def _infer_agenda_title(context: str) -> str | None:
     return candidates[-1] if candidates else None
 
 
+_TITLE_MAX_LEN = 255
+
+
 def _clean_title(text: str) -> str | None:
     text = re.sub(r"\s+", " ", text).strip(" .;:-")
     text = re.sub(r"^(?:and\s+)?", "", text, flags=re.I).strip()
     if not text:
         return None
-    return text[:255]
+    if len(text) <= _TITLE_MAX_LEN:
+        return text
+    # Cut at the last word boundary within the limit, not mid-word — a raw
+    # char-count slice can land inside a word or right after a space, leaving
+    # a dangling trailing space that then collides with build.py's ". Action:
+    # " glue text to produce "...the ." (see pipeline/build.py _add_action).
+    truncated = text[:_TITLE_MAX_LEN]
+    space = truncated.rfind(" ")
+    if space > _TITLE_MAX_LEN // 2:
+        truncated = truncated[:space]
+    return truncated.rstrip(" .;:-")
 
 
 def _is_noise_title(title: str) -> bool:

@@ -24,6 +24,7 @@ from eaglegis.classifiers import (
     match_locations,
 )
 from eaglegis.extractors import (
+    _clean_title,
     extract_agenda_entries,
     extract_date,
     infer_meeting_type,
@@ -74,12 +75,40 @@ class PipelineParserTests(unittest.TestCase):
 
     def test_action_without_vote_stops_at_next_numbered_heading(self) -> None:
         text = (
+            "Motion: Motion to approve. Action: Approved the Development Order with conditions. "
+            "7. WORKSHOP (1) Culver's Coconut Point Development Order (District 6) "
+            "8400 Murano Del Lago Dr, east of US 41."
+        )
+        entries = extract_agenda_entries(text)
+        self.assertEqual(entries[0].action_text, "Approved the Development Order with conditions")
+
+    def test_procedural_continue_the_meeting_motion_is_not_captured_as_action(self) -> None:
+        """A motion to continue/recess/adjourn the MEETING itself (not the
+        agenda item) must never be captured as an item's decision — see
+        _is_procedural_meeting_motion. The real item here has no other
+        recorded decision, so it should fall back to 'No formal action
+        recorded' rather than inheriting the procedural continuance text."""
+        text = (
             "Motion: Motion to continue. Action: Approved to continue the meeting until 9:15 pm. "
             "7. WORKSHOP (1) Culver's Coconut Point Development Order (District 6) "
             "8400 Murano Del Lago Dr, east of US 41."
         )
         entries = extract_agenda_entries(text)
-        self.assertEqual(entries[0].action_text, "Approved to continue the meeting until 9:15 pm")
+        for entry in entries:
+            self.assertNotIn("continue the meeting", (entry.action_text or "").lower())
+        self.assertTrue(any("Culver's Coconut Point" in (e.title or "") for e in entries))
+        coconut_point = next(e for e in entries if "Culver's Coconut Point" in (e.title or ""))
+        self.assertTrue((coconut_point.action_text or "").startswith("No formal action recorded"))
+
+    def test_continued_item_disposition_is_still_captured(self) -> None:
+        """Contrast case for the procedural filter above: continuing the
+        AGENDA ITEM (a real disposition, not the meeting) must still be
+        captured normally."""
+        text = "(a) Rivercreek Phase 2 Rezoning. Action: Continued deliberations to 9:00 a.m. on January 20, 2016."
+        entries = extract_agenda_entries(text)
+        self.assertTrue(
+            any("Continued deliberations to 9:00 a.m." in (e.action_text or "") for e in entries)
+        )
 
     def test_action_without_vote_stops_at_parenthetical_heading(self) -> None:
         text = (
@@ -625,6 +654,27 @@ class PipelineParserTests(unittest.TestCase):
         )
         entries = extract_agenda_entries(text)
         self.assertEqual(entries[0].action_text, "Adopted Ordinance No. 2025-16")
+
+    def test_clean_title_truncation_does_not_cut_mid_word(self) -> None:
+        """Regression for the '...the .' truncation artifact: a title over
+        255 chars must be cut at a word boundary with no dangling trailing
+        space/punctuation, not a raw character-count slice (see
+        pipeline/build.py's ". Action: " glue in _add_action)."""
+        long_text = "The applicant seeks to amend the " + ("conditions " * 40) + "for the property."
+        self.assertGreater(len(long_text), 255)
+        title = _clean_title(long_text)
+        self.assertIsNotNone(title)
+        assert title is not None
+        self.assertLessEqual(len(title), 255)
+        self.assertFalse(title.endswith(" "))
+        self.assertFalse(title.endswith("."))
+        self.assertTrue(long_text.startswith(title.split(" ")[0]))
+        # Every word in the truncated title must be a whole word from the
+        # source text, i.e. the cut landed on a space, not mid-word.
+        self.assertIn(title.split(" ")[-1], long_text.split(" "))
+
+    def test_clean_title_under_limit_is_unchanged(self) -> None:
+        self.assertEqual(_clean_title("  Short title.  "), "Short title")
 
     # --- Board routing / legacy stub suppression ---
 
