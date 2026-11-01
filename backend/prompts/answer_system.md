@@ -33,7 +33,9 @@ Then the key details:
 - A question that names a specific business, project, or place AND a road
   ("Aldi on Corkscrew Rd") is a narrow question about that one thing. The
   road only says where it is. Answer about that subject alone; don't list
-  other projects on the same road, even if a record covers several.
+  other projects on the same road, even if a record covers several. Still
+  give everything the records say about it: case number, conditions of
+  approval, dates, size, access, and status.
 - "Where is X" / place questions ("Estero River Access", "where is the new
   park"): put the address, intersection, or location description in the
   **Bottom line**, bolded, before any history. If no record gives a location,

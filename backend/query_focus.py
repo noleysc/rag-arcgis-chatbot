@@ -293,18 +293,58 @@ def focus_excerpt(text: str, about: Callable[[str], bool] | None) -> str:
     return " ".join(parts)
 
 
+# Places that put a sentence on one side of US 41 without saying "east" or
+# "west" ("widening from US-41 to Via Coconut Point"). Only used to tell
+# whether an article covers the other side at all; same list as the answer
+# prompt's "Roads and sides" rules.
+_US41_LANDMARKS = {
+    "east": re.compile(
+        r"\b(?:via coconut|three oaks|ben hill griffin|I-?\s?75|coconut point|hertz arena|sports park)\b",
+        re.IGNORECASE,
+    ),
+    "west": re.compile(r"\b(?:pelican sound|west bay|atlantic gulf|estero bay)\b", re.IGNORECASE),
+}
+
+
+def _names_side(sentence: str, target: RoadSide, side: str) -> bool:
+    if _text_side(sentence, target) == side:
+        return True
+    landmark = _US41_LANDMARKS[side] if target.divider == "US 41" else None
+    return bool(landmark and landmark.search(sentence))
+
+
 def excerpt_focus(
     store: DataStore, question: str, hits: list[tuple[Document, float]]
-) -> tuple[Callable[[str], bool] | None, set[str], RoadSide | None]:
-    """What article excerpts should be trimmed to for *question*: sentences
-    naming its anchor terms, or else sentences naming the asked road side.
+) -> tuple[Callable[[str, str], str] | None, set[str], RoadSide | None]:
+    """How article excerpts should be trimmed for *question*, as
+    trim(title, text) -> text: to the sentences naming its anchor terms, or
+    else to the sentences naming the asked road side.
+
+    Only articles that cover several subjects are trimmed. One whose title
+    names an anchor is about the subject, and a road article that never
+    mentions the other side is all on the asked side; trimming those only
+    loses details (conditions, dates, other projects on that side).
     Also returns the anchors and side, for logging."""
     if not ENABLE_QUERY_FOCUS:
         return None, set(), None
     anchors = anchor_terms(store, question, hits)
     side = query_road_side(question)
     if anchors:
-        return (lambda sentence: bool(anchors & set(_tokenize(sentence)))), anchors, side
+
+        def about_anchor(sentence: str) -> bool:
+            return bool(anchors & set(_tokenize(sentence)))
+
+        def trim_to_anchor(title: str, text: str) -> str:
+            return text if about_anchor(title) else focus_excerpt(text, about_anchor)
+
+        return trim_to_anchor, anchors, side
     if side:
-        return (lambda sentence: _text_side(sentence, side) == side.side), anchors, side
+        other = "west" if side.side == "east" else "east"
+
+        def trim_to_side(title: str, text: str) -> str:
+            if not any(_names_side(s, side, other) for s in [title, *_SENTENCE_SPLIT_RE.split(text)]):
+                return text
+            return focus_excerpt(text, lambda sentence: _text_side(sentence, side) == side.side)
+
+        return trim_to_side, anchors, side
     return None, anchors, side

@@ -33,7 +33,7 @@ from config import (
     SPARSE_K,
 )
 from onnx_reranker import OnnxCrossEncoder, load_onnx_reranker
-from query_focus import focus_excerpt, focus_hits
+from query_focus import focus_hits
 from schema_aliases import row_value
 from store import DataStore, _tokenize
 
@@ -920,7 +920,7 @@ def _clip(text: str, limit: int) -> str:
 def merge_records_for_llm(
     store: DataStore,
     hits: list[tuple[Document, float]],
-    focus: Callable[[str], bool] | None = None,
+    focus: Callable[[str, str], str] | None = None,
 ) -> list[dict[str, Any]]:
     """Merge hit chunks belonging to the same record into one entry, so a
     record isn't sent to the answer model twice (e.g. its 'meta' chunk and
@@ -933,9 +933,10 @@ def merge_records_for_llm(
     enough to answer from. Keeps the best rerank score across a record's
     chunks, for eval logging.
 
-    focus (query_focus.excerpt_focus) trims article excerpts to the sentences
-    about the question's subject or road side, so a roundup article doesn't
-    hand the model a dozen unrelated projects.
+    focus (query_focus.excerpt_focus) trims a multi-subject article, given
+    its title and text, to the sentences about the question's subject or
+    road side, so a roundup article doesn't hand the model a dozen unrelated
+    projects.
     """
     board_by_id: dict[str, dict[str, Any]] = {}
     supplemental_by_id: dict[str, dict[str, Any]] = {}
@@ -997,7 +998,9 @@ def merge_records_for_llm(
 
     for entry in supplemental_by_id.values():
         joined = " … ".join(entry.pop("_chunks"))
-        entry["text"] = _clip(focus_excerpt(joined, focus), _EXCERPT_CHARS_SUPPLEMENTAL)
+        if focus is not None:
+            joined = focus(entry["title"], joined)
+        entry["text"] = _clip(joined, _EXCERPT_CHARS_SUPPLEMENTAL)
     return list(board_by_id.values()) + list(supplemental_by_id.values())
 
 

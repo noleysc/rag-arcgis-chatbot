@@ -1248,6 +1248,7 @@ def test_answer_prompt_covers_feedback_rules():
     assert "west of US 41" in text
     assert "Where is X" in text
     assert "closest match" in text
+    assert "conditions of" in text  # narrow questions still get the full details
 
 
 def test_focus_excerpt_keeps_only_sentences_about_the_anchor():
@@ -1262,28 +1263,47 @@ def test_focus_excerpt_keeps_only_sentences_about_the_anchor():
     )
 
     store = _focus_store([_article("a", text)] + [_article(f"c{i}", "Corkscrew Road") for i in range(3)])
-    focus, anchors, _side = query_focus.excerpt_focus(store, "Aldi on Corkscrew Rd", [(store.documents[0], 0.9)])
-    out = query_focus.focus_excerpt(text, focus)
+    trim, anchors, _side = query_focus.excerpt_focus(store, "Aldi on Corkscrew Rd", [(store.documents[0], 0.9)])
+    out = trim("East Corkscrew Updates", text)
 
     assert anchors == {"aldi"}
     assert "Aldi's opens in December 2026" in out and "right-turn lane" in out
     assert "True North" not in out and "Wawa" not in out
     assert query_focus.focus_excerpt(text, lambda s: "pickleball" in s) == text
+    # An article titled after the subject is about it: kept whole.
+    assert trim("Aldi coming to Corkscrew Road", text) == text
 
 
 def test_focus_excerpt_keeps_only_sentences_about_the_asked_road_side():
     import query_focus
 
     text = (
-        "Williams Road widening: design is nearing completion and easements are pending. "
-        "Pinewoods Elementary will be within walking distance. "
+        "Williams Road widening from US-41 to Via Coconut Point: design is nearing completion. "
+        "Easements are pending. Pinewoods Elementary will be within walking distance. "
         "Plans are in place to build intersection improvements on Williams Road west of US-41. "
         "The roundabout will stop illegal left turns."
     )
     store = _focus_store([_article("a", text)])
-    focus, _anchors, side = query_focus.excerpt_focus(store, "Williams Rd west", [(store.documents[0], 0.9)])
-    out = query_focus.focus_excerpt(text, focus)
+    trim, _anchors, side = query_focus.excerpt_focus(store, "Williams Rd west", [(store.documents[0], 0.9)])
+    out = trim("Road Development Updates", text)
 
     assert side.side == "west"
     assert out.startswith("Plans are in place") and "roundabout" in out
     assert "Pinewoods" not in out
+
+
+def test_road_side_article_that_never_names_the_other_side_is_kept_whole():
+    # "East Corkscrew Road" lost its widening and Kingston Village details
+    # when every sentence not saying "east" was cut.
+    import query_focus
+
+    text = (
+        "East Corkscrew Road has surpassed 10,000 homes. "
+        "Corkscrew Road Widening Phase II is projected to finish in December 2026. "
+        "Kingston Village is widening Corkscrew Road to four lanes."
+    )
+    store = _focus_store([_article("a", text)])
+    trim, _anchors, side = query_focus.excerpt_focus(store, "What is happening on East Corkscrew Road?", [(store.documents[0], 0.9)])
+
+    assert side.side == "east" and side.divider == "I-75"
+    assert trim("East Corkscrew Road", text) == text
