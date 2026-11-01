@@ -117,6 +117,8 @@ class DataStore:
     # rag_path.retrieve_with_crag results for repeated questions. Lives on the
     # instance so a rebuilt index (a new DataStore) never serves stale hits.
     retrieval_cache: OrderedDict = field(default_factory=OrderedDict, repr=False)
+    # Chunks containing each BM25 token (query_focus anchor terms), built lazily.
+    _token_df: dict[str, int] | None = field(default=None, repr=False)
 
     def is_ready(self) -> bool:
         return self.vectorstore is not None and self.bm25 is not None and not self.dataframe.empty

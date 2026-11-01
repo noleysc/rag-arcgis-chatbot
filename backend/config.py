@@ -137,6 +137,11 @@ ENABLE_PROJECT_SCOPE = os.getenv("ENABLE_PROJECT_SCOPE", "true").lower() not in 
 PROJECT_SCOPE_MIN_SUPPORT = int(os.getenv("PROJECT_SCOPE_MIN_SUPPORT", "2"))
 PROJECT_SCOPE_CAP = int(os.getenv("PROJECT_SCOPE_CAP", "20"))
 
+# Query focus (query_focus.py): narrow hits to a rare subject term the question
+# names ("Aldi on Corkscrew Rd") and to the side of US 41 / I-75 a road
+# direction names ("Williams Rd West").
+ENABLE_QUERY_FOCUS = os.getenv("ENABLE_QUERY_FOCUS", "true").lower() not in {"0", "false", "no"}
+
 # Warn users when an answer cites meeting records older than this many years.
 STALE_SOURCE_YEARS = float(os.getenv("STALE_SOURCE_YEARS", "5"))
 # Prompt pack under backend/prompts/<variant>/ (default | concise).
