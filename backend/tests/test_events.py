@@ -350,14 +350,52 @@ def test_visitfortmyers_keeps_multi_day_still_running(monkeypatch):
     assert events[0]["source"] == "lee_county"
 
 
-def test_manual_events_load_from_public_json():
-    from events_sources.manual import fetch_manual_events
+def test_manual_events_load_from_public_json(tmp_path, monkeypatch):
+    """Unit-test manual loader with dates relative to today (not the live seed file)."""
+    import json
+    from datetime import date, timedelta
 
-    events = fetch_manual_events()
-    assert events, "community-events.json should have upcoming seed events"
+    from events_sources import manual
+
+    today = date.today()
+    past = (today - timedelta(days=7)).isoformat()
+    upcoming = (today + timedelta(days=7)).isoformat()
+    seed = {
+        "events": [
+            {
+                "id": f"coconut-point-farmers-market-{past}",
+                "title": "Coconut Point Farmers Market",
+                "start": f"{past}T09:00:00",
+                "end": f"{past}T13:00:00",
+                "allDay": False,
+                "venue": "Coconut Point Mall",
+                "url": "https://example.com/market",
+                "category": "market",
+                "location": "estero",
+            },
+            {
+                "id": f"coconut-point-farmers-market-{upcoming}",
+                "title": "Coconut Point Farmers Market",
+                "start": f"{upcoming}T09:00:00",
+                "end": f"{upcoming}T13:00:00",
+                "allDay": False,
+                "venue": "Coconut Point Mall",
+                "url": "https://example.com/market",
+                "category": "market",
+                "location": "estero",
+            },
+        ]
+    }
+    path = tmp_path / "community-events.json"
+    path.write_text(json.dumps(seed), encoding="utf-8")
+    monkeypatch.setattr(manual, "_CANDIDATES", [path])
+
+    events = manual.fetch_manual_events()
+    assert len(events) == 1, "past seed events must be filtered out"
     assert all(e["source"] == "manual" for e in events)
     assert any("Farmers Market" in e["title"] for e in events)
-    assert all(e["start"][:10] >= __import__("datetime").date.today().isoformat() for e in events)
+    assert all(e["start"][:10] >= today.isoformat() for e in events)
+    assert events[0]["start"][:10] == upcoming
 
 
 def test_aggregate_merges_lee_and_vfm(monkeypatch):
