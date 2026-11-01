@@ -28,6 +28,10 @@
   --village: #0e7490;
   --village-dark: #0b5a70;
   --village-light: #e3f2f4;
+  /* Info blue: Ask page summary box, section icons, citations */
+  --info: #1d6fd8;
+  --info-light: #eaf3fd;
+  --info-border: #c9def7;
   --text: #1a1a2e;
   /* ≥4.5:1 on both white cards and the --bg page background */
   --text-muted: #626b78;
@@ -73,6 +77,9 @@
   --village: #4fb8d0;
   --village-dark: #7fcde0;
   --village-light: #133340;
+  --info: #7cb4f5;
+  --info-light: #14273f;
+  --info-border: #24456d;
   --text: #e4e9f1;
   --text-muted: #9eaabb;
   --border: #283a53;

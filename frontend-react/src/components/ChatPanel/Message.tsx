@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ComponentType, ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage } from "../../types";
@@ -14,6 +15,16 @@ import Timeline from "./Timeline";
 import RelatedRecords from "./RelatedRecords";
 import FollowUpChips from "./FollowUpChips";
 import type { ReportPrefill } from "../ReportDialog/ReportDialog";
+import {
+  BuildingIcon,
+  CalendarIcon,
+  EngageMarkIcon,
+  GavelIcon,
+  InfoIcon,
+  LeafIcon,
+  RecordsIcon,
+  RoadIcon,
+} from "../Icons/Icons";
 
 function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -30,8 +41,41 @@ function splitBottomLine(markdown: string): { bottomLine: string | null; rest: s
   if (!/^\*\*Bottom line:?\*\*/i.test(firstPara)) {
     return { bottomLine: null, rest: markdown };
   }
-  return { bottomLine: firstPara, rest: breakIdx === -1 ? "" : markdown.slice(breakIdx + 2) };
+  return {
+    bottomLine: firstPara.replace(/^\*\*Bottom line:?\*\*:?\s*/i, ""),
+    rest: breakIdx === -1 ? "" : markdown.slice(breakIdx + 2),
+  };
 }
+
+/** Section headings in an answer get an icon picked from their wording. */
+const HEADING_ICONS: Array<[RegExp, ComponentType<{ size?: number }>]> = [
+  [/road|street|traffic|transport|infrastructure|trail|path|sidewalk|utilit/i, RoadIcon],
+  [/residential|housing|mixed|commercial|retail|development|building|homes/i, BuildingIcon],
+  [/council|board|decision|vote|approv|zoning|ordinance/i, GavelIcon],
+  [/meeting|schedule|timeline|date|event/i, CalendarIcon],
+  [/park|river|environment|preserve|sanctuary|water|green/i, LeafIcon],
+];
+
+function headingIcon(children: ReactNode): ComponentType<{ size?: number }> {
+  const text = flattenText(children);
+  return HEADING_ICONS.find(([re]) => re.test(text))?.[1] ?? RecordsIcon;
+}
+
+function flattenText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(flattenText).join("");
+  return "";
+}
+
+/** A bolded fact that is only a date, a percentage, or a dollar amount
+ * renders as a highlight pill ("Dec 2026", "80% built out", "$4.2 million"). */
+const PILL_PATTERNS = [
+  /\d{4}-\d{2}(?:-\d{2})?/,
+  /(?:early |mid-|late )?(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?|Spring|Summer|Fall|Autumn|Winter|Q[1-4])(?: \d{1,2},?)? \d{4}/,
+  /\d{1,3}(?:\.\d+)?% ?[a-z -]{0,20}/,
+  /\$[\d,.]+(?: ?(?:thousand|million|billion|[KMB]))?/,
+];
+const PILL_RE = new RegExp(`^(?:${PILL_PATTERNS.map((re) => re.source).join("|")})$`, "i");
 
 /** react-markdown (no rehype-raw plugin) never interprets embedded HTML —
  * it parses markdown into an AST and renders each node as a real React
@@ -45,6 +89,13 @@ function Markdown({ text, recordIds }: { text: string; recordIds: string[] }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
+        h1: SectionHeading,
+        h2: SectionHeading,
+        h3: SectionHeading,
+        h4: SectionHeading,
+        strong: ({ children }) => (
+          <strong className={PILL_RE.test(flattenText(children).trim()) ? "answer-pill" : undefined}>{children}</strong>
+        ),
         a: ({ href, children, ...props }) => {
           if (href?.startsWith("#record-")) {
             return (
@@ -67,6 +118,18 @@ function Markdown({ text, recordIds }: { text: string; recordIds: string[] }) {
     >
       {linked}
     </ReactMarkdown>
+  );
+}
+
+function SectionHeading({ children }: { children?: ReactNode }) {
+  const Icon = headingIcon(children);
+  return (
+    <h3 className="answer-section-head">
+      <span className="answer-section-icon" aria-hidden="true">
+        <Icon size={18} />
+      </span>
+      {children}
+    </h3>
   );
 }
 
@@ -117,7 +180,9 @@ export default function Message({
   return (
     <div className="msg-row">
       <div className="msg-bot">
-        <div className="bot-avatar">🏛</div>
+        <div className="bot-avatar" aria-hidden="true">
+          <EngageMarkIcon size={22} />
+        </div>
         <div className="bubble">
           {showTyping && <TypingIndicator />}
           {finished && sourceType === "general" && (
@@ -132,7 +197,11 @@ export default function Message({
             <div className="prose prose-reveal">
               {bottomLine && (
                 <div className="answer-bottom-line">
-                  <Markdown text={bottomLine} recordIds={usedRecordIds} />
+                  <InfoIcon size={22} className="answer-bottom-line-icon" />
+                  <div>
+                    <div className="answer-bottom-line-title">Executive Summary</div>
+                    <Markdown text={bottomLine} recordIds={usedRecordIds} />
+                  </div>
                 </div>
               )}
               {rest && <Markdown text={rest} recordIds={usedRecordIds} />}

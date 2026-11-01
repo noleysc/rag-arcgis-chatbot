@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import PromptHelpDialog from "../PromptHelp/PromptHelpDialog";
+import { SparklesIcon } from "../Icons/Icons";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -48,7 +49,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           aria-label="Help me ask a question"
           disabled={disabled}
         >
-          ?
+          <SparklesIcon size={20} />
         </button>
         <label htmlFor="question" className="sr-only">
           Ask a question

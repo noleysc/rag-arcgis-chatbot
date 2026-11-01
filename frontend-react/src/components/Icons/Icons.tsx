@@ -143,6 +143,48 @@ export const SendIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const InfoIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5.5M12 7.5h.01" />
+  </Icon>
+);
+
+export const GavelIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m14.5 3.5 6 6M12 6l6 6M10.5 7.5l6 6M13.5 10.5 5 19a1.4 1.4 0 0 1-2-2l8.5-8.5" />
+    <path d="M13 20.5h8" />
+  </Icon>
+);
+
+export const RoadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 3 5 21M15 3l4 18M12 4v2.5M12 10.5v3M12 17.5V20" />
+  </Icon>
+);
+
+export const BuildingIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 21V5.5A1.5 1.5 0 0 1 5.5 4h7A1.5 1.5 0 0 1 14 5.5V21M14 10h4.5a1.5 1.5 0 0 1 1.5 1.5V21M2.5 21h19" />
+    <path d="M7.5 8h3M7.5 12h3M7.5 16h3M16.5 14h.01M16.5 17.5h.01" />
+  </Icon>
+);
+
+export const LeafIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15" />
+    <path d="M5 19c3-4 6-6.5 9.5-8.5" />
+  </Icon>
+);
+
+/** The Engage Estero hexagon mark (white on the navy bot avatar). */
+export const EngageMarkIcon = (p: IconProps) => (
+  <Icon strokeWidth={2} {...p}>
+    <path d="M13 3.5H6.2L2.5 9.5l3.7 6H10M2.5 9.5H8" />
+    <path d="M11 8.5h6.8l3.7 6-3.7 6H14M21.5 14.5H16" />
+  </Icon>
+);
+
 /** A document glyph with a "PDF" label, for minutes downloads. */
 export const PdfIcon = ({ size = 28, ...rest }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 28 28" aria-hidden="true" focusable="false" {...rest}>

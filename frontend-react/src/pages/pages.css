@@ -760,40 +760,74 @@
   padding: 20px;
 }
 .ask-suggest h2 {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--navy);
 }
+.ask-suggest-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--green-light);
+  color: var(--green);
+}
 .suggest-group h3 {
-  margin: 20px 0 8px;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 10px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--navy);
+}
+.suggest-group h3 svg {
+  color: var(--info);
+  flex-shrink: 0;
 }
 .suggest-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .suggest-btn {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   text-align: left;
   border: 1px solid var(--border);
-  background: var(--bg);
-  border-radius: 8px;
-  padding: 9px 12px;
-  font-size: 13px;
+  background: var(--white);
+  border-radius: 10px;
+  padding: 11px 12px 11px 14px;
+  font-size: 14px;
   line-height: 1.4;
   color: var(--text);
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 39, 68, 0.05);
   transition:
     border-color 0.15s,
     background 0.15s;
 }
+.suggest-btn svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
 .suggest-btn:hover:not(:disabled) {
   border-color: var(--green);
   background: var(--green-light);
+}
+.suggest-btn.is-active {
+  border-color: var(--info-border);
+  background: var(--info-light);
 }
 .suggest-btn:disabled {
   opacity: 0.55;
@@ -801,7 +835,8 @@
 }
 .ask-suggest-foot {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 20px;
+  text-align: center;
 }
 .ask-clear {
   display: inline-flex;
@@ -809,9 +844,9 @@
   gap: 8px;
   border: 1px solid var(--border);
   background: var(--white);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--navy);
   cursor: pointer;
