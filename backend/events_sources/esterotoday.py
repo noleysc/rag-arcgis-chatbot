@@ -7,6 +7,7 @@ from datetime import date
 from typing import Any
 
 import requests
+from requests.exceptions import SSLError
 
 from events_sources.normalize import load_event_config, make_event, map_category
 
@@ -20,6 +21,36 @@ _HEADERS = {
         "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
     )
 }
+
+
+def _get(url: str, *, params: dict[str, Any]) -> requests.Response:
+    """GET with TLS verify first; soft-fallback if esterotoday omits intermediates.
+
+    As of the Oct 2026 cert renewal, esterotoday.com often serves leaf-only
+    (missing Sectigo Public Server Authentication CA DV R36), which breaks
+    default Python/certifi verification. Prefer verify=True; on SSLError only,
+    retry once with verify=False so Pulse still gets Village/community events.
+    """
+    try:
+        return requests.get(
+            url,
+            params=params,
+            headers=_HEADERS,
+            timeout=REQUEST_TIMEOUT,
+            verify=True,
+        )
+    except SSLError as exc:
+        logger.warning(
+            "esterotoday TLS verify failed (%s); retrying once without verify",
+            exc,
+        )
+        return requests.get(
+            url,
+            params=params,
+            headers=_HEADERS,
+            timeout=REQUEST_TIMEOUT,
+            verify=False,
+        )
 
 
 def _to_iso(dt_str: str) -> str:
@@ -59,23 +90,20 @@ def fetch_esterotoday_events() -> list[dict[str, Any]]:
 
     raw_by_id: dict[Any, dict] = {}
     if mode == "all":
-        resp = requests.get(
-            EVENTS_API,
-            params={"start_date": today, "per_page": per_page},
-            headers=_HEADERS,
-            timeout=REQUEST_TIMEOUT,
-        )
+        resp = _get(EVENTS_API, params={"start_date": today, "per_page": per_page})
         resp.raise_for_status()
         for ev in resp.json().get("events", []):
             raw_by_id.setdefault(ev["id"], ev)
     else:
         slugs = list((config.get("esterotoday_slug_map") or {}).keys())
         for slug in slugs:
-            resp = requests.get(
+            resp = _get(
                 EVENTS_API,
-                params={"categories": slug, "start_date": today, "per_page": min(per_page, 20)},
-                headers=_HEADERS,
-                timeout=REQUEST_TIMEOUT,
+                params={
+                    "categories": slug,
+                    "start_date": today,
+                    "per_page": min(per_page, 20),
+                },
             )
             resp.raise_for_status()
             for ev in resp.json().get("events", []):

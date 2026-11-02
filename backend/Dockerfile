@@ -42,6 +42,9 @@ COPY backend/ .
 COPY agent-sync /app/agent-sync
 COPY tools/engage-estero-mcp /app/tools/engage-estero-mcp
 COPY --from=frontend-build /web/dist /app/frontend
+# Bake Pulse manual seeds where events_sources.manual looks in-container
+# (/app/backend/data/ops/…), in case the Vite dist path is ever missing.
+COPY frontend-react/public/community-events.json /app/backend/data/ops/community-events.json
 
 # Pre-download models and bake FAISS + BM25 index for fast Cloud Run cold starts.
 # get_reranker() also bakes the validated ONNX export (backend/onnx_reranker/).
