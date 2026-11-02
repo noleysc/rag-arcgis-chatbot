@@ -1,7 +1,7 @@
 {
   "project": "rag-arcgis-chatbot",
   "product": "Ask Engage Estero",
-  "updated_at": "2026-11-01T23:50:00Z",
+  "updated_at": "2026-11-02T05:40:00Z",
   "updated_by": "cloud-agent",
   "team": {
     "nolan": {
@@ -17,9 +17,11 @@
       "role": "frontend Pulse / React UI"
     }
   },
-  "active_focus": "Community events seed refresh (Farmers Market through Mar 2027); VPS health",
+  "active_focus": "AI Day prod QA: restore manual Farmers Market + EsteroToday events on /api/events",
   "priorities": [
-    "Merge community-events.json refresh so Farmers Market returns on Pulse/chat and CI is green",
+    "Merge Docker path + EsteroToday TLS fallback so Pulse shows Markets and Village events again",
+    "After deploy: verify /api/events has source=manual and source=esterotoday",
+    "Ask EsteroToday host to fix incomplete Sectigo TLS chain (leaf-only since Oct 2026 renewal)",
     "Merge discover.py fix so pipeline-refresh ingests Jul/Sep 2026 council minutes + missing Jan–Jun 2026 PDFs",
     "Production is https://tracker.esterotoday.com/ only (Cloud Run rag-arcgis-chatbot deleted; Pages unused)",
     "Keep health-watch.yml green; follow deploy/vps/SECURITY.md on the box",

@@ -12,9 +12,13 @@ from events_sources.normalize import make_event, map_category
 logger = logging.getLogger(__name__)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+# Order matters: prefer the Vite-served seed in Docker (/app/frontend/…), then
+# the repo public/ path for local dev, then the ops copy baked into the image.
 _CANDIDATES = [
+    _REPO_ROOT / "frontend" / "community-events.json",
     _REPO_ROOT / "frontend-react" / "public" / "community-events.json",
-    Path(__file__).resolve().parent.parent / "data" / "ops" / "community-events.json",
+    _BACKEND_ROOT / "data" / "ops" / "community-events.json",
 ]
 
 

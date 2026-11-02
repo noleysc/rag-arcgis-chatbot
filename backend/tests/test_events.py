@@ -1,7 +1,9 @@
 """Unit tests for community events normalize / chat intent (no live network)."""
 from __future__ import annotations
 
+import json
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -396,6 +398,117 @@ def test_manual_events_load_from_public_json(tmp_path, monkeypatch):
     assert any("Farmers Market" in e["title"] for e in events)
     assert all(e["start"][:10] >= today.isoformat() for e in events)
     assert events[0]["start"][:10] == upcoming
+
+
+def test_manual_candidates_include_docker_and_dev_paths():
+    """VPS image serves Vite dist at /app/frontend; local uses frontend-react/public."""
+    from events_sources import manual
+
+    endings = [p.as_posix().replace("\\", "/") for p in manual._CANDIDATES]
+    assert any(p.endswith("frontend/community-events.json") for p in endings)
+    assert any(p.endswith("frontend-react/public/community-events.json") for p in endings)
+    assert any(p.endswith("data/ops/community-events.json") for p in endings)
+
+
+def test_manual_events_load_from_docker_dist_layout(tmp_path, monkeypatch):
+    """Simulate the production container layout: seed under <repo>/frontend/."""
+    from events_sources import manual
+
+    today = date.today()
+    upcoming = (today + timedelta(days=3)).isoformat()
+    dist_dir = tmp_path / "frontend"
+    dist_dir.mkdir()
+    seed_path = dist_dir / "community-events.json"
+    seed_path.write_text(
+        json.dumps(
+            {
+                "events": [
+                    {
+                        "id": f"coconut-point-farmers-market-{upcoming}",
+                        "title": "Coconut Point Farmers Market",
+                        "start": f"{upcoming}T09:00:00",
+                        "end": f"{upcoming}T13:00:00",
+                        "allDay": False,
+                        "venue": "Coconut Point Mall",
+                        "url": "https://example.com/market",
+                        "category": "market",
+                        "location": "estero",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        manual,
+        "_CANDIDATES",
+        [
+            tmp_path / "frontend" / "community-events.json",
+            tmp_path / "frontend-react" / "public" / "community-events.json",
+            tmp_path / "backend" / "data" / "ops" / "community-events.json",
+        ],
+    )
+    events = manual.fetch_manual_events()
+    assert len(events) == 1
+    assert events[0]["category"] == "market"
+    assert "Farmers Market" in events[0]["title"]
+
+
+def test_esterotoday_get_retries_without_verify_on_ssl_error(monkeypatch):
+    """Incomplete esterotoday.com chain must not wipe the whole EsteroToday source."""
+    from requests.exceptions import SSLError
+
+    from events_sources import esterotoday
+
+    calls: list[bool | None] = []
+
+    class _Resp:
+        status_code = 200
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "events": [
+                    {
+                        "id": 1,
+                        "title": "Council Meeting",
+                        "start_date": "2026-11-18 08:00:00",
+                        "end_date": "2026-11-18 12:00:00",
+                        "all_day": False,
+                        "url": "https://esterotoday.com/event/council/",
+                        "venue": {"venue": "Village Hall"},
+                        "categories": [{"slug": "village-of-estero-event"}],
+                    }
+                ]
+            }
+
+    def fake_get(url, params=None, headers=None, timeout=None, verify=True):
+        calls.append(verify)
+        if verify is True:
+            raise SSLError("unable to get local issuer certificate")
+        return _Resp()
+
+    monkeypatch.setattr(esterotoday.requests, "get", fake_get)
+    monkeypatch.setattr(
+        esterotoday,
+        "load_event_config",
+        lambda: {"esterotoday_per_page": 10, "esterotoday_fetch_mode": "all"},
+    )
+
+    class _FreezeDate(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 11, 2)
+
+    monkeypatch.setattr(esterotoday, "date", _FreezeDate)
+
+    events = esterotoday.fetch_esterotoday_events()
+    assert calls == [True, False]
+    assert len(events) == 1
+    assert events[0]["category"] == "government"
+    assert "Council" in events[0]["title"]
 
 
 def test_aggregate_merges_lee_and_vfm(monkeypatch):
