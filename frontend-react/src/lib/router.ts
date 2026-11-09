@@ -3,12 +3,13 @@ import { useSyncExternalStore } from "react";
 // Hash routes (#/map) rather than real paths: production serves the built SPA
 // through FastAPI's StaticFiles (backend/app.py), which has no index.html
 // fallback, so a refresh on /map would 404. Hash routes need no server help.
-export type Route = "home" | "map" | "ask" | "records" | "meetings" | "pulse";
+export type Route = "home" | "map" | "ask" | "projects" | "records" | "meetings" | "pulse";
 
 const SLUGS: Record<Route, string> = {
   home: "",
   map: "map",
   ask: "ask",
+  projects: "projects",
   records: "records",
   meetings: "meetings",
   pulse: "pulse",
@@ -18,6 +19,7 @@ export const ROUTE_LABELS: Record<Route, string> = {
   home: "Home",
   map: "Explore Map",
   ask: "Ask a Question",
+  projects: "Projects",
   records: "Board Records",
   meetings: "Meetings",
   pulse: "Community Pulse",

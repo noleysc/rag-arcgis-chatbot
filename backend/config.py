@@ -163,6 +163,10 @@ REPORTS_FILE = os.getenv(
     "REPORTS_FILE",
     os.path.join(DATA_DIR, "ops", "reports.json"),
 )
+NEARBY_SUBSCRIPTIONS_FILE = os.getenv(
+    "NEARBY_SUBSCRIPTIONS_FILE",
+    os.path.join(DATA_DIR, "ops", "nearby_subscriptions.json"),
+)
 
 # Public endpoint rate limits (in-memory, per process). Device = X-Device-Id.
 ENABLE_RATE_LIMIT = os.getenv("ENABLE_RATE_LIMIT", "true").lower() not in {"0", "false", "no"}

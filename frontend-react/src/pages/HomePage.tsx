@@ -13,6 +13,7 @@ import {
   ExternalIcon,
   MapIcon,
   MapPinIcon,
+  ProjectsIcon,
   RecordsIcon,
   SparklesIcon,
 } from "../components/Icons/Icons";
@@ -32,31 +33,31 @@ const ACTIONS: Array<{
   Icon: ComponentType<{ size?: number }>;
 }> = [
   {
+    route: "projects",
+    title: "Track developments",
+    text: "Browse projects, recent board actions, and alerts near your home.",
+    tone: "green",
+    Icon: ProjectsIcon,
+  },
+  {
     route: "ask",
     title: "Ask about Estero",
     text: "Search projects, votes, locations, and meeting records.",
-    tone: "green",
+    tone: "blue",
     Icon: ChatIcon,
   },
   {
     route: "map",
     title: "Explore the map",
     text: "View project locations and linked board records.",
-    tone: "blue",
+    tone: "amber",
     Icon: MapIcon,
   },
   {
-    route: "meetings",
-    title: "Meeting activity",
-    text: "Find upcoming meetings and recent meeting minutes.",
-    tone: "amber",
-    Icon: CalendarIcon,
-  },
-  {
-    route: "records",
-    query: "?tab=decisions",
-    title: "Recent decisions",
-    text: "See the latest board actions and open the original minutes.",
+    route: "projects",
+    query: "?tab=recent",
+    title: "What's happening",
+    text: "See the latest land-use actions from Village boards.",
     tone: "purple",
     Icon: RecordsIcon,
   },
@@ -126,7 +127,7 @@ export default function HomePage({ onAsk }: HomePageProps) {
 
         <ul className="home-actions">
           {ACTIONS.map(({ route, query, title, text, tone, Icon }) => (
-            <li key={route}>
+            <li key={`${route}:${query || ""}:${title}`}>
               <a className={`card action-card tone-${tone}`} href={routeHref(route) + (query || "")}>
                 <span className="action-watermark">
                   <Icon size={92} />

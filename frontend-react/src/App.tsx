@@ -6,6 +6,7 @@ import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
 import HomePage from "./pages/HomePage";
 import AskPage from "./pages/AskPage";
 import MapPage from "./pages/MapPage";
+import ProjectsPage from "./pages/ProjectsPage";
 import RecordsPage from "./pages/RecordsPage";
 import MeetingsPage from "./pages/MeetingsPage";
 import PulsePage from "./pages/PulsePage";
@@ -80,6 +81,8 @@ export default function App() {
         return <HomePage onAsk={ask} />;
       case "ask":
         return <AskPage messages={messages} onSend={send} busy={busy} onReport={openReport} onNewChat={newChat} />;
+      case "projects":
+        return <ProjectsPage onAsk={ask} />;
       case "records":
         return <RecordsPage onAsk={ask} />;
       case "meetings":

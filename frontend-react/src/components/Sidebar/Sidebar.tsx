@@ -3,13 +3,23 @@ import type { ComponentType } from "react";
 import logo from "../../assets/engage-estero-logo-light.png";
 import villageEmblem from "../../assets/village-emblem.png";
 import { ROUTE_LABELS, routeHref, type Route } from "../../lib/router";
-import { CalendarIcon, ChatIcon, CloseIcon, HomeIcon, MapPinIcon, PulseIcon, RecordsIcon } from "../Icons/Icons";
+import {
+  CalendarIcon,
+  ChatIcon,
+  CloseIcon,
+  HomeIcon,
+  MapPinIcon,
+  ProjectsIcon,
+  PulseIcon,
+  RecordsIcon,
+} from "../Icons/Icons";
 import SunsetArt from "./SunsetArt";
 
 const NAV_ITEMS: Array<{ route: Route; Icon: ComponentType<{ size?: number }> }> = [
   { route: "home", Icon: HomeIcon },
   { route: "map", Icon: MapPinIcon },
   { route: "ask", Icon: ChatIcon },
+  { route: "projects", Icon: ProjectsIcon },
   { route: "meetings", Icon: CalendarIcon },
   { route: "records", Icon: RecordsIcon },
   { route: "pulse", Icon: PulseIcon },

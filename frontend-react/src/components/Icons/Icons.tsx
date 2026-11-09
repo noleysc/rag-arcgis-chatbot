@@ -60,6 +60,14 @@ export const RecordsIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const ProjectsIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 20V9.5L12 4l8 5.5V20" />
+    <path d="M9 20v-6h6v6" />
+    <path d="M4 20h16" />
+  </Icon>
+);
+
 export const CalendarIcon = (p: IconProps) => (
   <Icon {...p}>
     <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
