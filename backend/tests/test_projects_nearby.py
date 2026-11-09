@@ -184,3 +184,70 @@ def test_haversine_and_email_helpers():
     assert haversine_miles(26.44, -81.81, 26.45, -81.81) < 1.0
     assert is_plausible_email("a@b.co")
     assert not is_plausible_email("nope")
+
+
+def test_tracker_home_snapshot(client):
+    res = client.get("/api/tracker/home", params={"review_limit": 3, "recent_limit": 3})
+    assert res.status_code == 200
+    body = res.json()
+    assert "under_review" in body and "recently_decided" in body
+    assert body["totals"]["projects"] > 0
+    assert len(body["recently_decided"]) <= 3
+
+
+def test_project_detail_includes_related_and_resolves_application_id(client):
+    listed = client.get("/api/projects", params={"limit": 20}).json()
+    with_app = next((p for p in listed["projects"] if p.get("application_id")), None)
+    assert with_app
+    by_app = client.get(f"/api/projects/{with_app['application_id']}")
+    assert by_app.status_code == 200
+    assert by_app.json()["project_id"] == with_app["project_id"]
+    detail = client.get(f"/api/projects/{with_app['project_id']}").json()
+    assert "related" in detail
+    assert "parcel_id" in detail or detail.get("parcel_id") is None
+
+
+def test_digest_dry_run(client, monkeypatch):
+    import nearby_subscriptions
+
+    monkeypatch.setattr(
+        nearby_subscriptions,
+        "preview_nearby",
+        lambda **kwargs: {
+            "ok": True,
+            "error": None,
+            "geocode": {
+                "lat": 26.44,
+                "lng": -81.81,
+                "display_name": "123 Main St, Estero, FL",
+                "source": "test",
+                "confidence": 1.0,
+            },
+            "radius_miles": 3.0,
+            "projects": [],
+            "activity": [],
+        },
+    )
+    created = client.post(
+        "/api/nearby/subscribe",
+        json={"email": "digest@example.com", "address": "123 Main St, Estero, FL", "radius_miles": 3},
+    ).json()
+    sub_id = created["subscription"]["id"]
+
+    # Pretend they subscribed long ago so historical activity qualifies.
+    with nearby_subscriptions._lock:
+        rows = nearby_subscriptions._read_all()
+        for row in rows:
+            if row["id"] == sub_id:
+                row["created_at"] = "2020-01-01T00:00:00+00:00"
+                row["last_sent_at"] = "2020-01-01T00:00:00+00:00"
+        nearby_subscriptions._write_all(rows)
+
+    dry = client.post(
+        "/admin/nearby-digests/run?dry_run=true",
+        headers={"Authorization": "Bearer test-admin-key"},
+    )
+    assert dry.status_code == 200
+    body = dry.json()
+    assert body["dry_run"] is True
+    assert body["sent"] + body["skipped"] >= 1

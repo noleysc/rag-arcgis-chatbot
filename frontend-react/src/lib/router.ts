@@ -22,7 +22,7 @@ export const ROUTE_LABELS: Record<Route, string> = {
   projects: "Projects",
   records: "Board Records",
   meetings: "Meetings",
-  pulse: "Community Pulse",
+  pulse: "Events",
 };
 
 export function routeHref(route: Route): string {

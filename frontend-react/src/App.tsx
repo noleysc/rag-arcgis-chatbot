@@ -18,7 +18,7 @@ import "./App.css";
 import "./pages/pages.css";
 import "./theme-dark.css";
 
-const BASE_TITLE = "Engage Estero — Planning & Zoning Records";
+const BASE_TITLE = "Engage Estero — Development Tracker";
 
 export default function App() {
   const route = useRoute();

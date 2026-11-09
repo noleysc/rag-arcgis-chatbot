@@ -15,8 +15,17 @@ export interface ProjectSummary {
   documentUrl: string | null;
   lat: number | null;
   lng: number | null;
+  parcelId: string | null;
   itemCount: number;
   distanceMiles?: number | null;
+}
+
+export interface RelatedProject {
+  projectId: string;
+  name: string;
+  status: string | null;
+  lastDate: string | null;
+  location: string | null;
 }
 
 export interface ProjectTimelineEntry {
@@ -31,6 +40,7 @@ export interface ProjectTimelineEntry {
 
 export interface ProjectDetail extends ProjectSummary {
   timeline: ProjectTimelineEntry[];
+  related: RelatedProject[];
 }
 
 export interface ActivityItem {
@@ -77,6 +87,7 @@ interface ApiProject {
   document_url: string | null;
   lat: number | null;
   lng: number | null;
+  parcel_id?: string | null;
   item_count: number;
   distance_miles?: number | null;
   timeline?: Array<{
@@ -87,6 +98,13 @@ interface ApiProject {
     application_id: string | null;
     document_url: string | null;
     record_id: string;
+  }>;
+  related?: Array<{
+    project_id: string;
+    name: string;
+    status: string | null;
+    last_date: string | null;
+    location: string | null;
   }>;
 }
 
@@ -106,6 +124,7 @@ function mapProject(p: ApiProject): ProjectSummary {
     documentUrl: p.document_url,
     lat: p.lat,
     lng: p.lng,
+    parcelId: p.parcel_id ?? null,
     itemCount: p.item_count,
     distanceMiles: p.distance_miles ?? null,
   };
@@ -176,6 +195,40 @@ export async function fetchProject(projectId: string): Promise<ProjectDetail> {
       documentUrl: t.document_url,
       recordId: t.record_id,
     })),
+    related: (data.related || []).map((r) => ({
+      projectId: r.project_id,
+      name: r.name,
+      status: r.status,
+      lastDate: r.last_date,
+      location: r.location,
+    })),
+  };
+}
+
+export async function fetchTrackerHome(limits?: {
+  reviewLimit?: number;
+  recentLimit?: number;
+}): Promise<{
+  underReview: ProjectSummary[];
+  recentlyDecided: ProjectSummary[];
+  totals: { underReview: number; recentlyDecided: number; projects: number };
+}> {
+  const qs = new URLSearchParams();
+  qs.set("review_limit", String(limits?.reviewLimit ?? 6));
+  qs.set("recent_limit", String(limits?.recentLimit ?? 6));
+  const data = await getJson<{
+    under_review: ApiProject[];
+    recently_decided: ApiProject[];
+    totals: { under_review: number; recently_decided: number; projects: number };
+  }>(`/api/tracker/home?${qs}`);
+  return {
+    underReview: data.under_review.map(mapProject),
+    recentlyDecided: data.recently_decided.map(mapProject),
+    totals: {
+      underReview: data.totals.under_review,
+      recentlyDecided: data.totals.recently_decided,
+      projects: data.totals.projects,
+    },
   };
 }
 

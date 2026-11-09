@@ -48,11 +48,12 @@ from nearby_subscriptions import (
     create_subscription,
     list_subscriptions,
     preview_nearby,
+    run_nearby_digests,
     subscription_counts,
     unsubscribe as unsubscribe_nearby,
 )
 from orchestrator import answer_question, stream_answer
-from projects_service import get_project, list_projects, recent_activity
+from projects_service import get_project, list_projects, recent_activity, tracker_home_snapshot
 from rate_limit import enforce_rate_limit
 from reports import create_report, list_reports, report_counts, update_report
 from schema_aliases import row_value
@@ -353,6 +354,18 @@ def api_recent_activity(
         raise HTTPException(500, "Could not load recent activity") from e
 
 
+@app.get("/api/tracker/home")
+def api_tracker_home(review_limit: int = 6, recent_limit: int = 6):
+    """Home-page tracker slices: under review + recently decided."""
+    try:
+        return tracker_home_snapshot(review_limit=review_limit, recent_limit=recent_limit)
+    except FileNotFoundError as e:
+        raise HTTPException(503, "Project data not loaded yet.") from e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not load tracker home") from e
+
+
 @app.post("/api/nearby/preview")
 def api_nearby_preview(payload: NearbyPreviewRequest, _: None = Depends(enforce_rate_limit("public_write"))):
     """Geocode an address (or use lat/lng) and list nearby projects."""
@@ -403,6 +416,16 @@ def api_nearby_unsubscribe(payload: NearbyUnsubscribeRequest, _: None = Depends(
 @app.get("/admin/nearby-subscriptions")
 def admin_nearby_subscriptions(_: None = Depends(require_admin)):
     return {"subscriptions": list_subscriptions(active_only=False), "counts": subscription_counts()}
+
+
+@app.post("/admin/nearby-digests/run")
+def admin_run_nearby_digests(dry_run: bool = False, _: None = Depends(require_admin)):
+    """Send (or dry-run) nearby development digests for active subscriptions."""
+    try:
+        return run_nearby_digests(dry_run=dry_run)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Digest run failed") from e
 
 
 @app.get("/admin")

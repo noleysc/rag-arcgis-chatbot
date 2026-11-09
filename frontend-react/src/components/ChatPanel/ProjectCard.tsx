@@ -1,7 +1,7 @@
 import type { NormalizedCard } from "../../types";
 import { statusClass, statusEmoji } from "../../lib/parseAnswer";
 import { openDirections, panToCoords } from "../../lib/mapViewStore";
-import { navigate } from "../../lib/router";
+import { navigate, routeHref } from "../../lib/router";
 import { recordDomId } from "../../lib/recordScroll";
 import type { ReportPrefill } from "../ReportDialog/ReportDialog";
 
@@ -14,11 +14,16 @@ export default function ProjectCard({ card, onReport }: ProjectCardProps) {
   const meta = [card.id, card.location].filter(Boolean).join(" · ");
   const minutesUrl = card.pdfUrl || card.documentUrl;
   const hasCoords = card.lat !== null && card.lng !== null;
+  const dossierKey = card.projectId || card.id;
+  const dossierHref = dossierKey
+    ? `${routeHref("projects")}?tab=browse&id=${encodeURIComponent(dossierKey)}`
+    : null;
 
   const showOnMap = () => {
     if (card.lat === null || card.lng === null) return;
     navigate("map");
-    requestAnimationFrame(() => panToCoords(card.lat!, card.lng!));
+    // Wait a tick so MapPanel is visible and MapView.resize has run.
+    window.setTimeout(() => panToCoords(card.lat!, card.lng!), 120);
   };
 
   return (
@@ -36,6 +41,11 @@ export default function ProjectCard({ card, onReport }: ProjectCardProps) {
         <div className="proj-meta">📅 {card.date}</div>
       ) : null}
       <div className="proj-actions">
+        {dossierHref && (
+          <a className="btn-minutes" href={dossierHref}>
+            📁 Project details
+          </a>
+        )}
         {minutesUrl && (
           <a
             className="btn-minutes"

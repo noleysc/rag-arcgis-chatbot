@@ -1,13 +1,14 @@
 """Persist nearby development-alert subscriptions (email + address).
 
-Email delivery is out of band for now — this store is the opt-in inbox a
-cron/digest can read later. Subscribe responses still return a live nearby
-preview so the UI is useful immediately.
+Subscribe responses return a live nearby preview. Digests are sent by
+``run_nearby_digests`` / ``backend/scripts/send_nearby_digests.py`` when SMTP
+is configured.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import secrets
 import threading
@@ -16,8 +17,11 @@ from datetime import datetime, timezone
 from typing import Any
 
 from config import NEARBY_SUBSCRIPTIONS_FILE
+from email_digest import compose_nearby_digest, send_email, smtp_configured
 from geocode import geocode_address
 from projects_service import is_plausible_email, nearby_projects, recent_activity
+
+logger = logging.getLogger(__name__)
 
 SUBSCRIPTIONS_FILE = NEARBY_SUBSCRIPTIONS_FILE
 
@@ -76,6 +80,7 @@ def _public_row(row: dict[str, Any]) -> dict[str, Any]:
         "radius_miles": row["radius_miles"],
         "status": row.get("status", "active"),
         "unsubscribe_token": row["unsubscribe_token"],
+        "last_sent_at": row.get("last_sent_at"),
     }
 
 
@@ -181,6 +186,8 @@ def create_subscription(
             if existing.get("email") == email_clean and existing.get("status") == "active":
                 row["id"] = existing.get("id") or row["id"]
                 row["created_at"] = existing.get("created_at") or row["created_at"]
+                row["last_sent_at"] = existing.get("last_sent_at")
+                row["unsubscribe_token"] = existing.get("unsubscribe_token") or row["unsubscribe_token"]
                 rows[i] = row
                 replaced = True
                 break
@@ -196,6 +203,82 @@ def create_subscription(
             "You're subscribed to nearby development alerts for this address. "
             "We'll email updates when new board activity is recorded nearby."
         ),
+    }
+
+
+def activity_since(row: dict[str, Any], *, lookback_days: int = 400) -> list[dict[str, Any]]:
+    """Board activity inside the subscription radius newer than last_sent_at."""
+    since = (row.get("last_sent_at") or row.get("created_at") or "")[:10]
+    activity = recent_activity(
+        days=lookback_days,
+        limit=50,
+        lat=float(row["lat"]),
+        lng=float(row["lng"]),
+        radius_miles=float(row.get("radius_miles") or DEFAULT_RADIUS_MILES),
+    )["activity"]
+    if not since:
+        return activity
+    return [a for a in activity if (a.get("date") or "") > since]
+
+
+def mark_digest_sent(subscription_id: str, *, sent_at: str | None = None) -> None:
+    stamp = sent_at or _utc_now()
+    with _lock:
+        rows = _read_all()
+        for i, row in enumerate(rows):
+            if row.get("id") == subscription_id:
+                row["last_sent_at"] = stamp
+                rows[i] = row
+                _write_all(rows)
+                return
+    raise KeyError(subscription_id)
+
+
+def run_nearby_digests(*, dry_run: bool = False, lookback_days: int = 400) -> dict[str, Any]:
+    """Send digests for every active subscription with new nearby activity."""
+    with _lock:
+        rows = [r for r in _read_all() if r.get("status") == "active"]
+
+    sent = 0
+    skipped = 0
+    errors: list[str] = []
+    for row in rows:
+        try:
+            activity = activity_since(row, lookback_days=lookback_days)
+            if not activity:
+                skipped += 1
+                continue
+            subject, text, html = compose_nearby_digest(
+                display_name=row.get("display_name") or row.get("address") or "your address",
+                radius_miles=float(row.get("radius_miles") or DEFAULT_RADIUS_MILES),
+                activity=activity,
+                unsubscribe_token=row["unsubscribe_token"],
+            )
+            if dry_run:
+                logger.info(
+                    "dry-run digest to %s (%d items): %s",
+                    row.get("email"),
+                    len(activity),
+                    subject,
+                )
+                sent += 1
+                continue
+            if not smtp_configured():
+                raise RuntimeError("SMTP is not configured")
+            send_email(to=row["email"], subject=subject, text=text, html=html)
+            mark_digest_sent(row["id"])
+            sent += 1
+        except Exception as exc:  # noqa: BLE001 — continue other subscribers
+            logger.exception("Digest failed for %s", row.get("email"))
+            errors.append(f"{row.get('email')}: {exc}")
+
+    return {
+        "sent": sent,
+        "skipped": skipped,
+        "errors": errors,
+        "smtp_configured": smtp_configured(),
+        "dry_run": dry_run,
+        "active_subscriptions": len(rows),
     }
 
 

@@ -31,11 +31,15 @@ Mark each item pass/fail. File thumbs-down feedback and any fail with steps to r
 
 ## 3. Projects tracker
 
+- [ ] Home shows Under review / Recently decided / Near you (not Pulse-first)
 - [ ] `#/projects` loads All projects with status/category filters
-- [ ] Project detail shows timeline + Ask / Show on map when coords exist
+- [ ] Project detail shows category chip, timeline, related corridor projects, Ask / Show on map
+- [ ] Ask project cards link to Project details (`#/projects?id=…`)
+- [ ] Explore Map uses embedded MapView; Show on map pans to the pin
 - [ ] `#/projects?tab=recent` lists recent board actions
 - [ ] Near me: preview an Estero address → nearby projects; subscribe with email succeeds
-- [ ] `GET /api/projects` and `GET /api/activity/recent` → 200
+- [ ] `GET /api/projects`, `/api/activity/recent`, `/api/tracker/home` → 200
+- [ ] Optional: admin `POST /admin/nearby-digests/run?dry_run=true` with SMTP configured later
 
 ## 4. Community Pulse
 

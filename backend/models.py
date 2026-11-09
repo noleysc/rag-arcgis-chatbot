@@ -18,6 +18,9 @@ class RouteKind(str, Enum):
 class ProjectOut(BaseModel):
     title: str = ""
     id: str = ""
+    # Gold ProjectId when the card came from a board row — used to deep-link
+    # Ask cards into #/projects?id=…
+    project_id: str = ""
     location: str = ""
     summary: str = ""
     status: str = "No decision recorded"

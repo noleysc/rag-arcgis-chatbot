@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import PageHeader from "../components/PageHeader/PageHeader";
 import { SkeletonRows } from "../components/Dashboard/Skeleton";
+import LocationThumb from "../components/LocationThumb/LocationThumb";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -10,6 +11,8 @@ import {
   SearchIcon,
 } from "../components/Icons/Icons";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { useParcelOutlines } from "../hooks/useParcelOutlines";
+import { API_BASE } from "../lib/config";
 import { formatShortDate } from "../lib/dates";
 import { statusClass } from "../lib/parseAnswer";
 import { navigate } from "../lib/router";
@@ -112,7 +115,12 @@ export default function ProjectsPage({ onAsk }: ProjectsPageProps) {
 
         <div id="projects-panel" role="tabpanel" aria-labelledby={`projects-tab-${tab}`} className="records-panel">
           {selectedId ? (
-            <ProjectDossier projectId={selectedId} onBack={clearProject} onAsk={onAsk} />
+            <ProjectDossier
+              projectId={selectedId}
+              onBack={clearProject}
+              onAsk={onAsk}
+              onOpen={openProject}
+            />
           ) : tab === "browse" ? (
             <BrowseProjects onOpen={openProject} onAsk={onAsk} />
           ) : tab === "recent" ? (
@@ -435,6 +443,28 @@ function NearbyView({ onOpen }: { onOpen: (id: string) => void }) {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
 
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.hash.split("?")[1] || "").get("unsubscribe");
+    if (!token) return;
+    let cancelled = false;
+    fetch(`${API_BASE}/api/nearby/unsubscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok) setMessage("You're unsubscribed from nearby development alerts.");
+        else setError("Could not unsubscribe — the link may already be used.");
+      })
+      .catch(() => {
+        if (!cancelled) setError("Could not unsubscribe right now.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const runPreview = async (e?: FormEvent) => {
     e?.preventDefault();
     setBusy(true);
@@ -605,10 +635,12 @@ function ProjectDossier({
   projectId,
   onBack,
   onAsk,
+  onOpen,
 }: {
   projectId: string;
   onBack: () => void;
   onAsk: (q: string) => void;
+  onOpen: (id: string) => void;
 }) {
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -639,10 +671,25 @@ function ProjectDossier({
   const showOnMap = () => {
     if (!project?.lat || !project?.lng) return;
     navigate("map");
-    requestAnimationFrame(() => panToCoords(project.lat!, project.lng!));
+    window.setTimeout(() => panToCoords(project.lat!, project.lng!), 120);
   };
 
   const timeline = useMemo(() => project?.timeline ?? [], [project]);
+  const parcelIds = useMemo(
+    () => (project?.parcelId ? [project.parcelId] : []),
+    [project?.parcelId],
+  );
+  const outlines = useParcelOutlines(parcelIds);
+  const mappedLocation =
+    project?.lat != null && project?.lng != null
+      ? {
+          lat: project.lat,
+          lon: project.lng,
+          name: project.location || project.name,
+          parcelId: project.parcelId || "",
+          confidence: 0.7,
+        }
+      : null;
 
   return (
     <div className="project-dossier">
@@ -659,20 +706,36 @@ function ProjectDossier({
       {!loading && project && (
         <>
           <header className="dossier-header">
-            <div>
-              <h2>{project.name}</h2>
-              <p className="project-row-meta">
-                {[
-                  project.applicationId,
-                  project.category,
-                  project.location,
-                  project.itemCount ? `${project.itemCount} board action${project.itemCount === 1 ? "" : "s"}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
+            <div className="dossier-header-main">
+              {mappedLocation && (
+                <div className="dossier-thumb">
+                  <LocationThumb
+                    title={project.name}
+                    category={project.category}
+                    location={mappedLocation}
+                    outline={project.parcelId ? outlines?.get(project.parcelId) : null}
+                  />
+                </div>
+              )}
+              <div>
+                <div className="dossier-chips">
+                  {project.category && <span className="category-chip">{project.category}</span>}
+                  <StatusChip status={project.status} />
+                </div>
+                <h2>{project.name}</h2>
+                <p className="project-row-meta">
+                  {[
+                    project.applicationId,
+                    project.location,
+                    project.itemCount
+                      ? `${project.itemCount} board action${project.itemCount === 1 ? "" : "s"}`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              </div>
             </div>
-            <StatusChip status={project.status} />
           </header>
 
           {project.summary && <p className="dossier-summary">{project.summary}</p>}
@@ -715,6 +778,26 @@ function ProjectDossier({
               </li>
             ))}
           </ol>
+
+          {project.related.length > 0 && (
+            <>
+              <h3 className="nearby-section-title">Related on this corridor</h3>
+              <ul className="related-projects">
+                {project.related.map((r) => (
+                  <li key={r.projectId}>
+                    <button type="button" className="related-project-btn" onClick={() => onOpen(r.projectId)}>
+                      <strong>{r.name}</strong>
+                      <span className="project-row-meta">
+                        {[r.status, r.lastDate ? formatShortDate(r.lastDate) : null, r.location]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </>
       )}
     </div>

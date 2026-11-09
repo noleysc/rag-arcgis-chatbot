@@ -17,9 +17,9 @@ import SunsetArt from "./SunsetArt";
 
 const NAV_ITEMS: Array<{ route: Route; Icon: ComponentType<{ size?: number }> }> = [
   { route: "home", Icon: HomeIcon },
+  { route: "projects", Icon: ProjectsIcon },
   { route: "map", Icon: MapPinIcon },
   { route: "ask", Icon: ChatIcon },
-  { route: "projects", Icon: ProjectsIcon },
   { route: "meetings", Icon: CalendarIcon },
   { route: "records", Icon: RecordsIcon },
   { route: "pulse", Icon: PulseIcon },
