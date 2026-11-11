@@ -43,6 +43,7 @@ export function normalizeProject(p: unknown): NormalizedCard | null {
     location: nullsafe(r.location),
     summary: nullsafe(r.summary),
     id: nullsafe(r.id) || nullsafe(r.application_id),
+    projectId: nullsafe(r.project_id ?? r.projectId),
     status: nullsafe(r.status),
     date: nullsafe(r.date) || nullsafe(r.meeting_date),
     documentUrl: cleanUrl(r.document_url ?? r.documentUrl),

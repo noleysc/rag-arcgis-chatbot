@@ -24,11 +24,11 @@
 }
 
 /* Ask page */
-:root[data-theme="dark"] #messages:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+:root[data-theme="dark"] #messages {
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
 }
-:root[data-theme="dark"] #messages:hover::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.22);
+:root[data-theme="dark"] #messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
 }
 :root[data-theme="dark"] .feedback-btn.selected {
   background: #22344f;

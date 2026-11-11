@@ -1,6 +1,5 @@
 // Legend entries for the Explore Map page, read from the same webmap the
-// Instant App embeds, so the swatches are the exact picture markers drawn on
-// the map. The iframe is cross-origin, so we can't read its legend directly.
+// MapPanel MapView loads, so the swatches match the picture markers on the map.
 const WEBMAP_DATA_URL = "https://www.arcgis.com/sharing/rest/content/items/84a56d2f741d49f5a70c547923fb45d5/data?f=json";
 
 export interface LegendEntry {

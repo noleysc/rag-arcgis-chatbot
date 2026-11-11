@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { NewsPost } from "../types";
 
-const NEWS_URL = "https://esterotoday.com/wp-json/wp/v2/posts?per_page=5&_fields=id,title,link,date,categories";
-
-// Same posts with each one's featured image embedded (~20 KB instead of
-// ~2 KB, so only asked for where the thumbnails show).
-const NEWS_WITH_IMAGES_URL =
-  "https://esterotoday.com/wp-json/wp/v2/posts?per_page=5&_embed=wp:featuredmedia" +
-  "&_fields=id,title,link,date,_links.wp:featuredmedia,_embedded";
+const WP_POSTS = "https://esterotoday.com/wp-json/wp/v2/posts";
 
 interface WpMedia {
   source_url?: string;
@@ -43,12 +37,18 @@ function decodeHtmlEntities(text: string): string {
   return el.value;
 }
 
-/** Fetches the 5 newest EsteroToday posts directly from their public WordPress
- * REST API — confirmed to send permissive CORS headers (reflects Origin), so
- * no backend proxy is needed. If that ever changes, this is the one place to
- * swap the URL for a backend proxy endpoint. `withImages` also fetches
- * each post's featured image. */
-export function useNews(withImages = false): UseNewsResult {
+function newsUrl(perPage: number, withImages: boolean): string {
+  const n = Math.max(1, Math.min(perPage, 20));
+  const fields = withImages
+    ? "id,title,link,date,_links.wp:featuredmedia,_embedded"
+    : "id,title,link,date,categories";
+  const embed = withImages ? "&_embed=wp:featuredmedia" : "";
+  return `${WP_POSTS}?per_page=${n}&_fields=${fields}${embed}`;
+}
+
+/** Fetches the newest EsteroToday posts from their public WordPress REST API
+ * (CORS-friendly). `count` caps how many posts to request (max 20). */
+export function useNews(withImages = false, count = 10): UseNewsResult {
   const [posts, setPosts] = useState<NewsPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export function useNews(withImages = false): UseNewsResult {
     setLoading(true);
     setError(null);
 
-    fetch(withImages ? NEWS_WITH_IMAGES_URL : NEWS_URL)
+    fetch(newsUrl(count, withImages))
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<WpPost[]>;
@@ -88,7 +88,7 @@ export function useNews(withImages = false): UseNewsResult {
     return () => {
       cancelled = true;
     };
-  }, [attempt, withImages]);
+  }, [attempt, withImages, count]);
 
   return { posts, loading, error, retry };
 }

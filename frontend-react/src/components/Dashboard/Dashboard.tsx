@@ -24,7 +24,7 @@ export default function Dashboard({ meetings, meetingsLoading, meetingsError, on
           title="Official Village Meetings"
           variant="feature"
         />
-        <LatestNews variant="feature" limit={3} />
+        <LatestNews variant="feature" limit={10} />
       </div>
     </div>
   );

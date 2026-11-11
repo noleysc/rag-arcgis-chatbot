@@ -36,12 +36,24 @@ from models import (
     ChatRequest,
     ChatResponse,
     FeedbackRequest,
+    NearbyPreviewRequest,
+    NearbySubscribeRequest,
+    NearbyUnsubscribeRequest,
     ReportCreate,
     ReportOut,
     ReportStatusUpdate,
 )
 from events import router as events_router
+from nearby_subscriptions import (
+    create_subscription,
+    list_subscriptions,
+    preview_nearby,
+    run_nearby_digests,
+    subscription_counts,
+    unsubscribe as unsubscribe_nearby,
+)
 from orchestrator import answer_question, stream_answer
+from projects_service import get_project, list_projects, recent_activity, tracker_home_snapshot
 from rate_limit import enforce_rate_limit
 from reports import create_report, list_reports, report_counts, update_report
 from schema_aliases import row_value
@@ -277,6 +289,145 @@ def recent_decisions(limit: int = 5):
     return {"decisions": decisions}
 
 
+@app.get("/api/projects")
+def api_list_projects(
+    q: str = "",
+    status: str = "",
+    category: str = "",
+    sort: str = "recent",
+    offset: int = 0,
+    limit: int = 25,
+):
+    """Browse development projects aggregated from the gold corpus."""
+    try:
+        return list_projects(
+            q=q,
+            status=status,
+            category=category,
+            sort=sort,
+            offset=offset,
+            limit=limit,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(503, "Project data not loaded yet.") from e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not list projects") from e
+
+
+@app.get("/api/projects/{project_id}")
+def api_get_project(project_id: str):
+    """Project dossier: summary + timeline of linked board actions."""
+    try:
+        project = get_project(project_id)
+    except FileNotFoundError as e:
+        raise HTTPException(503, "Project data not loaded yet.") from e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not load project") from e
+    if project is None:
+        raise HTTPException(404, "Project not found")
+    return project
+
+
+@app.get("/api/activity/recent")
+def api_recent_activity(
+    days: int = 180,
+    limit: int = 40,
+    lat: float | None = None,
+    lng: float | None = None,
+    radius_miles: float | None = None,
+):
+    """What's happening recently across development projects."""
+    try:
+        return recent_activity(
+            days=max(1, min(days, 3650)),
+            limit=limit,
+            lat=lat,
+            lng=lng,
+            radius_miles=radius_miles,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(503, "Project data not loaded yet.") from e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not load recent activity") from e
+
+
+@app.get("/api/tracker/home")
+def api_tracker_home(review_limit: int = 6, recent_limit: int = 6):
+    """Home-page tracker slices: under review + recently decided."""
+    try:
+        return tracker_home_snapshot(review_limit=review_limit, recent_limit=recent_limit)
+    except FileNotFoundError as e:
+        raise HTTPException(503, "Project data not loaded yet.") from e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not load tracker home") from e
+
+
+@app.post("/api/nearby/preview")
+def api_nearby_preview(payload: NearbyPreviewRequest, _: None = Depends(enforce_rate_limit("public_write"))):
+    """Geocode an address (or use lat/lng) and list nearby projects."""
+    try:
+        return preview_nearby(
+            address=payload.address,
+            lat=payload.lat,
+            lng=payload.lng,
+            radius_miles=payload.radius_miles,
+            limit=payload.limit,
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Nearby preview failed") from e
+
+
+@app.post("/api/nearby/subscribe")
+def api_nearby_subscribe(payload: NearbySubscribeRequest, _: None = Depends(enforce_rate_limit("public_write"))):
+    """Opt in to nearby development updates for a home address."""
+    try:
+        return create_subscription(
+            email=payload.email,
+            address=payload.address,
+            radius_miles=payload.radius_miles,
+            lat=payload.lat,
+            lng=payload.lng,
+        )
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not save subscription") from e
+
+
+@app.post("/api/nearby/unsubscribe")
+def api_nearby_unsubscribe(payload: NearbyUnsubscribeRequest, _: None = Depends(enforce_rate_limit("public_write"))):
+    try:
+        return unsubscribe_nearby(payload.token)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    except KeyError:
+        raise HTTPException(404, "Subscription not found") from None
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Could not unsubscribe") from e
+
+
+@app.get("/admin/nearby-subscriptions")
+def admin_nearby_subscriptions(_: None = Depends(require_admin)):
+    return {"subscriptions": list_subscriptions(active_only=False), "counts": subscription_counts()}
+
+
+@app.post("/admin/nearby-digests/run")
+def admin_run_nearby_digests(dry_run: bool = False, _: None = Depends(require_admin)):
+    """Send (or dry-run) nearby development digests for active subscriptions."""
+    try:
+        return run_nearby_digests(dry_run=dry_run)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, "Digest run failed") from e
+
+
 @app.get("/admin")
 def admin_redirect():
     return RedirectResponse(url="/admin.html", status_code=307)
@@ -295,6 +446,7 @@ def admin_status(_: None = Depends(require_admin)):
         "reranker_model": RERANKER_MODEL,
         "csv_path": DEFAULT_CSV_PATH,
         "reports": report_counts(),
+        "nearby_subscriptions": subscription_counts(),
     }
 
 

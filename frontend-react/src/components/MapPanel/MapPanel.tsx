@@ -1,25 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type MapView from "@arcgis/core/views/MapView";
+import "@arcgis/core/assets/esri/themes/light/main.css";
 import { setMapView } from "../../lib/mapViewStore";
 import { ExternalIcon, MapIcon, RecordsIcon } from "../Icons/Icons";
 
-// Esri "Nearby" Instant App wrapping webmap 84a56d2f741d49f5a70c547923fb45d5
-// (same webmap this panel used to load directly via the JS SDK). Embedding
-// the hosted app itself — not the raw webmap — was a deliberate choice: it
-// picks up the app's own theme/search config, at the cost of native SDK
-// control. See mapViewStore.ts: every pan/capture/restore call there already
-// no-ops safely when there's no live MapView (setMapView is never called
-// here), so "Show on map" on a chat card still opens this page, it just
-// can't zoom to the specific coordinates inside an opaque cross-origin iframe.
+// Same webmap the Instant App wraps — load it with the JS SDK so Show on map /
+// query pins can drive a live MapView (see docs/MAP_UX_PLAN.md Phase 1).
+const WEBMAP_ID = "84a56d2f741d49f5a70c547923fb45d5";
 const INSTANT_APP_ID = "4bd1bf488ac943d7966af9f3ccd22302";
 const INSTANT_APP_URL = `https://eccl-swfl-safety.maps.arcgis.com/apps/instant/nearby/index.html?appid=${INSTANT_APP_ID}`;
 
-// ArcGIS StoryMap "Where Estero Decides: 10 Years of Village Decisions", the
-// alternate view behind the Map | Story switch. It must stay *published*, not
-// just shared publicly: an unpublished story redirects anonymous visitors to
-// an ArcGIS sign-in page that refuses to render in an iframe. The story sizes
-// itself to the iframe, not the window, and below roughly 1100px it swaps its
-// inline dashboards for link cards — MapPage hides the legend while the story
-// is shown so the iframe gets the full page width.
+// ArcGIS StoryMap "Where Estero Decides: 10 Years of Village Decisions".
 const STORY_MAP_ID = "185eb6332dbf45be8be5213258916b49";
 const STORY_MAP_URL = `https://storymaps.arcgis.com/stories/${STORY_MAP_ID}`;
 
@@ -44,11 +35,11 @@ interface MapPanelProps {
 
 export default function MapPanel({ onViewChange }: MapPanelProps) {
   const [view, setView] = useState<MapPanelView>("map");
-  // The story iframe is only created on first switch (so the default Map view
-  // doesn't pay for loading it), then kept mounted so switching back and forth
-  // doesn't reload it or lose the reader's scroll position.
   const [storyLoaded, setStoryLoaded] = useState(false);
-  const [loadError, setLoadError] = useState<Record<MapPanelView, boolean>>({ map: false, story: false });
+  const [mapError, setMapError] = useState(false);
+  const [storyError, setStoryError] = useState(false);
+  const mapNodeRef = useRef<HTMLDivElement | null>(null);
+  const mapViewRef = useRef<MapView | null>(null);
   const active = VIEWS[view];
 
   const switchView = (next: MapPanelView) => {
@@ -59,10 +50,74 @@ export default function MapPanel({ onViewChange }: MapPanelProps) {
   };
 
   useEffect(() => {
-    // No live MapView to hand out from an iframe — clear any stale reference
-    // so "Show on map" etc. degrade to their already-safe no-op path.
-    setMapView(null);
+    let cancelled = false;
+    let handle: MapView | null = null;
+
+    async function mountMap() {
+      const node = mapNodeRef.current;
+      if (!node) return;
+      try {
+        const [{ default: esriConfig }, { default: WebMap }, { default: MapView }] = await Promise.all([
+          import("@arcgis/core/config.js"),
+          import("@arcgis/core/WebMap.js"),
+          import("@arcgis/core/views/MapView.js"),
+        ]);
+        // Workers / fonts / localization from the published package on the CDN
+        // so Vite builds don't need to copy node_modules assets.
+        esriConfig.assetsPath = "https://cdn.jsdelivr.net/npm/@arcgis/core@5.1.12/assets";
+
+        const webmap = new WebMap({
+          portalItem: { id: WEBMAP_ID },
+        });
+        handle = new MapView({
+          container: node,
+          map: webmap,
+          constraints: { snapToZoom: false },
+          popup: { defaultPopupTemplateEnabled: true },
+        });
+        await handle.when();
+        if (cancelled) {
+          handle.destroy();
+          return;
+        }
+        mapViewRef.current = handle;
+        setMapView(handle);
+        setMapError(false);
+      } catch (err) {
+        console.error("MapView failed to load", err);
+        if (!cancelled) {
+          setMapError(true);
+          setMapView(null);
+        }
+      }
+    }
+
+    void mountMap();
+    return () => {
+      cancelled = true;
+      setMapView(null);
+      mapViewRef.current = null;
+      if (handle) {
+        handle.destroy();
+        handle = null;
+      }
+    };
   }, []);
+
+  // After switching back from Story, the container may have been display:none;
+  // nudge the view to recalculate size so goTo/pan land correctly.
+  useEffect(() => {
+    if (view !== "map") return;
+    const mv = mapViewRef.current;
+    if (!mv) return;
+    requestAnimationFrame(() => {
+      try {
+        mv.resize();
+      } catch {
+        /* ignore */
+      }
+    });
+  }, [view]);
 
   return (
     <section id="map-panel">
@@ -94,30 +149,35 @@ export default function MapPanel({ onViewChange }: MapPanelProps) {
             </button>
           </div>
           <a className="map-btn" href={active.url} target="_blank" rel="noopener noreferrer">
-            <ExternalIcon size={14} /> Open<span className="sr-only"> {active.title} in a new tab</span>
+            <ExternalIcon size={14} /> Open full {view === "map" ? "map" : "story"}
+            <span className="sr-only"> {active.title} in a new tab</span>
           </a>
         </div>
       </div>
-      {loadError[view] && (
+      {view === "map" && mapError && (
         <div id="map-error-banner" role="alert">
-          ⚠️ The {view === "map" ? "map" : "story"} failed to load.{" "}
-          <a href={active.url} target="_blank" rel="noopener noreferrer">
+          ⚠️ The map failed to load.{" "}
+          <a href={INSTANT_APP_URL} target="_blank" rel="noopener noreferrer">
+            Open the Instant App on ArcGIS Online
+          </a>
+          .
+        </div>
+      )}
+      {view === "story" && storyError && (
+        <div id="map-error-banner" role="alert">
+          ⚠️ The story failed to load.{" "}
+          <a href={STORY_MAP_URL} target="_blank" rel="noopener noreferrer">
             Open it directly on ArcGIS Online
           </a>
           .
         </div>
       )}
-      {/* Cross-origin iframes: onError can catch a hard network/navigation
-          failure, but not an error the Esri app renders inside its own page —
-          that's invisible to us. The "Open directly" link above is the real
-          fallback for that case. */}
-      <iframe
+      <div
         id="viewDiv"
-        title="Estero Board Records map"
-        src={INSTANT_APP_URL}
+        ref={mapNodeRef}
         hidden={view !== "map"}
-        onError={() => setLoadError((e) => ({ ...e, map: true }))}
-        style={{ border: "none", width: "100%", height: "100%" }}
+        role="application"
+        aria-label="Estero board records map"
       />
       {storyLoaded && (
         <iframe
@@ -125,10 +185,9 @@ export default function MapPanel({ onViewChange }: MapPanelProps) {
           title="Where Estero Decides story map"
           src={STORY_MAP_URL}
           hidden={view !== "story"}
-          // Same permissions as Esri's own StoryMap embed snippet.
           allowFullScreen
           allow="geolocation"
-          onError={() => setLoadError((e) => ({ ...e, story: true }))}
+          onError={() => setStoryError(true)}
           style={{ border: "none", width: "100%", height: "100%" }}
         />
       )}

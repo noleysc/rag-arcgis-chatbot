@@ -26,6 +26,9 @@ backend/logs/
 # Runtime user reports (admin inbox)
 backend/data/ops/reports.json
 backend/data/ops/reports.json.tmp
+# Nearby development-alert subscriptions
+backend/data/ops/nearby_subscriptions.json
+backend/data/ops/nearby_subscriptions.json.tmp
 
 # Data files (add your own)
 data/*.csv

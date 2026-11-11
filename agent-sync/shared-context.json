@@ -1,7 +1,7 @@
 {
   "project": "rag-arcgis-chatbot",
   "product": "Ask Engage Estero",
-  "updated_at": "2026-11-02T05:40:00Z",
+  "updated_at": "2026-11-09T22:00:00Z",
   "updated_by": "cloud-agent",
   "team": {
     "nolan": {
@@ -17,21 +17,23 @@
       "role": "frontend Pulse / React UI"
     }
   },
-  "active_focus": "AI Day prod QA: restore manual Farmers Market + EsteroToday events on /api/events",
+  "active_focus": "Tracker slice 2: digests + MapView + home/Pulse demotion — in PR #41",
   "priorities": [
-    "Merge Docker path + EsteroToday TLS fallback so Pulse shows Markets and Village events again",
-    "After deploy: verify /api/events has source=manual and source=esterotoday",
-    "Ask EsteroToday host to fix incomplete Sectigo TLS chain (leaf-only since Oct 2026 renewal)",
+    "Review/merge PR #41 (projects + digests + MapView + tracker home)",
+    "Configure SMTP_* on VPS and cron deploy/vps/send-nearby-digests.sh",
+    "After deploy: verify MapView pan, /api/tracker/home, nearby subscribe",
     "Merge discover.py fix so pipeline-refresh ingests Jul/Sep 2026 council minutes + missing Jan–Jun 2026 PDFs",
-    "Production is https://tracker.esterotoday.com/ only (Cloud Run rag-arcgis-chatbot deleted; Pages unused)",
+    "Production is https://tracker.esterotoday.com/ only",
     "Keep health-watch.yml green; follow deploy/vps/SECURITY.md on the box",
-    "Coordinate Instant App / StoryMap embed with GIS storyboard owners before MapPanel changes"
+    "Map UX Phase 2: category filter chips on map (docs/MAP_UX_PLAN.md)"
   ],
   "owners": {
     "backend/events_sources": "nolan",
     "backend/tests": "nolan",
     "backend/retrieval": "ethan",
     "backend/rag_path": "ethan",
+    "backend/projects_service": "shared",
+    "backend/nearby_subscriptions": "shared",
     "frontend-react": "krish",
     "pipeline": "shared",
     "deploy/vps": "nolan"

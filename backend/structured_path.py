@@ -73,6 +73,7 @@ def _row_to_project(row: dict) -> ProjectOut:
     return ProjectOut(
         title=title,
         id=row_value(row, "application_id"),
+        project_id=row_value(row, "project_id"),
         location=row_value(row, "location"),
         summary=_clip_at_sentence(row_value(row, "summary", "outcome", "action_taken"), 480),
         status=status,
@@ -80,6 +81,7 @@ def _row_to_project(row: dict) -> ProjectOut:
         document_url=row_value(row, "document_url"),
         lat=_to_coord(row_value(row, "latitude")),
         lng=_to_coord(row_value(row, "longitude")),
+        category=str(row.get("LandUseCategory") or "").strip(),
     )
 
 

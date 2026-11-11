@@ -18,6 +18,9 @@ class RouteKind(str, Enum):
 class ProjectOut(BaseModel):
     title: str = ""
     id: str = ""
+    # Gold ProjectId when the card came from a board row — used to deep-link
+    # Ask cards into #/projects?id=…
+    project_id: str = ""
     location: str = ""
     summary: str = ""
     status: str = "No decision recorded"
@@ -130,3 +133,23 @@ class ReportOut(BaseModel):
 class ReportStatusUpdate(BaseModel):
     status: ReportStatus
     admin_note: str = Field(default="", max_length=2000)
+
+
+class NearbyPreviewRequest(BaseModel):
+    address: str = Field(default="", max_length=300)
+    lat: float | None = None
+    lng: float | None = None
+    radius_miles: float = Field(default=2.0, ge=0.25, le=10.0)
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class NearbySubscribeRequest(BaseModel):
+    email: str = Field(..., min_length=3, max_length=254)
+    address: str = Field(..., min_length=5, max_length=300)
+    lat: float | None = None
+    lng: float | None = None
+    radius_miles: float = Field(default=2.0, ge=0.25, le=10.0)
+
+
+class NearbyUnsubscribeRequest(BaseModel):
+    token: str = Field(..., min_length=8, max_length=200)

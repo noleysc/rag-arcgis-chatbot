@@ -6,6 +6,8 @@ export interface NormalizedCard {
   location: string;
   summary: string;
   id: string;
+  /** Gold ProjectId when available — deep-links to #/projects?id=… */
+  projectId: string;
   status: string;
   date: string;
   documentUrl: string;

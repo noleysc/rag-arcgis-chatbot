@@ -18,8 +18,8 @@ export default function PulsePage({ onAsk }: PulsePageProps) {
           <CalendarIcon size={30} />
         </span>
         <div className="pulse-hero-text">
-          <h1 id="pulse-title">Community Pulse</h1>
-          <p>Community events and Village meetings in Estero</p>
+          <h1 id="pulse-title">Community events</h1>
+          <p>Markets, sports, fairs, and Village meetings in Estero</p>
         </div>
       </section>
       <Dashboard meetings={meetings} meetingsLoading={loading} meetingsError={error} onSend={onAsk} />

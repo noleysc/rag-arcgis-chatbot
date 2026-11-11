@@ -29,7 +29,19 @@ Mark each item pass/fail. File thumbs-down feedback and any fail with steps to r
 | Events vs planning | `What is happening on Corkscrew Road?` | **RAG/planning**, not calendar dump |
 | Streaming | send via UI | Tokens or full answer; no blank bubble |
 
-## 3. Community Pulse
+## 3. Projects tracker
+
+- [ ] Home shows Under review / Recently decided / Near you (not Pulse-first)
+- [ ] `#/projects` loads All projects with status/category filters
+- [ ] Project detail shows category chip, timeline, related corridor projects, Ask / Show on map
+- [ ] Ask project cards link to Project details (`#/projects?id=…`)
+- [ ] Explore Map uses embedded MapView; Show on map pans to the pin
+- [ ] `#/projects?tab=recent` lists recent board actions
+- [ ] Near me: preview an Estero address → nearby projects; subscribe with email succeeds
+- [ ] `GET /api/projects`, `/api/activity/recent`, `/api/tracker/home` → 200
+- [ ] Optional: admin `POST /admin/nearby-digests/run?dry_run=true` with SMTP configured later
+
+## 4. Community Pulse
 
 - [ ] Next Meetings shows upcoming Council / PZDB rows
 - [ ] Latest News loads EsteroToday posts
@@ -39,25 +51,25 @@ Mark each item pass/fail. File thumbs-down feedback and any fail with steps to r
 - [ ] Mini-calendar dots match list for a selected day
 - [ ] FGCU away games (Atlanta / Baton Rouge) do **not** appear
 
-## 4. Map & cards
+## 5. Map & cards
 
 - [ ] Project with `lat`/`lng` shows **Show on map** and pans
 - [ ] Directions still works for an address string
 - [ ] Village Council cards render when applicable
 
-## 5. Admin & reports
+## 6. Admin & reports
 
 - [ ] `/admin.html` loads (same-origin API base; not forced to localhost)
 - [ ] Without `ADMIN_API_KEY` header, `/load` and `/admin/status` → 401
 - [ ] Public **Report** flow creates a row; admin list shows it with key
 
-## 6. Feedback & regression signals
+## 7. Feedback & regression signals
 
 - [ ] Thumbs up/down on a React chat answer succeeds
 - [ ] Optional: run `python scripts/summarize_feedback.py` after a few real sessions
 - [ ] Optional: `python scripts/eval_quality.py --retrieve-only --limit 20`
 
-## 7. Sign-off
+## 8. Sign-off
 
 | Role | Name | Date | Pass? |
 |------|------|------|-------|
