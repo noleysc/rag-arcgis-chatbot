@@ -641,28 +641,25 @@
 #messages {
   display: none;
   flex: 1;
+  min-height: 0; /* allow flex child to shrink so overflow-y can scroll */
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 28px 28px 8px;
   scroll-behavior: smooth;
   background: var(--white);
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-}
-#messages:hover {
-  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.28) transparent;
 }
 #messages::-webkit-scrollbar {
   width: 6px;
 }
 #messages::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.28);
   border-radius: 3px;
 }
-#messages:hover::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.25);
-}
 #messages.visible {
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 .msg-row {
   margin-bottom: 24px;
@@ -1705,6 +1702,21 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+}
+.news-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: middle;
 }
 .pulse-widget-header h2 {
   font-size: 16px;

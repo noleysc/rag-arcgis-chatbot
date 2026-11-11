@@ -752,6 +752,10 @@
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 16px;
 }
+.ask-layout > #chat-panel {
+  min-height: 0;
+  height: 100%;
+}
 .ask-suggest {
   display: flex;
   flex-direction: column;

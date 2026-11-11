@@ -13,14 +13,15 @@ interface LatestNewsProps {
   /** "feature": Community Pulse's larger card, with a header icon and each
    * post's featured image. */
   variant?: "compact" | "feature";
-  /** How many posts to show (the feed has 5). */
+  /** How many EsteroToday posts to show (fetched from WP, max 20). */
   limit?: number;
 }
 
-export default function LatestNews({ variant = "compact", limit = 5 }: LatestNewsProps) {
+export default function LatestNews({ variant = "compact", limit = 10 }: LatestNewsProps) {
   const feature = variant === "feature";
-  const { posts, loading, error, retry } = useNews(feature);
+  const { posts, loading, error, retry } = useNews(feature, limit);
   const titleId = useId();
+  const shown = posts.slice(0, limit);
 
   return (
     <section className={`pulse-widget${feature ? " pulse-widget-feature" : ""}`} aria-labelledby={titleId}>
@@ -31,7 +32,12 @@ export default function LatestNews({ variant = "compact", limit = 5 }: LatestNew
               <Newspaper size={22} strokeWidth={1.8} />
             </span>
           )}
-          Latest from Estero Today
+          Latest from EsteroToday
+          {!loading && !error && shown.length > 0 && (
+            <span className="news-count" aria-label={`${shown.length} articles`}>
+              {shown.length}
+            </span>
+          )}
         </h2>
         <a className="card-link" href="https://esterotoday.com/" target="_blank" rel="noopener noreferrer">
           View all <ArrowRightIcon size={14} />
@@ -39,7 +45,7 @@ export default function LatestNews({ variant = "compact", limit = 5 }: LatestNew
         </a>
       </div>
 
-      {loading && <SkeletonRows count={3} />}
+      {loading && <SkeletonRows count={Math.min(limit, 5)} />}
 
       {!loading && error && (
         <p className="pulse-empty">
@@ -55,7 +61,7 @@ export default function LatestNews({ variant = "compact", limit = 5 }: LatestNew
 
       {!loading && !error && (
         <ul className={`news-list${feature ? " news-list-feature" : ""}`}>
-          {posts.slice(0, limit).map((post) => (
+          {shown.map((post) => (
             <li className="news-row" key={post.id}>
               <a className="news-link" href={post.link} target="_blank" rel="noopener noreferrer">
                 {feature ? (

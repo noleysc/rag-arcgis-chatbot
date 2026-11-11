@@ -67,7 +67,7 @@ const HOME_SAMPLE_QUESTIONS = [
   "Any continued cases still under review?",
 ];
 
-const VILLAGE_URL = "https://estero-fl.gov/";
+const ESTEROTODAY_URL = "https://esterotoday.com/";
 
 interface HomePageProps {
   onAsk: (question: string) => void;
@@ -215,20 +215,20 @@ export default function HomePage({ onAsk }: HomePageProps) {
             <span className="home-community-emblem">
               <img src={villageEmblem} alt="" />
             </span>
-            Village of Estero
+            EsteroToday
           </div>
-          <h2 id="home-community-title">Meetings &amp; village news</h2>
-          <p>Council schedules stay here. Community events live under Events in the menu.</p>
+          <h2 id="home-community-title">Local news &amp; meetings</h2>
+          <p>Read EsteroToday coverage, then jump to meetings and community events.</p>
           <div className="home-community-links">
-            <a className="home-community-btn" href={routeHref("meetings")}>
+            <a className="home-community-btn" href={ESTEROTODAY_URL} target="_blank" rel="noopener noreferrer">
+              Visit esterotoday.com <ExternalIcon size={14} />
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            <a className="home-community-btn home-community-btn-ghost" href={routeHref("meetings")}>
               Meeting schedule <ArrowRightIcon size={14} />
             </a>
             <a className="home-community-btn home-community-btn-ghost" href={routeHref("pulse")}>
               Community events
-            </a>
-            <a className="home-community-btn home-community-btn-ghost" href={VILLAGE_URL} target="_blank" rel="noopener noreferrer">
-              estero-fl.gov <ExternalIcon size={14} />
-              <span className="sr-only"> (opens in a new tab)</span>
             </a>
           </div>
         </section>

@@ -99,15 +99,15 @@ export default function Sidebar({ route, drawer, open, onClose, onNavigate, meet
             behind a nav label; the Village card rests on its waves. */}
         <div className="sidebar-foot">
           <SunsetArt />
-          <a className="sidebar-village" href="https://estero-fl.gov/" target="_blank" rel="noopener noreferrer">
+          <a className="sidebar-village" href="https://esterotoday.com/" target="_blank" rel="noopener noreferrer">
             <span className="sidebar-village-emblem">
               <img src={villageEmblem} alt="" />
             </span>
             <span className="sidebar-village-text">
-              <strong>Village of Estero</strong>
-              <span>Florida</span>
+              <strong>EsteroToday</strong>
+              <span>Local news</span>
             </span>
-            <span className="sr-only"> (opens estero-fl.gov in a new tab)</span>
+            <span className="sr-only"> (opens esterotoday.com in a new tab)</span>
           </a>
         </div>
       </aside>
