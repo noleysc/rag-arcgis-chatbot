@@ -1,5 +1,5 @@
 import type { ChatMessage } from "../../types";
-import { useAutoScroll } from "../../hooks/useAutoScroll";
+import { useAnswerScroll } from "../../hooks/useAnswerScroll";
 import Message from "./Message";
 import type { ReportPrefill } from "../ReportDialog/ReportDialog";
 
@@ -10,14 +10,14 @@ interface MessageListProps {
 }
 
 export default function MessageList({ messages, onReport, onSend }: MessageListProps) {
-  const { ref, onScroll } = useAutoScroll<HTMLDivElement>([messages]);
+  const { ref, scrollHandlers } = useAnswerScroll<HTMLDivElement>(messages);
 
   return (
     <div
       id="messages"
       className="visible"
       ref={ref}
-      onScroll={onScroll}
+      {...scrollHandlers}
       role="log"
       aria-live="polite"
       aria-relevant="additions"
