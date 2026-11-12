@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-/** Runs a one-shot board-records layer query on mount. Pass a stable
- * (module-level) loader. undefined = loading, null = layer unreachable,
- * otherwise the result. */
+/** Runs a one-shot query (board-records layer or backend) on mount. Pass a
+ * stable (module-level) loader. undefined = loading, null = source
+ * unreachable, otherwise the result. */
 export function useLayerData<T>(load: () => Promise<T>): T | null | undefined {
   const [data, setData] = useState<T | null | undefined>(undefined);
 

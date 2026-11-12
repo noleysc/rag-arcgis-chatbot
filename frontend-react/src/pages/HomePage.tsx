@@ -9,6 +9,7 @@ import {
   ChatIcon,
   ChevronRightIcon,
   ClockIcon,
+  EngageMarkIcon,
   MapIcon,
   MapPinIcon,
   RecordsIcon,
@@ -17,6 +18,7 @@ import {
 import { useLayerData } from "../hooks/useLayerData";
 import { useMeetings } from "../hooks/useMeetings";
 import { fetchLayerStats, type LayerStats } from "../lib/boardRecords";
+import { fetchEsteroTodayShare } from "../lib/datasetStats";
 import { routeHref, type Route } from "../lib/router";
 
 type Tone = "green" | "blue" | "purple" | "amber";
@@ -86,6 +88,8 @@ interface HomePageProps {
 
 export default function HomePage({ onAsk }: HomePageProps) {
   const stats = useLayerData(fetchLayerStats);
+  // From the chatbot backend, not the layer: the layer holds board records only.
+  const share = useLayerData(fetchEsteroTodayShare);
   const { meetings, loading: meetingsLoading, error: meetingsError } = useMeetings(3);
 
   return (
@@ -100,20 +104,37 @@ export default function HomePage({ onAsk }: HomePageProps) {
               </span>
             </h1>
             <p>An Engage Estero project: explore planning and zoning decisions, board records, and meeting information from Estero's public records.</p>
-            {/* Layer unreachable: drop the row rather than show four dashes. */}
-            {stats !== null && (
-              <ul className="home-stats" aria-busy={stats === undefined}>
-                {STATS.map(({ label, value, Icon }) => (
-                  <li key={label}>
+            {/* Source unreachable: drop its stats rather than show dashes. */}
+            {(stats !== null || share !== null) && (
+              <ul className="home-stats" aria-busy={stats === undefined || share === undefined}>
+                {stats !== null &&
+                  STATS.map(({ label, value, Icon }) => (
+                    <li key={label}>
+                      <span className="home-stat-icon">
+                        <Icon size={22} />
+                      </span>
+                      <span className="home-stat-text">
+                        <strong>{stats ? value(stats).toLocaleString() : "…"}</strong>
+                        <span>{label}</span>
+                      </span>
+                    </li>
+                  ))}
+                {share !== null && (
+                  <li
+                    className="home-stat-source"
+                    title={
+                      share ? `${share.count.toLocaleString()} of ${share.total.toLocaleString()} records` : undefined
+                    }
+                  >
                     <span className="home-stat-icon">
-                      <Icon size={22} />
+                      <EngageMarkIcon size={22} />
                     </span>
                     <span className="home-stat-text">
-                      <strong>{stats ? value(stats).toLocaleString() : "…"}</strong>
-                      <span>{label}</span>
+                      <strong>{share ? `${share.count.toLocaleString()} · ${share.percent}%` : "…"}</strong>
+                      <span>From EsteroToday</span>
                     </span>
                   </li>
-                ))}
+                )}
               </ul>
             )}
           </div>

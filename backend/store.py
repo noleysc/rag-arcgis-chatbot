@@ -119,6 +119,7 @@ class DataStore:
     retrieval_cache: OrderedDict = field(default_factory=OrderedDict, repr=False)
     # Chunks containing each BM25 token (query_focus anchor terms), built lazily.
     _token_df: dict[str, int] | None = field(default=None, repr=False)
+    _source_counts: dict[str, int] | None = field(default=None, repr=False)
 
     def is_ready(self) -> bool:
         return self.vectorstore is not None and self.bm25 is not None and not self.dataframe.empty
@@ -129,6 +130,25 @@ class DataStore:
                 d.metadata.get("chunk_id", str(i)): d for i, d in enumerate(self.documents)
             }
         return self._doc_by_id
+
+    def source_counts(self) -> dict[str, int]:
+        """Indexed records by origin: board-record CSV rows, and distinct
+        EsteroToday (Engage Estero site) records, i.e. every supplemental
+        source, counted per record rather than per chunk."""
+        if self._source_counts is None:
+            try:
+                from sources import SOURCE_SPECS
+
+                site_types = {spec.source_type for spec in SOURCE_SPECS}
+            except ImportError:
+                site_types = set()
+            site_records = {
+                (d.metadata.get("source_type"), d.metadata.get("record_id"))
+                for d in self.documents
+                if d.metadata.get("source_type") in site_types and d.metadata.get("record_id")
+            }
+            self._source_counts = {"board_records": self.record_count, "esterotoday": len(site_records)}
+        return self._source_counts
 
 
 

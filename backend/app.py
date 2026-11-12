@@ -188,6 +188,8 @@ def health():
         "chain_ready": _chain_ready(),
         "record_count": _record_count(),
         "chunk_count": store.chunk_count if store else 0,
+        # Home banner: share of the dataset that comes from EsteroToday.
+        "source_counts": store.source_counts() if store else {"board_records": 0, "esterotoday": 0},
         "embedding_model": EMBEDDING_MODEL,
         "mcp_http": mcp_http_enabled(),
     }

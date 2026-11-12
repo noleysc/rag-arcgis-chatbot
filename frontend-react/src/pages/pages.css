@@ -168,6 +168,17 @@
   margin-right: 0;
   border-right: none;
 }
+/* EsteroToday share: about the dataset, not the records, so it gets its own
+   row below the record counts (five don't fit the hero's width anyway). */
+.home-stats li.home-stat-source {
+  flex-basis: 100%;
+  grid-column: 1 / -1;
+}
+.home-stats li:has(+ .home-stat-source) {
+  padding-right: 0;
+  margin-right: 0;
+  border-right: none;
+}
 .home-stat-icon {
   flex-shrink: 0;
   width: 42px;

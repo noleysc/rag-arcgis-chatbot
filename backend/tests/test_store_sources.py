@@ -110,3 +110,25 @@ def _docs_for(base):
     from sources.documents import records_to_documents
 
     return records_to_documents(load_records(SPECS_BY_KEY["posts"], base))
+
+
+def test_source_counts_count_site_records_not_chunks():
+    """The Home banner's EsteroToday share counts records, not chunks."""
+    from langchain_core.documents import Document
+
+    from store import DataStore
+
+    def doc(source_type, record_id, i=0):
+        return Document(page_content="x", metadata={
+            "chunk_id": f"{source_type}-{record_id}-{i}", "source_type": source_type, "record_id": record_id,
+        })
+
+    store = DataStore(record_count=10, documents=[
+        doc("website_article", "post-1", 0),
+        doc("website_article", "post-1", 1),
+        doc("website_page", "page-1"),
+        doc("document", "doc-1"),
+        doc("board_record", "7"),
+        Document(page_content="meeting", metadata={"chunk_id": "0-meta"}),
+    ])
+    assert store.source_counts() == {"board_records": 10, "esterotoday": 3}
