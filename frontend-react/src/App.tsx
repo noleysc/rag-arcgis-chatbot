@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import TopBar from "./components/TopBar/TopBar";
 import ReportDialog, { type ReportPrefill } from "./components/ReportDialog/ReportDialog";
 import DisclaimerModal from "./components/DisclaimerModal/DisclaimerModal";
 import HomePage from "./pages/HomePage";
 import AskPage from "./pages/AskPage";
-import MapPage from "./pages/MapPage";
 import RecordsPage from "./pages/RecordsPage";
 import MeetingsPage from "./pages/MeetingsPage";
 import PulsePage from "./pages/PulsePage";
@@ -16,6 +15,9 @@ import { ROUTE_LABELS, navigate, useRoute, type Route } from "./lib/router";
 import "./App.css";
 import "./pages/pages.css";
 import "./theme-dark.css";
+
+// The map page pulls in the ArcGIS SDK; load it only when the map is opened.
+const MapPage = lazy(() => import("./pages/MapPage"));
 
 const BASE_TITLE = "Engage Estero — Planning & Zoning Records";
 
@@ -114,7 +116,9 @@ export default function App() {
           <main id="main" ref={mainRef} tabIndex={-1} className={`app-main app-main-${route}`}>
             {mapVisited && (
               <div className="page page-map" hidden={route !== "map"}>
-                <MapPage onAsk={ask} />
+                <Suspense fallback={null}>
+                  <MapPage onAsk={ask} />
+                </Suspense>
               </div>
             )}
             {route !== "map" && <div className={`page page-${route}`}>{renderPage(route)}</div>}
