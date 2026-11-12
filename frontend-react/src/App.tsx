@@ -91,7 +91,7 @@ export default function App() {
 
   return (
     <>
-      <DisclaimerModal />
+      <DisclaimerModal onFeedback={() => openReport({ kind: "other" })} />
       <button type="button" className="skip-link" onClick={() => mainRef.current?.focus()}>
         Skip to content
       </button>

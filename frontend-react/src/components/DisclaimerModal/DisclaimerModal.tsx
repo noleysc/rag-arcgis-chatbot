@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-export default function DisclaimerModal() {
+interface DisclaimerModalProps {
+  /** Opens the site's feedback form (ReportDialog). */
+  onFeedback: () => void;
+}
+
+export default function DisclaimerModal({ onFeedback }: DisclaimerModalProps) {
   const [open, setOpen] = useState(true);
 
   if (!open) return null;
@@ -8,14 +13,29 @@ export default function DisclaimerModal() {
   return (
     <div className="disclaimer-backdrop">
       <div className="disclaimer-dialog" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title">
-        <h2 id="disclaimer-title">Before you begin</h2>
+        <h2 id="disclaimer-title">
+          <span className="disclaimer-badge">Beta</span>
+          Welcome to Engage Estero
+        </h2>
         <p>
-          This tool uses AI to summarize public records. It can make mistakes. Don&apos;t rely on it for financial or
-          legal decisions.
+          This is a beta site under active development. Information may be incomplete or contain errors. Your feedback
+          is appreciated.
         </p>
-        <button type="button" className="btn-showmap disclaimer-ack-btn" onClick={() => setOpen(false)}>
-          I understand
-        </button>
+        <div className="disclaimer-actions">
+          <button type="button" className="btn-showmap disclaimer-ack-btn" onClick={() => setOpen(false)}>
+            I understand
+          </button>
+          <button
+            type="button"
+            className="disclaimer-feedback-btn"
+            onClick={() => {
+              setOpen(false);
+              onFeedback();
+            }}
+          >
+            Share feedback
+          </button>
+        </div>
       </div>
     </div>
   );

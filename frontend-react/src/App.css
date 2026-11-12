@@ -2410,20 +2410,58 @@ a.meeting-row-link:hover .meeting-name {
   font-family: var(--font);
 }
 .disclaimer-dialog h2 {
-  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--navy);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+}
+.disclaimer-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--gold-light);
+  color: var(--gold-text);
+  border: 1px solid var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .disclaimer-dialog p {
-  font-size: 13.5px;
-  line-height: 1.55;
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.6;
   color: var(--text);
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--gold);
+  border-radius: 6px;
+  background: var(--gold-light);
+}
+.disclaimer-actions {
+  display: flex;
+  gap: 10px;
 }
 .disclaimer-ack-btn {
-  width: 100%;
+  flex: 1;
   justify-content: center;
+}
+.disclaimer-feedback-btn {
+  flex: 1;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  background: var(--green-solid);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.disclaimer-feedback-btn:hover {
+  background: var(--green-solid-hover);
 }
 
 /* PROMPT HELP DIALOG */
