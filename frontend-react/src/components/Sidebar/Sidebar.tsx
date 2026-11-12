@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { ComponentType } from "react";
 import logo from "../../assets/engage-estero-logo-light.png";
-import villageEmblem from "../../assets/village-emblem.png";
 import { ROUTE_LABELS, routeHref, type Route } from "../../lib/router";
 import { CalendarIcon, ChatIcon, CloseIcon, HomeIcon, MapPinIcon, PulseIcon, RecordsIcon } from "../Icons/Icons";
 import SunsetArt from "./SunsetArt";
@@ -86,19 +85,9 @@ export default function Sidebar({ route, drawer, open, onClose, onNavigate, meet
           </ul>
         </nav>
         {/* The sunset sits in the flow below the nav, so it never runs
-            behind a nav label; the Village card rests on its waves. */}
+            behind a nav label. */}
         <div className="sidebar-foot">
           <SunsetArt />
-          <a className="sidebar-village" href="https://estero-fl.gov/" target="_blank" rel="noopener noreferrer">
-            <span className="sidebar-village-emblem">
-              <img src={villageEmblem} alt="" />
-            </span>
-            <span className="sidebar-village-text">
-              <strong>Village of Estero</strong>
-              <span>Florida</span>
-            </span>
-            <span className="sr-only"> (opens estero-fl.gov in a new tab)</span>
-          </a>
         </div>
       </aside>
     </>

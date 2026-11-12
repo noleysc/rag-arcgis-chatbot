@@ -21,7 +21,7 @@ export default function Dashboard({ meetings, meetingsLoading, meetingsError, on
           meetings={meetings}
           loading={meetingsLoading}
           error={meetingsError}
-          title="Official Village Meetings"
+          title="Village Meetings"
           variant="feature"
         />
         <LatestNews variant="feature" limit={3} />

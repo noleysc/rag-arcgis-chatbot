@@ -24,7 +24,7 @@ export default function NextMeetings({
   meetings,
   loading,
   error,
-  title = "Official Village meetings",
+  title = "Village meetings",
   variant = "compact",
 }: NextMeetingsProps) {
   const feature = variant === "feature";
@@ -54,7 +54,7 @@ export default function NextMeetings({
         <p className="pulse-empty">
           Couldn't load the meeting schedule —{" "}
           <a href={VILLAGE_MEETINGS_URL} target="_blank" rel="noopener noreferrer">
-            check the official Village meetings page ↗
+            check the Village meetings page ↗
           </a>
         </p>
       )}
@@ -68,7 +68,7 @@ export default function NextMeetings({
           </span>
           <p className="pulse-empty-title">No upcoming meetings listed</p>
           <p className="pulse-empty">
-            No official Village meetings are listed here yet. Check the official agendas and minutes for the latest
+            No Village meetings are listed here yet. Check the Village agendas and minutes for the latest
             schedule and materials.
           </p>
           <a className="pulse-outline-btn" href={VILLAGE_MEETINGS_URL} target="_blank" rel="noopener noreferrer">
@@ -82,7 +82,7 @@ export default function NextMeetings({
         <p className="pulse-empty">
           No upcoming meetings are listed here yet. For the latest schedule and agendas, check the{" "}
           <a href={VILLAGE_MEETINGS_URL} target="_blank" rel="noopener noreferrer">
-            official agendas and minutes ↗
+            Village agendas and minutes ↗
           </a>
         </p>
       )}
@@ -124,7 +124,7 @@ export default function NextMeetings({
       {/* The feature header already links to the meetings page. */}
       {meetings.length > 0 && !feature && (
         <a className="pulse-widget-link" href={VILLAGE_MEETINGS_URL} target="_blank" rel="noopener noreferrer">
-          Official meeting page ↗
+          Village meeting page ↗
         </a>
       )}
     </section>

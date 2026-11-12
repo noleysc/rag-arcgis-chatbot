@@ -80,7 +80,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           </svg>
         </button>
       </div>
-      <div id="input-footer">Data: Village of Estero · Built by Engage Estero</div>
+      <div id="input-footer">Data from Village of Estero public records · An Engage Estero project</div>
       <PromptHelpDialog
         open={helpOpen}
         onClose={() => setHelpOpen(false)}

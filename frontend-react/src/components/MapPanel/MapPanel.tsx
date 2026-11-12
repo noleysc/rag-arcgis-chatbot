@@ -29,7 +29,7 @@ const VIEWS: Record<MapPanelView, { url: string; title: string; subtitle: string
   map: {
     url: INSTANT_APP_URL,
     title: "Estero Board Records",
-    subtitle: "Live ArcGIS map · Village of Estero",
+    subtitle: "Live ArcGIS map · Estero, FL",
   },
   story: {
     url: STORY_MAP_URL,

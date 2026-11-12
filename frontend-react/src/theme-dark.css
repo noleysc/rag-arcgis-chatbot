@@ -100,10 +100,6 @@
   border-color: #2a3d5a;
   background: #172539;
 }
-/* White button on the dark community card: keep its text dark. */
-:root[data-theme="dark"] .home-community-btn:hover {
-  color: #0f2744;
-}
 
 /* Explore Map */
 :root[data-theme="dark"] .loc-thumb {

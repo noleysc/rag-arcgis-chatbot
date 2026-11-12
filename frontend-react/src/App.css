@@ -71,8 +71,8 @@
   isolation: isolate;
   flex-shrink: 0;
   margin-top: auto;
-  /* Fill what the brand + nav (~560px) leave, so the Village card stays in
-     view without scrolling. */
+  /* Fill what the brand + nav (~560px) leave, so the sunset stays in view
+     without scrolling. */
   height: clamp(150px, calc(100dvh - 560px), 380px);
   display: flex;
   align-items: flex-end;
@@ -176,52 +176,6 @@
     gap: 2px;
     padding: 16px 14px 12px;
   }
-}
-.sidebar-village {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 14px 16px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(16, 33, 58, 0.62);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: #fff;
-  text-decoration: none;
-  transition: background 0.18s ease;
-}
-.sidebar-village:hover {
-  background: rgba(16, 33, 58, 0.78);
-}
-.sidebar-village-emblem {
-  flex-shrink: 0;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.sidebar-village-emblem img {
-  width: 32px;
-  height: auto;
-}
-.sidebar-village-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-}
-.sidebar-village-text strong {
-  font-size: 14px;
-  font-weight: 600;
-}
-.sidebar-village-text span {
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.75);
 }
 .sidebar-dot {
   width: 8px;

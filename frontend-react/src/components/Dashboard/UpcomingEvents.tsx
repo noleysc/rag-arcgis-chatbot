@@ -251,7 +251,7 @@ export default function UpcomingEvents() {
             <span className="pulse-stat-value">
               {meetingsLoading ? "…" : meetingsError ? "—" : meetings.length.toLocaleString()}
             </span>
-            <span className="pulse-stat-label">Official Village meetings</span>
+            <span className="pulse-stat-label">Village meetings</span>
           </span>
         </div>
       </div>
@@ -373,9 +373,9 @@ export default function UpcomingEvents() {
 
           {meetingsError && (
             <p className="events-source-note" role="status">
-              Official Village meeting dates are unavailable right now.{" "}
+              Village meeting dates are unavailable right now.{" "}
               <a href="https://estero-fl.gov/meetings/" target="_blank" rel="noopener noreferrer">
-                Check the official meeting page
+                Check the Village meeting page
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </p>
@@ -445,7 +445,7 @@ function EventsList({ items, total, visibleCount, loadingMeetings, onLoadMore, h
                         {formatDate(item.dateKey)} · {item.time}
                         {venue ? ` · ${venue}` : ""}
                       </p>
-                      {item.source === "meeting" && <p className="official-meeting-label">Official Village meeting</p>}
+                      {item.source === "meeting" && <p className="official-meeting-label">Village meeting</p>}
                       {item.url && (
                         <a href={item.url} target="_blank" rel="noopener noreferrer">
                           {item.source === "meeting" ? "Meeting information" : "Event details"}

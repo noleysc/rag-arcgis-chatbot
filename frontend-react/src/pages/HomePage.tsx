@@ -1,6 +1,5 @@
 import type { ComponentType } from "react";
 import heroBg from "../assets/hero-bg.jpg";
-import villageEmblem from "../assets/village-emblem.png";
 import LatestNews from "../components/Dashboard/LatestNews";
 import NextMeetings from "../components/Dashboard/NextMeetings";
 import MapPreview from "../components/MapPreview/MapPreview";
@@ -10,7 +9,6 @@ import {
   ChatIcon,
   ChevronRightIcon,
   ClockIcon,
-  ExternalIcon,
   MapIcon,
   MapPinIcon,
   RecordsIcon,
@@ -82,8 +80,6 @@ const HOME_SAMPLE_QUESTIONS = [
   "Find meetings about traffic safety",
 ];
 
-const VILLAGE_URL = "https://estero-fl.gov/";
-
 interface HomePageProps {
   onAsk: (question: string) => void;
 }
@@ -103,7 +99,7 @@ export default function HomePage({ onAsk }: HomePageProps) {
                 Engage <span>Estero</span>
               </span>
             </h1>
-            <p>Explore planning and zoning decisions, board records, and meeting information for the Village of Estero.</p>
+            <p>An Engage Estero project: explore planning and zoning decisions, board records, and meeting information from Estero's public records.</p>
             {/* Layer unreachable: drop the row rather than show four dashes. */}
             {stats !== null && (
               <ul className="home-stats" aria-busy={stats === undefined}>
@@ -183,21 +179,6 @@ export default function HomePage({ onAsk }: HomePageProps) {
         </section>
 
         <NextMeetings meetings={meetings} loading={meetingsLoading} error={meetingsError} title="Upcoming meetings" />
-
-        <section className="home-community" aria-labelledby="home-community-title">
-          <div className="home-community-brand">
-            <span className="home-community-emblem">
-              <img src={villageEmblem} alt="" />
-            </span>
-            Village of Estero
-          </div>
-          <h2 id="home-community-title">Our Community</h2>
-          <p>Stay informed, get involved, and help shape the future of Estero.</p>
-          <a className="home-community-btn" href={VILLAGE_URL} target="_blank" rel="noopener noreferrer">
-            Visit estero-fl.gov <ExternalIcon size={14} />
-            <span className="sr-only"> (opens in a new tab)</span>
-          </a>
-        </section>
       </aside>
     </div>
   );
