@@ -697,6 +697,40 @@
   border-color: var(--navy);
   color: var(--navy);
 }
+/* Download PDF — same pill as Copy, with an icon / spinner. */
+.msg-actions {
+  flex-wrap: wrap;
+}
+.btn-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-pdf:disabled {
+  cursor: progress;
+  opacity: 0.8;
+}
+.btn-pdf:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.btn-pdf-spinner {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btnPdfSpin 0.7s linear infinite;
+}
+@keyframes btnPdfSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.btn-pdf-error {
+  font-size: 11px;
+  color: var(--denied);
+}
 
 .feedback-bar {
   display: flex;

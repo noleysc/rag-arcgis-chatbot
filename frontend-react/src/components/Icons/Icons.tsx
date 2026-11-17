@@ -137,6 +137,13 @@ export const ExternalIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const DownloadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" />
+    <path d="M5 19.5h14" />
+  </Icon>
+);
+
 export const SendIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M4 12 20 4l-6 16-3-7-7-1Z" />

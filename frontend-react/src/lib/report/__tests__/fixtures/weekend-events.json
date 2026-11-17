@@ -1,0 +1,19 @@
+{
+ "question": "What events are happening this weekend?",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "- Sat Nov 21 (all day): Adopt-a-Highway Pickup at US 41 — https://esterotoday.com/event/adopt-a-highway-pickup-2/\n- Sat Nov 21 10:00 AM: Howard Alan Art Festival at Coconut Point Mall, 23181 Via Villagio Drive Estero, FL — https://esterotoday.com/event/howard-alan-art-festival/\n- Sat Nov 21 10:00 AM: Junior Rangers Program at Lovers Key State Park  8700 Estero blvd  Ft. Myers Beach FL 33931 — https://esterotoday.com/event/junior-rangers-program/\n- Sun Nov 22 1:00 PM: FGCU Volleyball vs TBD - ASUN Championship FInal at Fort Myers, Fla., Alico Arena — https://fgcuathletics.com/calendar.aspx?game_id=15203&sport_id=15",
+  "answer": "- Sat Nov 21 (all day): Adopt-a-Highway Pickup at US 41 — https://esterotoday.com/event/adopt-a-highway-pickup-2/\n- Sat Nov 21 10:00 AM: Howard Alan Art Festival at Coconut Point Mall, 23181 Via Villagio Drive Estero, FL — https://esterotoday.com/event/howard-alan-art-festival/\n- Sat Nov 21 10:00 AM: Junior Rangers Program at Lovers Key State Park  8700 Estero blvd  Ft. Myers Beach FL 33931 — https://esterotoday.com/event/junior-rangers-program/\n- Sun Nov 22 1:00 PM: FGCU Volleyball vs TBD - ASUN Championship FInal at Fort Myers, Fla., Alico Arena — https://fgcuathletics.com/calendar.aspx?game_id=15203&sport_id=15",
+  "projects": [],
+  "timeline": [],
+  "related": [],
+  "used_record_ids": [],
+  "follow_ups": [],
+  "source_type": "records",
+  "route": "events",
+  "meta": {
+   "events_count": 4
+  }
+ }
+}

@@ -1,0 +1,45 @@
+{
+ "question": "What happened with the Wawa on Corkscrew Road?",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "**Bottom line:** The Wawa Convenience Food & Beverage Store at **10081 Estero Town Commons Place** (south of Corkscrew Road) was **approved** on **2023-08-22** [DOS2022-E016].\n\n- The site was previously a Ruby Tuesday Restaurant.",
+  "answer": "**Bottom line:** The Wawa Convenience Food & Beverage Store at **10081 Estero Town Commons Place** (south of Corkscrew Road) was **approved** on **2023-08-22** [DOS2022-E016].\n\n- The site was previously a Ruby Tuesday Restaurant.",
+  "projects": [
+   {
+    "title": "Wawa Convenience Food & Beverage Store - Estero Town Commons Pl",
+    "id": "DOS2022-E016",
+    "location": "10081 ESTERO TOWN COMMONS PL",
+    "summary": "Wawa Convenience Food & Beverage Store with Gas Development Order (DOS2022-E016) (District 4) 10081 Estero Town Commons Place, south of Corkscrew Road. The site was previously developed and operated as a Ruby Tuesday Restaurant. Applicant is seeking to.",
+    "status": "Approved",
+    "date": "2023-08-22",
+    "document_url": "https://estero-fl.gov/wp-content/uploads/library-ada/minutes/2023%20MINUTES/PZDB/08222023%20PZDB%20Minutes.pdf",
+    "lat": 26.43076631928911,
+    "lng": -81.78522309388235,
+    "source_type": "board_record",
+    "article_url": "",
+    "category": ""
+   }
+  ],
+  "timeline": [
+   {
+    "date": "2023-08-22",
+    "event": "Planning, Zoning & Design Board approved the Wawa development with conditions on lighting, signage, and landscaping",
+    "status": "Approved",
+    "record_id": "DOS2022-E016"
+   }
+  ],
+  "related": [],
+  "used_record_ids": [
+   "DOS2022-E016"
+  ],
+  "follow_ups": [
+   "When did construction start or is it complete?",
+   "Are there other developments planned at Estero Town Commons?",
+   "What are the hours and services at this Wawa location?"
+  ],
+  "source_type": "records",
+  "route": "rag",
+  "meta": {}
+ }
+}

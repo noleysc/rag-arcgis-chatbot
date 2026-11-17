@@ -1,0 +1,113 @@
+{
+ "question": "Will Estero Sports Park affect traffic on Williams Road?",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "**Bottom line:** Yes, traffic on Williams Road is expected to increase due to development, and the Village is taking steps to manage it. Estero Sports Park is **located north of Williams Road**, and a **2024 traffic study found Williams Road volume was noticeably higher** than other roads.",
+  "answer": "**Bottom line:** Yes, traffic on Williams Road is expected to increase due to development, and the Village is taking steps to manage it. Estero Sports Park is **located north of Williams Road**, and a **2024 traffic study found Williams Road volume was noticeably higher** than other roads.",
+  "projects": [
+   {
+    "title": "Estero Sports Park",
+    "id": "",
+    "location": "Estero Sports Park, north of Williams Road and east of Via Coconut Point, Estero, FL",
+    "summary": "Estero Sports Park (Village Project) (District 4) Located north of Williams Road and east of Via Coconut Point. Action: No formal action recorded. Estero Sports Park (Village Project) (District 4) Located north of Williams Road and east of Via Coconut Point.",
+    "status": "No decision recorded",
+    "date": "2024-12-10",
+    "document_url": "https://estero-fl.gov/wp-content/uploads/library-ada/minutes/2024%20Minutes/PZDB/12102024%20PZDB%20Minutes.pdf",
+    "lat": 26.422098,
+    "lng": -81.802186,
+    "source_type": "board_record",
+    "article_url": "",
+    "category": ""
+   },
+   {
+    "title": "Traffic Study Results Presented at March Meeting",
+    "id": "https://esterotoday.com/mar2025summary/",
+    "location": "",
+    "summary": "Those cited were Tamiami Trail (US 41) and Estero Parkway Tamiami Trail (US 41) and Corkscrew Road. Corkscrew Road and Three Oaks Parkway. The volume of traffic on Williams Road was noticeably higher.",
+    "status": "",
+    "date": "2025-04-02",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/mar2025summary/",
+    "category": "Safety; Transportation"
+   },
+   {
+    "title": "Good Things Happening in Estero: Key Updates on Local Parks, Taxes, Traffic Safety & Recreation",
+    "id": "post-225516",
+    "location": "",
+    "summary": "Major Road & Safety Upgrades: Roundabouts at West Coconut/Walden Drive and west of US-41 o n Williams Road at the access road behind Walgreens. They are targeted for completion by spring 2027.",
+    "status": "",
+    "date": "2026-10-22",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/estero-fl-community-developments-parks-road-improvements/",
+    "category": "Governance"
+   },
+   {
+    "title": "RFP-100625 - Estero Sports Park, north of Williams Ro",
+    "id": "",
+    "location": "Estero Sports Park, north of Williams Road and east of Via Coconut Point, Estero, FL",
+    "summary": "RFP 100625 Estero Sports Park CMAR Deleted from Agenda. Action: No formal action recorded. RFP 100625 Estero Sports Park CMAR Deleted from Agenda",
+    "status": "No decision recorded",
+    "date": "2025-02-05",
+    "document_url": "https://estero-fl.gov/wp-content/uploads/library-ada/minutes/2025%20Minutes/Council/02052025.pdf",
+    "lat": 26.422098,
+    "lng": -81.802186,
+    "source_type": "board_record",
+    "article_url": "",
+    "category": ""
+   }
+  ],
+  "timeline": [
+   {
+    "date": "2024-12-10",
+    "event": "Planning, Zoning & Design Board received staff presentation on Estero Sports Park (Village project north of Williams Road and east of Via Coconut Point)",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2025-04-02",
+    "event": "Traffic study results presented; Williams Road volume found to be noticeably higher; Village agreed to widen Williams Road to 4 lanes and install roundabout at Williams Road and River Ranch Road",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2025-02-05",
+    "event": "Village Council agenda item on Estero Sports Park CMAR (Construction Manager at Risk) deleted from agenda",
+    "status": "No decision recorded",
+    "record_id": ""
+   },
+   {
+    "date": "2026-10-22",
+    "event": "Roundabout west of US-41 on Williams Road and protected left-turn signals at US-41 and Williams Road targeted for completion by spring 2027",
+    "status": "Update",
+    "record_id": "post-225516"
+   }
+  ],
+  "related": [
+   {
+    "record_id": "",
+    "one_line": "Broader traffic safety concerns across Estero, including Williams Road intersection improvements and turn lane extensions."
+   }
+  ],
+  "used_record_ids": [
+   "row-2666",
+   "https://esterotoday.com/mar2025summary/",
+   "post-225516",
+   "row-257"
+  ],
+  "follow_ups": [
+   "What are the specific traffic impacts projected for Estero Sports Park?",
+   "When will the Williams Road widening project be completed?",
+   "Are there other developments planned near Williams Road that could affect traffic?"
+  ],
+  "source_type": "records",
+  "route": "mixed",
+  "meta": {}
+ }
+}

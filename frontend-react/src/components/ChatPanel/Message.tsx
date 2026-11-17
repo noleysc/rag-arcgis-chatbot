@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage } from "../../types";
 import { isArticle } from "../../lib/parseAnswer";
+import { splitBottomLine } from "../../lib/answerText";
 import { linkifyRecordCitations, scrollToRecord } from "../../lib/recordScroll";
 import ProjectCard from "./ProjectCard";
 import ArticleCard from "./ArticleCard";
@@ -14,6 +15,8 @@ import FeedbackBar from "./FeedbackBar";
 import Timeline from "./Timeline";
 import RelatedRecords from "./RelatedRecords";
 import FollowUpChips from "./FollowUpChips";
+import DownloadReportButton from "./DownloadReportButton";
+import { canExportReport } from "../../lib/report/download";
 import type { ReportPrefill } from "../ReportDialog/ReportDialog";
 import {
   BuildingIcon,
@@ -28,23 +31,6 @@ import {
 
 function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-}
-
-/** The system prompt always opens answer_markdown with a "**Bottom line:**"
- * paragraph — split it off so it can render in its own highlighted box,
- * separate from the rest of the answer. Falls back to no special box for
- * anything that doesn't follow that convention (e.g. the plain-text JSON
- * -parse-failure fallback in rag_path.generate_answer). */
-function splitBottomLine(markdown: string): { bottomLine: string | null; rest: string } {
-  const breakIdx = markdown.indexOf("\n\n");
-  const firstPara = (breakIdx === -1 ? markdown : markdown.slice(0, breakIdx)).trim();
-  if (!/^\*\*Bottom line:?\*\*/i.test(firstPara)) {
-    return { bottomLine: null, rest: markdown };
-  }
-  return {
-    bottomLine: firstPara.replace(/^\*\*Bottom line:?\*\*:?\s*/i, ""),
-    rest: breakIdx === -1 ? "" : markdown.slice(breakIdx + 2),
-  };
 }
 
 /** Section headings in an answer get an icon picked from their wording. */
@@ -237,6 +223,7 @@ export default function Message({
               <button type="button" className="btn-copy" onClick={copyAnswer}>
                 {copied ? "✓ Copied" : "⧉ Copy"}
               </button>
+              {canExportReport(message) && <DownloadReportButton message={message} />}
               <span className="msg-time">{formatTime(message.timestamp)}</span>
             </div>
           )}

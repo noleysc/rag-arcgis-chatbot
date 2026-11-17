@@ -38,6 +38,8 @@ VITE_API_BASE=   # empty = same-origin (VPS / Docker production)
 - `npm run build` — type-check (`tsc -b`) and produce a production build in `dist/`
 - `npm run preview` — serve the production build locally
 - `npm run lint` — run oxlint
+- `npm test` — run the Vitest suite (report builder + PDF rendering)
+- `npm run report:samples` — render the sample PDF briefs into `report-samples/`
 
 ## Layout and routing
 
@@ -97,6 +99,39 @@ public/
   meetings.json     manually maintained meeting schedule — see the file's own _comment
                     field for the update process and source of truth
 ```
+
+## PDF briefs ("Download PDF")
+
+Every finished answer has a **Download PDF** button next to Copy. It exports that one
+question and answer as an Engage Estero *Civic Intelligence Brief*: a real PDF with
+selectable text, embedded fonts, clickable sources, numbered citations that jump to the
+reference list, and PDF bookmarks. It is generated entirely in the browser from the answer
+already on screen — no second AI call, no backend change.
+
+How it works (`src/lib/report/`):
+
+- `buildReport.ts` turns one `ChatMessage` into a `Report` (`model.ts`). Sections come from
+  what the answer actually contains, never from question keywords: the "Bottom line" becomes
+  the short answer; bullet lists become numbered findings (a `**Label:**` line above a list
+  becomes its section title); `$`, `%` and "number + unit" figures become *At a Glance* cards
+  (only when there are two or more); the structured `timeline` becomes a timeline (sorted,
+  future dates marked); cited board/council records become *Decisions on Record* (outcomes
+  copied verbatim — "No decision recorded" is never shown as an approval); articles become
+  *Supporting Evidence*. Missing data is left out or stated as missing — never filled in.
+- `pdf/` renders it with `@react-pdf/renderer` (Lato + PT Serif, OFL, subset in
+  `src/assets/fonts/report`). `text.ts` keeps text inside the fonts' glyph coverage;
+  `urls.ts` breaks long URLs by measured width.
+- `renderBlob.ts` is the lazy-loaded browser entry (react-pdf only loads on first export);
+  `download.ts` / `components/ChatPanel/DownloadReportButton.tsx` handle the click,
+  loading and error states.
+- `vite.config.ts` has a small resolver plugin so all `@react-pdf/*` packages share one
+  `pdfkit` (ArcGIS's charting pins an older pdfkit at the top level; without the plugin the
+  browser export fails with `Standard font "Helvetica" is not registered`).
+
+Tests live in `src/lib/report/__tests__/`. `fixtures/*.json` are real `/chat` responses
+captured from the local backend on 2026-11-17; `synthetic.ts` holds clearly fake edge cases
+(`TEST-` IDs, example.org links). `npm run report:samples` writes the real ones to
+`report-samples/` and the synthetic ones to `report-samples/edge-cases/`.
 
 ## Board records data
 

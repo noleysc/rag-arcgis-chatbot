@@ -1,0 +1,126 @@
+{
+ "question": "What developments are planned near Corkscrew Road?",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "**Bottom line:** East Corkscrew Road is experiencing rapid growth with multiple large residential communities, mixed-use projects, and infrastructure improvements underway.\n\n**Residential & Mixed-Use:**\n- **River Creek, Wild Blue, The Preserve at Corkscrew, The Place at Corkscrew, Verdana Village** — master-planned communities adding tens of thousands of homes; Verdana is approximately 80% built out as of January 2026.\n- **Estero Crossing** — mixed-use project with retail and luxury apartments underway.\n- **Kingston Development** — Phase 1 underway; Cameratta Companies' full plan includes 10,000 dwelling units, a 240-unit hotel, 700,000 sq ft of commercial space, and 3,287 acres of conservation.\n- **FFD (Florida Farms Development)** — 5,208-acre site south of Corkscrew Road; proposed for 5,208 residential units and 100,000 sq ft of commercial uses, though current development status is uncertain.\n\n**Infrastructure & Services:**\n- **Corkscrew Road Improvements** — multi-use path, streetlights, and native landscaping progressing; completion expected **Fall 2026** [post-222997].\n- **Corkscrew Road Widening – Phase II** — completion projected **December 2026**; eastbound lanes functioning, westbound under construction [post-222997].\n- **Outpatient healthcare facility** planned near Verdana.\n- **Cell service** — new towers coming at Bella Terra and near Kingston; gaps may remain.",
+  "answer": "**Bottom line:** East Corkscrew Road is experiencing rapid growth with multiple large residential communities, mixed-use projects, and infrastructure improvements underway.\n\n**Residential & Mixed-Use:**\n- **River Creek, Wild Blue, The Preserve at Corkscrew, The Place at Corkscrew, Verdana Village** — master-planned communities adding tens of thousands of homes; Verdana is approximately 80% built out as of January 2026.\n- **Estero Crossing** — mixed-use project with retail and luxury apartments underway.\n- **Kingston Development** — Phase 1 underway; Cameratta Companies' full plan includes 10,000 dwelling units, a 240-unit hotel, 700,000 sq ft of commercial space, and 3,287 acres of conservation.\n- **FFD (Florida Farms Development)** — 5,208-acre site south of Corkscrew Road; proposed for 5,208 residential units and 100,000 sq ft of commercial uses, though current development status is uncertain.\n\n**Infrastructure & Services:**\n- **Corkscrew Road Improvements** — multi-use path, streetlights, and native landscaping progressing; completion expected **Fall 2026** [post-222997].\n- **Corkscrew Road Widening – Phase II** — completion projected **December 2026**; eastbound lanes functioning, westbound under construction [post-222997].\n- **Outpatient healthcare facility** planned near Verdana.\n- **Cell service** — new towers coming at Bella Terra and near Kingston; gaps may remain.",
+  "projects": [
+   {
+    "title": "East Corkscrew Road Development & Infrastructure Update: October 2026",
+    "id": "post-222997",
+    "location": "",
+    "summary": "East Corkscrew Road Development & Infrastructure Update: October 2026 Summary East Corkscrew continues to experience rapid growth, surpassing 10,000 homes by June 2026 , with major implications for roads, schools…",
+    "status": "",
+    "date": "2026-10-15",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/east-corkscrew-road-development-infrastructure-update-october-2026/",
+    "category": "Growth; East Corkscrew"
+   },
+   {
+    "title": "East Corkscrew Updates: What’s happening and why it matters to every Greater Estero resident",
+    "id": "https://esterotoday.com/east-corkscrew-updates-whats-happening-and-why-it-matters-to-every-greater-estero-resident/",
+    "location": "",
+    "summary": "Golf Course  Cell service: Currently weak in areas New towers coming (Bella Terra + near Kingston), but gaps may remain  Mining impacts: Weekly blasting from nearby rock mine (typically late morning) Monitoring in…",
+    "status": "",
+    "date": "2026-04-23",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/east-corkscrew-updates-whats-happening-and-why-it-matters-to-every-greater-estero-resident/",
+    "category": "Community Development; East Corkscrew; Growth"
+   },
+   {
+    "title": "East Corkscrew Road: What’s Been Built, What’s Underway, and What’s Coming Next",
+    "id": "https://esterotoday.com/east-corkscrew-road-whats-been-built-whats-underway-and-whats-coming-next/",
+    "location": "",
+    "summary": "Housing and Community Development East Corkscrew has become synonymous with residential growth.",
+    "status": "",
+    "date": "2026-01-21",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/east-corkscrew-road-whats-been-built-whats-underway-and-whats-coming-next/",
+    "category": "Community Development; Developments; DR/GR Protection"
+   },
+   {
+    "title": "Corkscrew Road: What is going on, and when?",
+    "id": "https://esterotoday.com/corkscrew-road-what-is-going-on-and-when/",
+    "location": "",
+    "summary": "The Rivercreek developer is constructing the 10' multi-use path to coordinate with the future sidewalk layout with the traffic signal.",
+    "status": "",
+    "date": "2024-05-16",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/corkscrew-road-what-is-going-on-and-when/",
+    "category": "Development / Community Planning; Developments; Transportation"
+   }
+  ],
+  "timeline": [
+   {
+    "date": "2024-02-21",
+    "event": "Village Council approved right-of-way acquisition agreement with GL Homes (Rivercreek) for multi-use path along Corkscrew Road",
+    "status": "Approved",
+    "record_id": ""
+   },
+   {
+    "date": "2026-01-21",
+    "event": "East Corkscrew Road development status: Verdana Village ~80% built out; Estero Crossing retail and apartments underway; Kingston Development Phase 1 underway; FFD site status uncertain",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2026-04-23",
+    "event": "New cell towers planned at Bella Terra and near Kingston; outpatient healthcare facility planned near Verdana; ongoing residential and commercial projects",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2026-06",
+    "event": "East Corkscrew surpassed 10,000 homes; median landscaping began with sod removal",
+    "status": "Update",
+    "record_id": "post-222997"
+   },
+   {
+    "date": "2026-08",
+    "event": "Native landscaping began on Corkscrew Road improvements",
+    "status": "Update",
+    "record_id": "post-222997"
+   },
+   {
+    "date": "Fall 2026",
+    "event": "Corkscrew Road multi-use path, streetlights, and landscaping improvements expected to complete",
+    "status": "Update",
+    "record_id": "post-222997"
+   },
+   {
+    "date": "December 2026",
+    "event": "Corkscrew Road Widening – Phase II completion projected",
+    "status": "Update",
+    "record_id": "post-222997"
+   }
+  ],
+  "related": [],
+  "used_record_ids": [
+   "post-222997",
+   "https://esterotoday.com/east-corkscrew-updates-whats-happening-and-why-it-matters-to-every-greater-estero-resident/",
+   "https://esterotoday.com/east-corkscrew-road-whats-been-built-whats-underway-and-whats-coming-next/",
+   "https://esterotoday.com/corkscrew-road-what-is-going-on-and-when/"
+  ],
+  "follow_ups": [
+   "What is the current status of the FFD (Florida Farms Development) project?",
+   "When will the new cell towers be operational?",
+   "Are there traffic or school capacity impacts from this growth?"
+  ],
+  "source_type": "records",
+  "route": "mixed",
+  "meta": {}
+ }
+}

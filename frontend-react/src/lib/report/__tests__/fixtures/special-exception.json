@@ -1,0 +1,94 @@
+{
+ "question": "What is a special exception in zoning?",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "**Bottom line:** A **special exception** is a zoning tool that lets a property owner use their land in a way the zoning code wouldn't normally allow—granted case by case by the Planning, Zoning & Design Board, often with conditions.\n\nExamples from Estero:\n- **Riverwoods Plantation Pickleball** sought a special exception in the RM-2 (residential) zoning district to add pickleball courts as an amenity. The board **approved** it on **2022-08-09** with a condition: the applicant had to provide a noise abatement plan or noise study within 30 days.\n- **AT&T Cell Tower** at Coconut Road requested a special exception in a Commercial Special Office district to build a 99-foot wireless tower—a use not normally permitted in that zone.\n\nUnlike a **variance** (which asks to break a rule like setback or height), a special exception asks to add a use the code doesn't list as \"permitted\" in that zone. The board can approve, deny, or approve with conditions.",
+  "answer": "**Bottom line:** A **special exception** is a zoning tool that lets a property owner use their land in a way the zoning code wouldn't normally allow—granted case by case by the Planning, Zoning & Design Board, often with conditions.\n\nExamples from Estero:\n- **Riverwoods Plantation Pickleball** sought a special exception in the RM-2 (residential) zoning district to add pickleball courts as an amenity. The board **approved** it on **2022-08-09** with a condition: the applicant had to provide a noise abatement plan or noise study within 30 days.\n- **AT&T Cell Tower** at Coconut Road requested a special exception in a Commercial Special Office district to build a 99-foot wireless tower—a use not normally permitted in that zone.\n\nUnlike a **variance** (which asks to break a rule like setback or height), a special exception asks to add a use the code doesn't list as \"permitted\" in that zone. The board can approve, deny, or approve with conditions.",
+  "projects": [
+   {
+    "title": "Special Exception Riverwoods Plantation Pickleball - Plantation Blvd",
+    "id": "",
+    "location": "20481 PLANTATION BLVD",
+    "summary": "Special Exception Riverwoods Plantation Pickleball (SEZ2022-E001) (District 1 20481 Plantation Boulevard located approximately 1 mile west of US 41 and north of Broadway West. Final Action Agenda/Minutes are supplemented by audio and video recordings of. Action: Approved the Resolution Motion with the condition the applicant must provide either a noise abatement plan or a noise study within 30 days of staff request",
+    "status": "Approved",
+    "date": "2022-08-09",
+    "document_url": "https://estero-fl.gov/wp-content/uploads/library-ada/minutes/2022%20MINUTES/PZD%20BOARD/08092022%20PZDB%20Minutes.pdf",
+    "lat": 26.44285162453201,
+    "lng": -81.83135034257168,
+    "source_type": "board_record",
+    "article_url": "",
+    "category": ""
+   },
+   {
+    "title": "Special Exception & Limited Development Order - Riverwoods Plantation Pickleball Courts - Applicant is seeking a Special Exception in the…",
+    "id": "",
+    "location": "Riverwoods Plantation Condominium",
+    "summary": "Special Exception & Limited Development Order - Riverwoods Plantation Pickleball Courts - Applicant is seeking a Special Exception in the RM-2 Zoning District to add pickleball as a permitted amenity. - Limited Development Order for the construction of 4. Action: No formal action recorded.",
+    "status": "No decision recorded",
+    "date": "2022-06-14",
+    "document_url": "https://estero-fl.gov/wp-content/uploads/library-ada/minutes/2022%20MINUTES/PZD%20BOARD/06142022%20PZDB%20Minutes.pdf",
+    "lat": 26.44551087014053,
+    "lng": -81.83135830974891,
+    "source_type": "board_record",
+    "article_url": "",
+    "category": ""
+   },
+   {
+    "title": "AT&T Cell Tower - Coconut Rd",
+    "id": "",
+    "location": "3231 COCONUT RD",
+    "summary": "AT&T Cell Tower (District 1) (SEZ2020-E0101) 3231 Coconut Road, located on the property of Bonita Springs #2753 Benevolent and Protective Order of Elks, west of US 41 and south of Coconut Road. Special Exception request in CS - Commercial Special Office. Action: No formal action recorded.",
+    "status": "No decision recorded",
+    "date": "2022-07-12",
+    "document_url": "https://estero-fl.gov/wp-content/uploads/library-ada/minutes/2022%20MINUTES/PZD%20BOARD/07122022%20PZDB%20Minutes.pdf",
+    "lat": 26.397287176635327,
+    "lng": -81.81527773523757,
+    "source_type": "board_record",
+    "article_url": "",
+    "category": ""
+   }
+  ],
+  "timeline": [
+   {
+    "date": "2022-06-14",
+    "event": "Board reviewed Riverwoods Plantation Pickleball special exception request to add pickleball courts in RM-2 residential district",
+    "status": "No decision recorded",
+    "record_id": ""
+   },
+   {
+    "date": "2022-07-12",
+    "event": "Board reviewed AT&T Cell Tower special exception request for 99-foot wireless tower in Commercial Special Office district",
+    "status": "No decision recorded",
+    "record_id": ""
+   },
+   {
+    "date": "2022-08-09",
+    "event": "Board approved Riverwoods Plantation Pickleball special exception with condition to provide noise abatement plan or study within 30 days",
+    "status": "Approved",
+    "record_id": ""
+   }
+  ],
+  "related": [
+   {
+    "record_id": "Ordinance 2020-10",
+    "one_line": "Village Land Development Code adopted 2021-01-27, which defines zoning districts and permitted vs. special exception uses"
+   }
+  ],
+  "used_record_ids": [
+   "row-1632",
+   "row-1209",
+   "row-1500"
+  ],
+  "follow_ups": [
+   "What's the difference between a special exception and a variance?",
+   "How do I request a special exception for my property?",
+   "What conditions are typically attached to special exception approvals?"
+  ],
+  "source_type": "records",
+  "route": "rag",
+  "meta": {
+   "stale_notice": "Note: This answer draws on a meeting record from 2021-01-27 (about 5 years old). Details may no longer be current."
+  }
+ }
+}

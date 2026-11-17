@@ -1,0 +1,119 @@
+{
+ "question": "Summarize the latest updates about Estero.",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "**Bottom line:** Estero has several positive developments underway as of late 2026, including the lowest property tax rate in Florida, a new riverfront park, and major trail funding secured.\n\n**Key updates:**\n\n- **Estero RiverPark** is now open Friday–Sunday, 7 AM–6 PM, with parking in the north-side lot off County Road and pedestrian bridge access [post-225516].\n- **Property taxes:** The Village holds the **lowest tax rate in Lee County and Florida** [post-225516].\n- **Bonita Estero Rail Trail (BERT):** Full municipal funding is **secured**—Bonita Springs voters approved a $35M bond and Estero allocated $19M to acquire the 11.4-mile inactive Seminole Gulf Railway line [post-225516].\n- **Golf driving range:** A new Public-Private Partnership will bring a driving range to the Estero Sports and Recreation Center within **12 months** [post-225516].\n- **Economic conditions:** As of mid-2026, local businesses report cautious sentiment; the Lee County Executive Business Climate Index fell to 50.4 in Q2 2026, with slower hiring expectations [post-223868].",
+  "answer": "**Bottom line:** Estero has several positive developments underway as of late 2026, including the lowest property tax rate in Florida, a new riverfront park, and major trail funding secured.\n\n**Key updates:**\n\n- **Estero RiverPark** is now open Friday–Sunday, 7 AM–6 PM, with parking in the north-side lot off County Road and pedestrian bridge access [post-225516].\n- **Property taxes:** The Village holds the **lowest tax rate in Lee County and Florida** [post-225516].\n- **Bonita Estero Rail Trail (BERT):** Full municipal funding is **secured**—Bonita Springs voters approved a $35M bond and Estero allocated $19M to acquire the 11.4-mile inactive Seminole Gulf Railway line [post-225516].\n- **Golf driving range:** A new Public-Private Partnership will bring a driving range to the Estero Sports and Recreation Center within **12 months** [post-225516].\n- **Economic conditions:** As of mid-2026, local businesses report cautious sentiment; the Lee County Executive Business Climate Index fell to 50.4 in Q2 2026, with slower hiring expectations [post-223868].",
+  "projects": [
+   {
+    "title": "Good Things Happening in Estero: Key Updates on Local Parks, Taxes, Traffic Safety & Recreation",
+    "id": "post-225516",
+    "location": "",
+    "summary": "Good Things Happening in Estero: Key Updates on Local Parks, Taxes, Traffic Safety & Recreation Key Take-Aways Lowest Property Tax in Florida: The Village of Estero currently holds the lowest property tax rate in both…",
+    "status": "",
+    "date": "2026-10-22",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/estero-fl-community-developments-parks-road-improvements/",
+    "category": "Governance"
+   },
+   {
+    "title": "Southwest Florida’s Economy in 2026: What Comes Next for Estero?",
+    "id": "post-223868",
+    "location": "",
+    "summary": "These pressures are not limited to homeowners. Renters and consumers are also dealing with higher everyday expenses.",
+    "status": "",
+    "date": "2026-08-20",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/southwest-floridas-economy-in-2026-what-comes-next-for-estero/",
+    "category": "Growth"
+   },
+   {
+    "title": "Traffic Study Results Presented at March Meeting",
+    "id": "https://esterotoday.com/mar2025summary/",
+    "location": "",
+    "summary": "2024 Traffic Study Results A Summary of the Results of the Estero Road Traffic Survey Conducted in 2024 (Written by Allan Bowditch, Engage Estero’s Chief Communications Officer) Introduction This article summarizes the…",
+    "status": "",
+    "date": "2025-04-02",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/mar2025summary/",
+    "category": "Safety; Transportation"
+   },
+   {
+    "title": "Sustainability in Estero",
+    "id": "https://esterotoday.com/sustainability-in-estero/",
+    "location": "",
+    "summary": "Consider planted areas, gravel, or permeable pavers instead of adding solid concrete. Even small changes can reduce runoff. Protect swales and storm drains.",
+    "status": "",
+    "date": "2026-03-04",
+    "document_url": "",
+    "lat": null,
+    "lng": null,
+    "source_type": "website_article",
+    "article_url": "https://esterotoday.com/sustainability-in-estero/",
+    "category": "Environment; Sustainability Series"
+   }
+  ],
+  "timeline": [
+   {
+    "date": "2024",
+    "event": "Village Council commissioned updated traffic study to assess road conditions and safety",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2025-04-02",
+    "event": "2024 traffic study results presented at community meeting",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2026-03-04",
+    "event": "Sustainability guidance published on stormwater, flood zones, and property mitigation",
+    "status": "Update",
+    "record_id": ""
+   },
+   {
+    "date": "2026-08-20",
+    "event": "Economic analysis shows cautious business sentiment and rising household costs across Southwest Florida",
+    "status": "Update",
+    "record_id": "post-223868"
+   },
+   {
+    "date": "2026-10-22",
+    "event": "Estero RiverPark soft opening (Fri–Sun); BERT trail funding secured; golf driving range partnership announced",
+    "status": "Update",
+    "record_id": "post-225516"
+   }
+  ],
+  "related": [
+   {
+    "record_id": "",
+    "one_line": "Guide to which areas are incorporated Village of Estero vs. Bonita Springs or unincorporated (2024)."
+   }
+  ],
+  "used_record_ids": [
+   "post-225516",
+   "post-223868",
+   "https://esterotoday.com/mar2025summary/",
+   "https://esterotoday.com/sustainability-in-estero/"
+  ],
+  "follow_ups": [
+   "What are the details on the Bonita Estero Rail Trail project—timeline and route?",
+   "What did the 2024 traffic study recommend for Estero's roads?",
+   "How does Estero's property tax rate compare to neighboring communities?"
+  ],
+  "source_type": "records",
+  "route": "rag",
+  "meta": {}
+ }
+}

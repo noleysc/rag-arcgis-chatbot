@@ -1,0 +1,32 @@
+{
+ "question": "What did the Village Council decide at its last meeting?",
+ "captured": "2026-11-17",
+ "capturedFrom": "local backend POST /chat (rag/structured/events routes, claude-haiku-4-5)",
+ "response": {
+  "summary": "**Bottom line:** I don't have records of the Village Council's most recent meeting.\n\nThe records I have access to are from **2016 to 2020**, with the most recent being a **March 18, 2020** meeting about COVID-19 scheduling. To find out what the Council decided at its latest meeting, check the **Village's website at estero-fl.gov** for the current meeting calendar, agendas, and minutes.",
+  "answer": "**Bottom line:** I don't have records of the Village Council's most recent meeting.\n\nThe records I have access to are from **2016 to 2020**, with the most recent being a **March 18, 2020** meeting about COVID-19 scheduling. To find out what the Council decided at its latest meeting, check the **Village's website at estero-fl.gov** for the current meeting calendar, agendas, and minutes.",
+  "projects": [],
+  "timeline": [],
+  "related": [
+   {
+    "record_id": "",
+    "one_line": "March 18, 2020 Council meeting on COVID-19 meeting schedule adjustments"
+   },
+   {
+    "record_id": "page-26679",
+    "one_line": "Overview of how the Village Council, Planning Board, and staff make decisions"
+   }
+  ],
+  "used_record_ids": [],
+  "follow_ups": [
+   "What's on the upcoming Village Council agenda?",
+   "How do I find past Council meeting minutes?",
+   "Is there a specific project or issue you'd like to know about?"
+  ],
+  "source_type": "general",
+  "route": "rag",
+  "meta": {
+   "stale_notice": "Note: This answer draws on meeting records more than 5 years old (oldest: 2016-05-18). Details may no longer be current."
+  }
+ }
+}
