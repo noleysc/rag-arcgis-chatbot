@@ -168,17 +168,6 @@
   margin-right: 0;
   border-right: none;
 }
-/* EsteroToday share: about the dataset, not the records, so it gets its own
-   row below the record counts (five don't fit the hero's width anyway). */
-.home-stats li.home-stat-source {
-  flex-basis: 100%;
-  grid-column: 1 / -1;
-}
-.home-stats li:has(+ .home-stat-source) {
-  padding-right: 0;
-  margin-right: 0;
-  border-right: none;
-}
 .home-stat-icon {
   flex-shrink: 0;
   width: 42px;
@@ -1664,9 +1653,9 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  min-height: 116px;
-  padding: 22px 32px;
-  margin-bottom: 16px;
+  min-height: 96px;
+  padding: 16px 32px;
+  margin-bottom: 14px;
   overflow: hidden;
   border-radius: 14px;
   /* Lighter teal on the right, behind the palm silhouettes. */
@@ -1723,7 +1712,7 @@
 .pulse-events {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -1736,8 +1725,8 @@
 .pulse-stat {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 18px 22px;
+  gap: 16px;
+  padding: 12px 20px;
   border: 1px solid;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
@@ -1755,9 +1744,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   box-shadow: 0 1px 3px rgba(15, 39, 68, 0.08);
 }
 .pulse-stat-green .pulse-stat-icon {
@@ -1868,9 +1857,18 @@
   display: grid;
   grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
   gap: 16px;
-  align-items: start;
+  /* Both cards share one height: the calendar's week rows grow to fill
+     the card when the list beside it is the taller of the two. */
+  align-items: stretch;
+}
+.pulse-calendar-card {
+  display: flex;
+  flex-direction: column;
 }
 .pulse-calendar-card .mini-cal {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   margin: 0;
 }
 .pulse-calendar-card .mini-cal-header {
@@ -1898,6 +1896,12 @@
   text-transform: none;
 }
 .pulse-calendar-card .mini-cal-grid {
+  flex: 1;
+  /* Rows stop growing at about 64px, so a list expanded with "View More
+     Events" doesn't stretch the weeks out of shape. */
+  max-height: 440px;
+  grid-template-rows: auto; /* weekday labels keep their own height */
+  grid-auto-rows: minmax(44px, 1fr);
   row-gap: 4px;
 }
 .pulse-calendar-card .mini-cal-weekday {
@@ -1906,7 +1910,7 @@
   font-weight: 600;
 }
 .pulse-calendar-card .mini-cal-day-wrap {
-  height: 44px;
+  height: auto;
 }
 .pulse-calendar-card .mini-cal-day,
 .pulse-calendar-card .mini-cal-day-clickable:hover,
@@ -1988,7 +1992,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 11px 0;
+  padding: 9px 0;
   border-bottom: 1px solid var(--border);
 }
 .pulse-page .event-row:last-child {
@@ -2094,9 +2098,12 @@
   font-weight: 600;
   color: var(--navy);
 }
-.pulse-page .events-load-more {
-  display: block;
-  margin: 14px auto 0;
+.events-pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
 }
 .events-source-note {
   font-size: 12px;
@@ -2213,8 +2220,18 @@
   object-fit: cover;
   transition: transform 0.3s ease;
 }
-.news-list-feature .news-link:hover .news-thumb img {
+.news-link:hover .news-thumb img {
   transform: scale(1.05);
+}
+/* Compact list (Home): smaller thumbnails beside the two-line titles. */
+.news-list:not(.news-list-feature) .news-link {
+  align-items: center;
+  gap: 12px;
+}
+.news-list:not(.news-list-feature) .news-thumb {
+  width: 76px;
+  height: 54px;
+  border-radius: 6px;
 }
 .news-list-feature .news-title {
   font-size: 14.5px;

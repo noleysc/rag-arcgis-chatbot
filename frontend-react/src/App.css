@@ -1662,7 +1662,7 @@
 #pulse-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: 14px;
   align-items: start;
 }
 .pulse-side {
@@ -1846,14 +1846,6 @@ a.meeting-row-link:hover .meeting-name {
   text-decoration: none;
   color: inherit;
   align-items: flex-start;
-}
-.news-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--gold);
-  flex-shrink: 0;
-  margin-top: 6px;
 }
 .news-body {
   flex: 1;

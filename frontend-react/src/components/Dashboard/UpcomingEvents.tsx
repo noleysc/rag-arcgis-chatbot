@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Users } from "lucide-react";
 import { useEvents } from "../../hooks/useEvents";
 import { useMeetings } from "../../hooks/useMeetings";
@@ -11,7 +11,8 @@ import { meetingSourceUrl } from "../../lib/meetingSource";
 
 type CategoryFilter = "all" | EventCategory | "markets-fairs";
 
-const PAGE_SIZE = 12;
+/** Events shown at first, and added by each "View More Events" click. */
+const PAGE_SIZE = 5;
 
 const CATEGORY_OPTIONS: Array<{ value: CategoryFilter; label: string; matches: EventCategory[] }> = [
   { value: "government", label: "Government", matches: ["government"] },
@@ -360,6 +361,7 @@ export default function UpcomingEvents() {
               visibleCount={visibleCount}
               loadingMeetings={meetingsLoading}
               onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              onShowLess={() => setVisibleCount(PAGE_SIZE)}
               heading={
                 dateFilter
                   ? `Events on ${formatDate(dateFilter)}`
@@ -392,12 +394,28 @@ interface EventsListProps {
   visibleCount: number;
   loadingMeetings: boolean;
   onLoadMore: () => void;
+  onShowLess: () => void;
   heading: string;
 }
 
-function EventsList({ items, total, visibleCount, loadingMeetings, onLoadMore, heading }: EventsListProps) {
+function EventsList({
+  items,
+  total,
+  visibleCount,
+  loadingMeetings,
+  onLoadMore,
+  onShowLess,
+  heading,
+}: EventsListProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  // Collapsing can leave the reader below the now-shorter list; bring it back.
+  const showLess = () => {
+    onShowLess();
+    requestAnimationFrame(() => sectionRef.current?.scrollIntoView({ block: "nearest" }));
+  };
+
   return (
-    <section className="pulse-card events-results" aria-live="polite">
+    <section ref={sectionRef} className="pulse-card events-results" aria-live="polite">
       <div className="events-results-header">
         <h3>{heading}</h3>
         <span>{total.toLocaleString()} {total === 1 ? "result" : "results"}</span>
@@ -458,10 +476,19 @@ function EventsList({ items, total, visibleCount, loadingMeetings, onLoadMore, h
               );
             })}
           </ul>
-          {visibleCount < total && (
-            <button type="button" className="events-load-more" onClick={onLoadMore}>
-              Load more events
-            </button>
+          {total > PAGE_SIZE && (
+            <div className="events-pager">
+              {visibleCount < total && (
+                <button type="button" className="events-load-more" onClick={onLoadMore}>
+                  View More Events
+                </button>
+              )}
+              {visibleCount > PAGE_SIZE && (
+                <button type="button" className="events-load-more" onClick={showLess}>
+                  Show Less
+                </button>
+              )}
+            </div>
           )}
         </>
       )}

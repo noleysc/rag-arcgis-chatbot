@@ -10,8 +10,8 @@ function formatDate(iso: string): string {
 }
 
 interface LatestNewsProps {
-  /** "feature": Community Pulse's larger card, with a header icon and each
-   * post's featured image. */
+  /** "feature": Community Pulse's larger card, with a header icon and
+   * bigger thumbnails. "compact" (Home) uses smaller ones. */
   variant?: "compact" | "feature";
   /** How many posts to show (the feed has 5). */
   limit?: number;
@@ -19,7 +19,8 @@ interface LatestNewsProps {
 
 export default function LatestNews({ variant = "compact", limit = 5 }: LatestNewsProps) {
   const feature = variant === "feature";
-  const { posts, loading, error, retry } = useNews(feature);
+  // Both variants show each post's featured image.
+  const { posts, loading, error, retry } = useNews(true);
   const titleId = useId();
 
   return (
@@ -58,17 +59,13 @@ export default function LatestNews({ variant = "compact", limit = 5 }: LatestNew
           {posts.slice(0, limit).map((post) => (
             <li className="news-row" key={post.id}>
               <a className="news-link" href={post.link} target="_blank" rel="noopener noreferrer">
-                {feature ? (
-                  <span className="news-thumb" aria-hidden="true">
-                    {post.image ? (
-                      <img src={post.image} alt="" loading="lazy" decoding="async" />
-                    ) : (
-                      <Newspaper size={24} strokeWidth={1.6} />
-                    )}
-                  </span>
-                ) : (
-                  <span className="news-dot" aria-hidden="true" />
-                )}
+                <span className="news-thumb" aria-hidden="true">
+                  {post.image ? (
+                    <img src={post.image} alt="" loading="lazy" decoding="async" />
+                  ) : (
+                    <Newspaper size={feature ? 24 : 20} strokeWidth={1.6} />
+                  )}
+                </span>
                 <span className="news-body">
                   <span className="news-title">{post.title}</span>
                   <span className="news-date">{formatDate(post.date)}</span>
