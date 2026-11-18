@@ -4,18 +4,13 @@ import PageHeader from "../components/PageHeader/PageHeader";
 import { SkeletonRows } from "../components/Dashboard/Skeleton";
 import { ChevronLeftIcon, ChevronRightIcon, ExternalIcon, PdfIcon, SearchIcon } from "../components/Icons/Icons";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import {
-  fetchBoards,
-  fetchMinutesDocs,
-  fetchRecordsPage,
-  isDecisionType,
-  type BoardRecord,
-  type MinutesDoc,
-  type RecordSort,
-} from "../lib/boardRecords";
+import { isDecisionType, type BoardRecord, type MinutesDoc, type RecordSort } from "../lib/boardRecords";
+// Records come from the backend (the chatbot's own data), not the ArcGIS
+// layer: see lib/recordsApi.ts.
+import { fetchBoards, fetchMinutesDocs, fetchRecordsPage } from "../lib/recordsApi";
 import { formatShortDate } from "../lib/dates";
 
-// Agendas and Documents tabs from the design are omitted: the map layer has
+// Agendas and Documents tabs from the design are omitted: the records have
 // no agenda data, and the Engage Estero documents synced into the backend
 // (data/engage_estero/documents.csv) aren't served by any API yet.
 type Tab = "all" | "decisions" | "minutes";
@@ -198,7 +193,7 @@ export default function RecordsPage({ onAsk }: RecordsPageProps) {
 
           {!loading && error && (
             <p className="empty-note records-empty">
-              Couldn't load records from the map layer.{" "}
+              Couldn't load the board records.{" "}
               <button type="button" className="pulse-retry" onClick={() => setAttempt((a) => a + 1)}>
                 Retry
               </button>

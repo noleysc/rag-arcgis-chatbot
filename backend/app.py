@@ -41,6 +41,7 @@ from models import (
     ReportStatusUpdate,
 )
 from events import router as events_router
+from records_api import router as records_router
 from orchestrator import answer_question, stream_answer
 from rate_limit import enforce_rate_limit
 from reports import create_report, list_reports, report_counts, update_report
@@ -121,6 +122,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(events_router)
+app.include_router(records_router)
 
 
 class McpAuthMiddleware(BaseHTTPMiddleware):

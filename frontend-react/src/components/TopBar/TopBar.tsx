@@ -3,7 +3,8 @@ import type { FormEvent } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useLayerData } from "../../hooks/useLayerData";
 import { useTheme } from "../../hooks/useTheme";
-import { fetchLayerUpdated } from "../../lib/boardRecords";
+import { formatShortDate } from "../../lib/dates";
+import { fetchRecordsSummary } from "../../lib/recordsApi";
 import { ArrowRightIcon, MenuIcon, SearchIcon } from "../Icons/Icons";
 
 const ADMIN_TOKEN_KEY = "ee_admin_token";
@@ -14,10 +15,6 @@ function hasAdminToken(): boolean {
   } catch {
     return false;
   }
-}
-
-function formatUpdated(ms: number): string {
-  return new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 interface TopBarProps {
@@ -32,7 +29,8 @@ interface TopBarProps {
 export default function TopBar({ onOpenNav, navOpen, onAsk }: TopBarProps) {
   const [isAdmin, setIsAdmin] = useState(hasAdminToken);
   const [query, setQuery] = useState("");
-  const updated = useLayerData(fetchLayerUpdated);
+  // Newest meeting in the board records the site and chatbot serve.
+  const records = useLayerData(fetchRecordsSummary);
   const [theme, toggleTheme] = useTheme();
   const dark = theme === "dark";
 
@@ -91,12 +89,12 @@ export default function TopBar({ onOpenNav, navOpen, onAsk }: TopBarProps) {
         )}
       </div>
       <div id="topbar-right">
-        {typeof updated === "number" && (
-          <p className="topbar-updated" title="Last edit to the Estero Board Records layer on ArcGIS Online">
+        {records?.latestMeeting && (
+          <p className="topbar-updated" title="Newest meeting in the Board Records data">
             <span className="topbar-updated-dot" aria-hidden="true" />
             <span>
-              Records updated
-              <strong>{formatUpdated(updated)}</strong>
+              Latest meeting
+              <strong>{formatShortDate(records.latestMeeting)}</strong>
             </span>
           </p>
         )}
