@@ -192,6 +192,14 @@ export const EngageMarkIcon = (p: IconProps) => (
   </Icon>
 );
 
+/** A play button in a screen frame, for meeting-video links. */
+export const VideoIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m10 9 5 3-5 3V9Z" fill="currentColor" />
+  </Icon>
+);
+
 /** A document glyph with a "PDF" label, for minutes downloads. */
 export const PdfIcon = ({ size = 28, ...rest }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 28 28" aria-hidden="true" focusable="false" {...rest}>

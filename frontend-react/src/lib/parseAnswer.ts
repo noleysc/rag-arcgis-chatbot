@@ -53,6 +53,9 @@ export function normalizeProject(p: unknown): NormalizedCard | null {
     category: nullsafe(r.category),
     lat: nullableFloat(r.lat),
     lng: nullableFloat(r.lng),
+    videoUrl: cleanUrl(r.video_url ?? r.videoUrl),
+    videoLabel: nullsafe(r.video_label ?? r.videoLabel),
+    videoApproximate: Boolean(r.video_approximate ?? r.videoApproximate),
   };
 
   if (!norm.title && !norm.id && !norm.articleUrl && !norm.documentUrl && !norm.pdfUrl) return null;

@@ -61,8 +61,32 @@ describe("recordsApi", () => {
       action: "Adopted Resolution 2026-11",
       applicationId: "",
       minutesUrl: "https://estero-fl.gov/minutes/10072026.pdf",
+      video: null,
     });
     expect(res.records[1].title).toBe("Untitled agenda item");
+  });
+
+  it("passes through a record's timestamped video link", async () => {
+    const video = {
+      url: "https://play.champds.com/esterofl/event/250/s/579",
+      label: "Watch discussion (9:39)",
+      start: 579,
+      approximate: false,
+    };
+    mockFetch({
+      total: 2,
+      records: [
+        { id: 7, title: "Walmart Repaint", date: "2026-03-10", board: "Planning Zoning & Design Board",
+          item_type: "Vote", action: "", application_id: "", minutes_url: "", video },
+        { id: 8, title: "Old item", date: "2019-01-02", board: "Village Council",
+          item_type: "", action: "", application_id: "", minutes_url: "", video: null },
+      ],
+    });
+    const res = await fetchRecordsPage({
+      decisionsOnly: false, board: "", search: "", sort: "newest", offset: 0, pageSize: 25,
+    });
+    expect(res.records[0].video).toEqual(video);
+    expect(res.records[1].video).toBeNull();
   });
 
   it("omits empty filters from the query string", async () => {
