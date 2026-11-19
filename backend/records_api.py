@@ -7,7 +7,8 @@ the pipeline refreshes the data and the VPS redeploys. It replaced reading
 the ArcGIS Online feature layer, which is a one-time copy that only holds
 mappable items and has to be re-uploaded by hand.
 
-    GET /api/records          one page of agenda items + total matching
+    GET /api/records          one page of agenda items + total matching, each
+                              with its timestamped meeting-video link or null
     GET /api/records/boards   distinct board names, for the filter
     GET /api/records/minutes  distinct minutes PDFs, newest first
     GET /api/records/summary  record count and newest/oldest meeting date
@@ -19,6 +20,7 @@ from typing import Any, Literal
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 
+from meeting_videos import clip_for_row
 from store import get_store
 
 router = APIRouter()
@@ -113,7 +115,24 @@ def list_records(
         rows = rows.sort_values(["date", "id"], ascending=[asc, asc], kind="stable")
     page = rows.iloc[offset : offset + limit]
     public = ["id", "title", "date", "board", "item_type", "action", "application_id", "minutes_url"]
-    return {"records": page[public].to_dict(orient="records"), "total": int(len(rows))}
+    records = page[public].to_dict(orient="records")
+    source = get_store().dataframe
+    for rec in records:
+        rec["video"] = _video(source, rec["id"])
+    return {"records": records, "total": int(len(rows))}
+
+
+def _video(source: pd.DataFrame, row_id: int) -> dict[str, Any] | None:
+    """The agenda item's timestamped meeting-video link (meeting_videos.py,
+    the same matcher the chat cards use), or None. Only links that open at
+    the item are offered, never a whole-meeting video."""
+    try:
+        clip = clip_for_row(source.iloc[int(row_id)].to_dict())
+    except (IndexError, ValueError):
+        return None
+    if clip is None:
+        return None
+    return {"url": clip.url, "label": clip.label, "start": clip.start, "approximate": clip.approximate}
 
 
 @router.get("/api/records/boards")

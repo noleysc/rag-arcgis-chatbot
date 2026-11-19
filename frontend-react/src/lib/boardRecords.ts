@@ -78,6 +78,19 @@ export interface BoardRecord {
   action: string;
   applicationId: string;
   minutesUrl: string;
+  /** Meeting video opened at this item's discussion. Only the backend
+   * records API (lib/recordsApi.ts) supplies it; null when the item has no
+   * timestamped video. */
+  video?: RecordVideo | null;
+}
+
+export interface RecordVideo {
+  url: string;
+  /** "Watch discussion (12:34)", or "(about 12:34)" when estimated. */
+  label: string;
+  /** Start estimated from the transcript or neighbouring items rather than
+   * the Village's own timeline. */
+  approximate: boolean;
 }
 
 const RECORD_FIELDS =

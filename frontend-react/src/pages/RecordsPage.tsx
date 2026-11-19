@@ -2,9 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import PageHeader from "../components/PageHeader/PageHeader";
 import { SkeletonRows } from "../components/Dashboard/Skeleton";
-import { ChevronLeftIcon, ChevronRightIcon, ExternalIcon, PdfIcon, SearchIcon } from "../components/Icons/Icons";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExternalIcon,
+  PdfIcon,
+  SearchIcon,
+  VideoIcon,
+} from "../components/Icons/Icons";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import { isDecisionType, type BoardRecord, type MinutesDoc, type RecordSort } from "../lib/boardRecords";
+import {
+  isDecisionType,
+  type BoardRecord,
+  type MinutesDoc,
+  type RecordSort,
+  type RecordVideo,
+} from "../lib/boardRecords";
 // Records come from the backend (the chatbot's own data), not the ArcGIS
 // layer: see lib/recordsApi.ts.
 import { fetchBoards, fetchMinutesDocs, fetchRecordsPage } from "../lib/recordsApi";
@@ -22,6 +35,10 @@ const TABS: Array<{ id: Tab; label: string }> = [
 ];
 
 const PAGE_SIZE = 25;
+
+function videoTip(video: RecordVideo): string {
+  return `${video.label} in the meeting video${video.approximate ? " (estimated time)" : ""}`;
+}
 
 /** Deep links like #/records?tab=minutes open on that tab. */
 function initialTab(): Tab {
@@ -266,6 +283,20 @@ export default function RecordsPage({ onAsk }: RecordsPageProps) {
                       </span>
                     </td>
                     <td className="rec-links">
+                      {r.video && (
+                        <a
+                          className="rec-icon-btn rec-video"
+                          href={r.video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={videoTip(r.video)}
+                        >
+                          <VideoIcon size={20} />
+                          <span className="sr-only">
+                            {videoTip(r.video)} for {r.title} (opens in a new tab)
+                          </span>
+                        </a>
+                      )}
                       {r.minutesUrl && (
                         <a
                           className="rec-icon-btn"

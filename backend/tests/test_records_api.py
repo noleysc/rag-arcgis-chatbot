@@ -63,7 +63,9 @@ def test_newest_first_with_agenda_order_and_title_fallback(client):
     # Same meeting: later agenda item first (mirrors the old ObjectId DESC tie-break).
     assert [r["title"] for r in body["records"][:2]] == ["Sandy Lane Extension", "Approval of Agenda"]
     first = body["records"][0]
-    assert set(first) == {"id", "title", "date", "board", "item_type", "action", "application_id", "minutes_url"}
+    assert set(first) == {
+        "id", "title", "date", "board", "item_type", "action", "application_id", "minutes_url", "video",
+    }
     assert first["minutes_url"] == MINUTES_A
 
 

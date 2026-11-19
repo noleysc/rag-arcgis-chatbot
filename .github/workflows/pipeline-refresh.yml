@@ -23,6 +23,9 @@ name: Refresh pipeline deliverables
 # the ArcGIS webmap is still imported manually from
 # backend/data/gold/arcgis/layers/.
 #
+# The same run syncs timestamped meeting-video links
+# (backend/data/meeting_videos/meetings.json) so new minutes ship with them.
+#
 # The verify gate runs BEFORE the commit: if the rebuilt map data has any
 # MISMATCH rows against Lee County parcels, nothing is committed.
 #
@@ -49,6 +52,11 @@ on:
     # Friday 18:00 UTC (~2pm Eastern) — after Village Friday minutes uploads.
     - cron: "0 18 * * 5"
   workflow_dispatch:
+    inputs:
+      force_videos:
+        description: "Re-fetch every meeting video (after changing meeting_videos.py)"
+        type: boolean
+        default: false
 
 concurrency:
   group: pipeline-refresh
@@ -118,6 +126,20 @@ jobs:
           print(f"{len(bad)} MISMATCH row(s) out of {len(rows)} verified")
           sys.exit(1 if bad else 0)
           EOF
+
+      # Timestamped meeting-video links (docs/MEETING_VIDEOS.md). Runs on
+      # every refresh, not only when minutes change: the Village adds a
+      # meeting's video timeline a day or two after the meeting, usually
+      # weeks before its minutes, so the weekly run keeps the timestamps
+      # current and new minutes find them already synced. The chatbot matches
+      # records to timestamps at request time, so committing both files
+      # together is all a new meeting needs. Soft-fails: a CHAMP outage must
+      # never block a minutes refresh (the saved file is kept as is).
+      - name: Sync meeting video timestamps
+        continue-on-error: true
+        run: |
+          pip install requests==2.34.2 python-dotenv==1.0.1
+          python backend/scripts/sync_meeting_videos.py ${{ inputs.force_videos && '--force' || '' }}
 
       - name: Commit refreshed deliverables
         id: commit
