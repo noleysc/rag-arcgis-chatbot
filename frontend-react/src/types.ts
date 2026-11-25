@@ -16,6 +16,12 @@ export interface NormalizedCard {
   category: string;
   lat: number | null;
   lng: number | null;
+  /** Meeting video opened at this item's discussion (backend
+   * meeting_videos.py); "" when the item couldn't be timestamped. */
+  videoUrl: string;
+  videoLabel: string;
+  /** The start was estimated rather than taken from the Village's timeline. */
+  videoApproximate: boolean;
 }
 
 /** One entry in a bot answer's timeline (backend/models.py TimelineEntry). */

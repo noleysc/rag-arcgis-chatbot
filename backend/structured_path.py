@@ -5,6 +5,7 @@ import re
 
 import pandas as pd
 
+from meeting_videos import clip_for_row
 from models import ChatResponse, ProjectOut, RouteKind
 from schema_aliases import pick_column, row_value
 
@@ -70,7 +71,7 @@ def _row_to_project(row: dict) -> ProjectOut:
     elif "continued" in low:
         status = "Continued"
     title = _clip_at_sentence(row_value(row, "project_name"), 140)
-    return ProjectOut(
+    project = ProjectOut(
         title=title,
         id=row_value(row, "application_id"),
         location=row_value(row, "location"),
@@ -81,6 +82,19 @@ def _row_to_project(row: dict) -> ProjectOut:
         lat=_to_coord(row_value(row, "latitude")),
         lng=_to_coord(row_value(row, "longitude")),
     )
+    attach_video(project, row)
+    return project
+
+
+def attach_video(project: ProjectOut, row: dict) -> None:
+    """Fill the card's meeting-video link from its source row, if any."""
+    clip = clip_for_row(row)
+    if clip is None:
+        return
+    project.video_url = clip.url
+    project.video_label = clip.label
+    project.video_start = clip.start
+    project.video_approximate = clip.approximate
 
 
 def attach_coords(projects: list[ProjectOut], df: pd.DataFrame) -> None:

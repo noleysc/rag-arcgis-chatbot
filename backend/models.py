@@ -37,6 +37,15 @@ class ProjectOut(BaseModel):
     # routes these to ArticleCard.
     article_url: str = ""
     category: str = ""
+    # Meeting video for a board record (meeting_videos.py), opened at the
+    # agenda item's discussion. Empty when the item couldn't be timestamped,
+    # for meetings before 2025, and for non-board sources.
+    video_url: str = ""
+    video_label: str = ""
+    video_start: int | None = None
+    # True when the start was estimated (transcript/neighbouring items)
+    # rather than taken from the Village's own timeline.
+    video_approximate: bool = False
 
 
 class TimelineEntry(BaseModel):

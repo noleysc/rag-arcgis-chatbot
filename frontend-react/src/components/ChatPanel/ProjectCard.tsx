@@ -47,6 +47,21 @@ export default function ProjectCard({ card, onReport }: ProjectCardProps) {
             {card.pdfUrl ? "📄 Minutes (PDF)" : "📄 View Minutes"}
           </a>
         )}
+        {card.videoUrl && (
+          <a
+            className="btn-dir btn-video"
+            href={card.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={
+              card.videoApproximate
+                ? "Opens the meeting video at this item (estimated time)"
+                : "Opens the meeting video at this item"
+            }
+          >
+            ▶ {card.videoLabel || "Watch discussion"}
+          </a>
+        )}
         {card.location && (
           <button type="button" className="btn-dir" onClick={() => openDirections(card.location)}>
             📍 Directions

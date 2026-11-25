@@ -1378,6 +1378,10 @@
   border-color: var(--border);
   color: var(--green-dark);
 }
+/* Opens the meeting video at this item's discussion. */
+.rec-video {
+  color: var(--green);
+}
 .type-tag {
   display: inline-block;
   padding: 2px 9px;

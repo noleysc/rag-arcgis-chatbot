@@ -5,7 +5,7 @@
 // ArcGIS Online layer (lib/boardRecords.ts), which is a one-time copy that
 // only holds mappable items and must be re-uploaded by hand.
 import { API_BASE } from "./config";
-import type { BoardRecord, MinutesDoc, RecordSort } from "./boardRecords";
+import type { BoardRecord, MinutesDoc, RecordSort, RecordVideo } from "./boardRecords";
 
 async function getJson<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
   const qs = new URLSearchParams();
@@ -25,6 +25,7 @@ interface ApiRecord {
   action: string;
   application_id: string;
   minutes_url: string;
+  video?: RecordVideo | null;
 }
 
 function toRecord(r: ApiRecord): BoardRecord {
@@ -38,6 +39,7 @@ function toRecord(r: ApiRecord): BoardRecord {
     action: r.action.trim(),
     applicationId: r.application_id,
     minutesUrl: r.minutes_url,
+    video: r.video?.url ? r.video : null,
   };
 }
 
