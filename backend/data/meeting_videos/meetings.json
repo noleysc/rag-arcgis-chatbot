@@ -13836,7 +13836,7 @@
    "board": "pz",
    "title": "Planning Zoning And Design Board Meeting",
    "url": "https://play.champds.com/esterofl/event/283",
-   "last_modified": "2026-11-17 22:25:26",
+   "last_modified": "2026-11-24 11:35:55",
    "has_timeline": true,
    "segments": [
     {
@@ -13994,7 +13994,7 @@
      "timing": "champ"
     }
    ],
-   "has_transcript": false
+   "has_transcript": true
   },
   {
    "event_id": 284,
@@ -14002,7 +14002,7 @@
    "board": "vc",
    "title": "Village Council Meeting",
    "url": "https://play.champds.com/esterofl/event/284",
-   "last_modified": "2026-11-18 16:14:23",
+   "last_modified": "2026-11-24 11:36:17",
    "has_timeline": true,
    "segments": [
     {
@@ -14077,10 +14077,10 @@
      "parent_id": 5460,
      "parent_title": "CONSENT AGENDA",
      "refs": [],
-     "start": 364,
-     "end": 401,
-     "inherited": true,
-     "timing": "champ"
+     "start": 370,
+     "end": null,
+     "inherited": false,
+     "timing": "transcript"
     },
     {
      "agenda_item_id": 5463,
@@ -14243,7 +14243,7 @@
      "timing": "champ"
     }
    ],
-   "has_transcript": false
+   "has_transcript": true
   }
  ]
 }
